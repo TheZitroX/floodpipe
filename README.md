@@ -2,6 +2,8 @@
 ## Pascal programming internship 2022
 Implementiert werden soll das Spiel FloodPipe, in dem der Spieler ein Spielfeld präsentiert bekommt, auf dem unterschiedliche Rohrstücke platziert sind. Der Spieler kann durch (mehrfaches) Anklicken einer Zelle das jeweilige Rohrstück drehen, um Verbindungen herzustellen. Ziel ist es, alle Rohre derart zu verbinden, dass jedes Rohrstück von der Quelle ausgehend geflutet wird und keine offenen Enden vorhanden sind.
 
+![shuffeled](https://user-images.githubusercontent.com/62332469/180308016-e7b529f5-f18c-430a-93f5-88da8abf2c85.jpg) ![solved](https://user-images.githubusercontent.com/62332469/180308043-be8cca45-0de2-423b-a478-a6c337bc33f3.jpg)
+
 ## Belegung des Spielfeldes
 
 Jede Zelle des Spielfeldes enthält genau ein Rohrstück oder ein Mauerstück (grau). Als Rohrstücke existieren Geraden, Kurven, T-Verzweigungen und Endstücke. Außerdem können per Default maximal 10% der Zellen mit Mauerstücken belegt sein (s.a. Einstellungen). Die Rohre müssen als solche erkennbar sein und die Übergänge zueinander passen. Erlaubt sind einfache dickere Linien oder auch andere Formen auf dem Canvas (wie z.B. Rechtecke oder Bögen), aber auch ansprechendere bzw. komplexere Darstellungen wie z.B. die rechts zu sehende mit "Verbindungsstücken" (auf Basis von selbst erstellten Bildern).
