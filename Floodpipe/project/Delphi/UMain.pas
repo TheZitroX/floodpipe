@@ -27,8 +27,6 @@ type
         procedure FormCanResize(Sender: TObject; var NewWidth,
                 NewHeight: Integer; var Resize: Boolean);
         procedure FormCreate(Sender: TObject);
-
-	public
 	end;
 
 var
