@@ -15,6 +15,10 @@ Changelog](https://keepachangelog.com/en/1.0.0/).
 - `UFunctions.pas`
 - `UTypedefine.pas`
 
+## Modified
+
+- `UMain.pas` First layout and structure
+
 ## [0.1.1]
 
 ### Added
