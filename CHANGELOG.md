@@ -21,7 +21,7 @@ Changelog](https://keepachangelog.com/en/1.0.0/).
 
 - `CHANGELOG.md`
 
-### Changed
+### Modified
 
 - `README.md`
 
