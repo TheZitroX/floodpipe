@@ -28,6 +28,7 @@ type
 		{ Private-Deklarationen }
 	public
 		{ Public-Deklarationen }
+        // todo create lable
 	end;
 
 var
