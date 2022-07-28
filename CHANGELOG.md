@@ -7,6 +7,14 @@ Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## Added
+
+- `documentation.tex`
+- `Floodpipe.drawio`
+- `UProperties.pas`
+- `UFunctions.pas`
+- `UTypedefine.pas`
+
 ## [0.1.1]
 
 ### Added
