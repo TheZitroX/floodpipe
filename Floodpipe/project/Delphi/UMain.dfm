@@ -12,6 +12,7 @@ object FMain: TFMain
   Font.Style = []
   OldCreateOrder = False
   OnCanResize = FormCanResize
+  OnCreate = FormCreate
   PixelsPerInch = 96
   TextHeight = 13
 end
