@@ -18,6 +18,7 @@ Changelog](https://keepachangelog.com/en/1.0.0/).
 ## Modified
 
 - `UMain.pas` First layout and structure
+- `.gitignore` nomore history from delphi
 
 ## [0.1.1]
 
