@@ -74,8 +74,11 @@ end;
 
 procedure TFMain.FormCreate(Sender: TObject);
 begin
-    // Set variables
-    fMainResizing := true;
+    // accessviolation if panels resizes when not existing
+    // starting with false and after creation the 
+    // FormCanResize triggers and sets itself to true
+    fMainResizing := false;
+
     // create panel-layout
     panelGameArea := TPanel.Create(FMain);
     panelGameArea.Parent := FMain;
