@@ -3,7 +3,7 @@
     author:     John Lienau
     title:      Main unit of project Floodpipe
     version:    v1.0
-    date:       28.07.2022
+    date:       29.07.2022
     copyright:  Copyright (c) 2022
 
     brief:      Main implementations of all units of the project Floodpipe
@@ -28,6 +28,7 @@ type
         public
             //panel
             panelGameArea:TPanel;
+            panelRightSideArea:TPanel;
 	end;
 
 var
@@ -48,7 +49,8 @@ implementation
 }
 procedure panelRedraw(
     mainWidth, mainHeight:integer;
-    var panelGameArea:TPanel);
+    var panelGameArea:TPanel;
+    var panelRightSideArea:TPanel);
 
     procedure setDimentions(
         var panel:TPanel;
@@ -64,14 +66,30 @@ procedure panelRedraw(
     end;
 
 begin
+    // panelGameArea
     setDimentions(
         panelGameArea,
         0, 0, // pos(0, 0)
         (mainWidth * 80) div 100, // 80% of the Width
         mainHeight
     );
+
+    // panelRightSideArea
+    setDimentions(
+        panelRightSideArea,
+        0, // top of FMain
+        (mainWidth * 80) div 100, // 80% of the Width
+        (mainWidth * 20) div 100, // 20% of the Width
+        mainHeight
+    );
 end;
 
+{
+    Setup before the FMain shows
+    Panels, buttons and the game is setup here
+
+    @param  Sender: not used
+}
 procedure TFMain.FormCreate(Sender: TObject);
 begin
     // accessviolation if panels resizes when not existing
@@ -80,17 +98,28 @@ begin
     fMainResizing := false;
 
     // create panel-layout
+    // panel GameArea
     panelGameArea := TPanel.Create(FMain);
     panelGameArea.Parent := FMain;
+    panelGameArea.Name := 'panelGameArea';
+
+    // panel RightSideArea
+    panelRightSideArea := TPanel.Create(FMain);
+    panelRightSideArea.Parent := FMain;
+    panelRightSideArea.Name := 'panelRightSideArea';
+
+    // update positions
     panelRedraw(
         FMain.ClientWidth,
         FMain.ClientHeight,
-        panelGameArea
+        panelGameArea,
+        panelRightSideArea
     );
 end;
 
 {
     On Resize the aspect ratio will be maintained
+    // fixme Horizontal sizing is not possible
 
     @param  Sender: not used
             var NewWidth: used to get the Width
@@ -107,7 +136,8 @@ begin
         panelRedraw(
             FMain.ClientWidth,
             FMain.ClientHeight,
-            panelGameArea
+            panelGameArea,
+            panelRightSideArea
         );
 
     // set true to be able so resize after Form is created
