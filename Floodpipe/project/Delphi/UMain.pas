@@ -26,9 +26,11 @@ type
         procedure FormCreate(Sender: TObject);
 
         public
-            //panel
+            // panel
             panelGameArea:TPanel;
             panelRightSideArea:TPanel;
+            // infoPanel
+            panelRightSideInfo:TPanel;
 	end;
 
 var
@@ -50,7 +52,8 @@ implementation
 procedure panelRedraw(
     mainWidth, mainHeight:integer;
     var panelGameArea:TPanel;
-    var panelRightSideArea:TPanel);
+    var panelRightSideArea:TPanel;
+    var panelRightSideInfo:TPanel);
 
     procedure setDimentions(
         var panel:TPanel;
@@ -82,6 +85,15 @@ begin
         (mainWidth * 20) div 100, // 20% of the Width
         mainHeight
     );
+
+    // panelRightSideInfo
+    setDimentions(
+        panelRightSideInfo,
+        0, // top of FMain
+        0, // 80% of the Width
+        panelRightSideArea.Width,
+        (panelRightSideArea.Height * 33) div 100 // 33% height of panelRightSideArea
+    );
 end;
 
 {
@@ -98,22 +110,28 @@ begin
     fMainResizing := false;
 
     // create panel-layout
-    // panel GameArea
+    // panel game area
     panelGameArea := TPanel.Create(FMain);
     panelGameArea.Parent := FMain;
     panelGameArea.Name := 'panelGameArea';
 
-    // panel RightSideArea
+    // panel right side area
     panelRightSideArea := TPanel.Create(FMain);
     panelRightSideArea.Parent := FMain;
     panelRightSideArea.Name := 'panelRightSideArea';
+
+    // panel Right side info
+    panelRightSideInfo := TPanel.Create(panelRightSideArea);
+    panelRightSideInfo.Parent := panelRightSideArea;
+    panelRightSideInfo.Name := 'panelRightSideInfo';
 
     // update positions
     panelRedraw(
         FMain.ClientWidth,
         FMain.ClientHeight,
         panelGameArea,
-        panelRightSideArea
+        panelRightSideArea,
+        panelRightSideInfo
     );
 end;
 
@@ -137,7 +155,8 @@ begin
             FMain.ClientWidth,
             FMain.ClientHeight,
             panelGameArea,
-            panelRightSideArea
+            panelRightSideArea,
+            panelRightSideInfo
         );
 
     // set true to be able so resize after Form is created
