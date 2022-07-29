@@ -72,19 +72,10 @@ begin
     );
 end;
 
-{
-    Setup before the FMain shows
-    Panels, buttons and the game is setup here
-
-    @param  Sender: not used
-}
 procedure TFMain.FormCreate(Sender: TObject);
 begin
-    // accessviolation if panels resizes when not existing
-    // starting with false and after creation the 
-    // FormCanResize triggers and sets itself to true
-    fMainResizing := false;
-
+    // Set variables
+    fMainResizing := true;
     // create panel-layout
     panelGameArea := TPanel.Create(FMain);
     panelGameArea.Parent := FMain;
@@ -97,7 +88,6 @@ end;
 
 {
     On Resize the aspect ratio will be maintained
-    // fixme Horizontal sizing is not possible
 
     @param  Sender: not used
             var NewWidth: used to get the Width
