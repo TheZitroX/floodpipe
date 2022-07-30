@@ -104,6 +104,10 @@ end;
 }
 procedure TFMain.FormCreate(Sender: TObject);
 begin
+    // FMain setup
+    FMain.Constraints.MinWidth := MAIN_FORM_MIN_WIDTH;
+    FMain.Constraints.MinHeight := MAIN_FORM_MIN_HEIGHT;
+
     // accessviolation if panels resizes when not existing
     // starting with false and after creation the 
     // FormCanResize triggers and sets itself to true
