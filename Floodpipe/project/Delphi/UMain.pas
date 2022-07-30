@@ -17,7 +17,7 @@ uses
 	Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
 	Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls,
 
-	UProperties, UFunctions;
+	UProperties, UFunctions, UTypedefine;
 
 type
 	TFMain = class(TForm)
@@ -25,6 +25,7 @@ type
                 NewHeight: Integer; var Resize: Boolean);
         procedure FormCreate(Sender: TObject);
         procedure FormResize(Sender: TObject);
+        procedure updateLayout();
 
         public
             // panel
@@ -33,6 +34,11 @@ type
             panelRightSideInfo:TPanel;
             panelButtons:TPanel;
             panelGamefield:TPanel;
+
+            // gamefield cells
+            cellField:TCellField;
+            cellRowLength:integer;
+            cellColumnLength:integer;
 	end;
 
 var
@@ -42,6 +48,25 @@ implementation
 
 {$R *.dfm}
 
+{
+    Calles the panelRedraw procedure to update all positions and sizes
+}
+procedure TFMain.updateLayout();
+begin
+    // update positions
+    panelRedraw(
+        FMain.ClientWidth,
+        FMain.ClientHeight,
+        panelGameArea,
+        panelGamefield,
+        panelRightSideArea,
+        panelRightSideInfo,
+        panelButtons,
+        cellField,
+        cellRowLength,
+        cellColumnLength
+    );
+end;
 
 {
     Setup before the FMain shows
@@ -67,29 +92,16 @@ begin
     // panel Right side info
     panelSetup(panelButtons, panelRightSideArea, 'panelButtons');
 
-    // update positions
-    panelRedraw(
-        FMain.ClientWidth,
-        FMain.ClientHeight,
-        panelGameArea,
-        panelGamefield,
-        panelRightSideArea,
-        panelRightSideInfo,
-        panelButtons
-    );
+    cellRowLength := 10;
+    cellColumnLength := 10;
+    createCells(cellField, panelGamefield, cellRowLength, cellColumnLength);
+
+    updateLayout();
 end;
 
 procedure TFMain.FormResize(Sender: TObject);
 begin
-    panelRedraw(
-        FMain.ClientWidth,
-        FMain.ClientHeight,
-        panelGameArea,
-        panelGamefield,
-        panelRightSideArea,
-        panelRightSideInfo,
-        panelButtons
-    );
+    updateLayout();
 end;
 
 {
