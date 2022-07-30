@@ -16,6 +16,7 @@ object FMain: TFMain
   Visible = True
   OnCanResize = FormCanResize
   OnCreate = FormCreate
+  OnResize = FormResize
   PixelsPerInch = 96
   TextHeight = 13
 end
