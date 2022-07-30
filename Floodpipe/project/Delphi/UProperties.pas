@@ -16,10 +16,10 @@ unit UProperties;
 
         const
             // window
-                MAIN_FORM_WIDTH = 800;
-                MAIN_FORM_HEIGHT = 450;
+                MAIN_FORM_MIN_WIDTH = 800;
+                MAIN_FORM_MIN_HEIGHT = 450;
                 // aspect ratio 9 / 16
-                MAIN_FORM_ASPECT_RATIO = MAIN_FORM_HEIGHT / MAIN_FORM_WIDTH;
+                MAIN_FORM_ASPECT_RATIO = MAIN_FORM_MIN_HEIGHT / MAIN_FORM_MIN_WIDTH;
 
     implementation
     end.
