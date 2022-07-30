@@ -17,7 +17,7 @@ uses
 	Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
 	Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls,
 
-	UProperties;
+	UProperties, UFunctions;
 
 type
 	TFMain = class(TForm)
@@ -29,8 +29,8 @@ type
             // panel
             panelGameArea:TPanel;
             panelRightSideArea:TPanel;
-            // infoPanel
             panelRightSideInfo:TPanel;
+            panelButtons:TPanel;
 	end;
 
 var
@@ -53,7 +53,8 @@ procedure panelRedraw(
     mainWidth, mainHeight:integer;
     var panelGameArea:TPanel;
     var panelRightSideArea:TPanel;
-    var panelRightSideInfo:TPanel);
+    var panelRightSideInfo:TPanel;
+    var panelButtons:TPanel);
 
     procedure setDimentions(
         var panel:TPanel;
@@ -94,6 +95,15 @@ begin
         panelRightSideArea.Width,
         (panelRightSideArea.Height * 33) div 100 // 33% height of panelRightSideArea
     );
+
+    // panelRightSideInfo
+    setDimentions(
+        panelButtons,
+        (panelRightSideArea.Height * 33) div 100, // 33% height of panelRightSideArea
+        0,
+        panelRightSideArea.Width,
+        (panelRightSideArea.Height * 67) div 100 // 67% height of panelRightSideArea
+    );
 end;
 
 {
@@ -115,19 +125,13 @@ begin
 
     // create panel-layout
     // panel game area
-    panelGameArea := TPanel.Create(FMain);
-    panelGameArea.Parent := FMain;
-    panelGameArea.Name := 'panelGameArea';
-
+    panelSetup(panelGameArea, FMain, 'panelGameArea');
     // panel right side area
-    panelRightSideArea := TPanel.Create(FMain);
-    panelRightSideArea.Parent := FMain;
-    panelRightSideArea.Name := 'panelRightSideArea';
-
+    panelSetup(panelRightSideArea, FMain, 'panelSetup');
     // panel Right side info
-    panelRightSideInfo := TPanel.Create(panelRightSideArea);
-    panelRightSideInfo.Parent := panelRightSideArea;
-    panelRightSideInfo.Name := 'panelRightSideInfo';
+    panelSetup(panelRightSideInfo, panelRightSideArea, 'panelRightSideInfo');
+    // panel Right side info
+    panelSetup(panelButtons, panelRightSideArea, 'panelButtons');
 
     // update positions
     panelRedraw(
@@ -135,7 +139,8 @@ begin
         FMain.ClientHeight,
         panelGameArea,
         panelRightSideArea,
-        panelRightSideInfo
+        panelRightSideInfo,
+        panelButtons
     );
 end;
 
@@ -160,7 +165,8 @@ begin
             FMain.ClientHeight,
             panelGameArea,
             panelRightSideArea,
-            panelRightSideInfo
+            panelRightSideInfo,
+            panelButtons
         );
 
     // set true to be able so resize after Form is created
