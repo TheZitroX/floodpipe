@@ -20,5 +20,13 @@ unit UTypedefine;
             // cells
             TCellField = array of array of TPanel;
 
+            // position einer Celle
+            TPosition = record
+                x:integer;
+                y:integer;
+            end;
+            // liste von positionen
+            TPositionList = array of TPosition;
+
     implementation
     end.

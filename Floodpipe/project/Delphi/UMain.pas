@@ -3,7 +3,7 @@
     author:     John Lienau
     title:      Main unit of project Floodpipe
     version:    v1.0
-    date:       29.07.2022
+    date:       31.07.2022
     copyright:  Copyright (c) 2022
 
     brief:      Main implementations of all units of the project Floodpipe
@@ -26,6 +26,7 @@ type
         procedure FormCreate(Sender: TObject);
         procedure FormResize(Sender: TObject);
         procedure updateLayout();
+        procedure cellQueueHandler(Sender: TObject);
 
         public
             // panel
@@ -43,6 +44,8 @@ type
 
 var
 	FMain: TFMain;
+    cellAnimationTickRate:integer;
+    positionQueueList:TPositionList;
 
 implementation
 
@@ -69,13 +72,49 @@ begin
 end;
 
 {
+    Works through the positionQueueList
+
+    Global: positionQueueList die abzuarbeiten ist
+}
+procedure TFMain.cellQueueHandler(Sender: TObject);
+var
+    outputString:TStringBuilder;
+begin
+    // Nur ein durchlauf
+    (Sender as TTimer).Enabled := false;
+
+    outputString := TStringBuilder.Create;
+    try
+        outputString.Append('Hello World!');
+        outputString.Append(sLineBreak);
+        outputString.Append('positionQueueList:');
+        outputString.Append(sLineBreak);
+
+        showmessage(outputString.toString());
+    finally
+        outputString.Free;
+    end;
+end;
+
+{
     Setup before the FMain shows
     Panels, buttons and the game is setup here
 
     @param  Sender: not used
 }
 procedure TFMain.FormCreate(Sender: TObject);
+var
+    t:TTimer;
 begin
+    cellAnimationTickRate := DEFAULT_CELL_TICK_RATE;
+    // fix testweise
+    t := TTimer.Create(FMain);
+    t.Interval := cellAnimationTickRate;
+    t.OnTimer := FMain.cellQueueHandler;
+    t.Enabled := True;
+
+
+
     // FMain setup
     FMain.Constraints.MinWidth := MAIN_FORM_MIN_WIDTH;
     FMain.Constraints.MinHeight := MAIN_FORM_MIN_HEIGHT;

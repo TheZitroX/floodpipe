@@ -3,7 +3,7 @@
     author:     John Lienau
     title:      Default properties for Floodpipe
     version:    v1.0
-    date:       28.07.2022
+    date:       31.07.2022
     copyright:  Copyright (c) 2022
 
     brief:      Best to not change the values of the constants
@@ -20,6 +20,9 @@ unit UProperties;
                 MAIN_FORM_MIN_HEIGHT = 450;
                 // aspect ratio 9 / 16
                 MAIN_FORM_ASPECT_RATIO = MAIN_FORM_MIN_HEIGHT / MAIN_FORM_MIN_WIDTH;
+
+            // cells
+                DEFAULT_CELL_TICK_RATE = 1000; // (in ms)
 
     implementation
     end.
