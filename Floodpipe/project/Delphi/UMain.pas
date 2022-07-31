@@ -85,10 +85,10 @@ begin
 
     outputString := TStringBuilder.Create;
     try
-        outputString.Append('Hello World!');
-        outputString.Append(sLineBreak);
-        outputString.Append('positionQueueList:');
-        outputString.Append(sLineBreak);
+        outputString := outputString.Append('Hello World!');
+        outputString := outputString.Append(sLineBreak);
+        outputString := outputString.Append('positionQueueList:');
+        outputString := outputString.Append(sLineBreak);
 
         showmessage(outputString.toString());
     finally
