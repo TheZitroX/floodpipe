@@ -23,6 +23,11 @@ unit UFunctions;
         var panel:TPanel;
         panelParent:TWinControl;
         panelName:string);
+    procedure createCellGrid(
+        var cellGrid:TGridPanel;
+        panelParent:TWinControl;
+        cellField:TCellField;
+        rowCount, columnCount:integer);
     procedure panelRedraw(
         mainWidth, mainHeight:integer;
         var panelGameArea:TPanel;
@@ -31,13 +36,12 @@ unit UFunctions;
         var panelRightSideInfo:TPanel;
         var panelButtons:TPanel;
         var cellField:TCellField;
-        cellRowLength, cellColumnLength:integer);
+        rowCount, columnCount:integer);
     
     procedure createCells(
         var cellField:TCellField;
-        panelGamefield:TPanel;
-        cellRowLength:integer;
-        cellColumnLength:integer);
+        newParent:TWinControl;
+        rowCount, columnCount:integer);
 
     implementation
 
@@ -87,6 +91,86 @@ unit UFunctions;
             end;
 
         {
+            creates a field (rows * columns) of TCellField
+
+            @param  cellField the field of TPanel
+                    newParent the parent of cellField
+                    rowCount the row-count
+                    columnCount the column-count
+        }
+        procedure createCells(
+            var cellField:TCellField;
+            newParent:TWinControl;
+            rowCount, columnCount:integer);
+        var
+            i, j,
+            cellSideLength:integer;
+        begin
+            // create the array-field with the needed length
+            setLength(cellField, rowCount, columnCount);
+            // create cells
+            for i := 0 to rowCount - 1 do
+                for j := 0 to columnCount - 1 do
+                begin
+                    panelSetup(
+                        cellField[i][j],
+                        newParent,
+                        'cellx' + inttostr(i) + 'y' + inttostr(j)
+                    );
+                    cellField[i][j].Align := alClient;
+                end;
+        end;
+
+        procedure createCellGrid(
+            var cellGrid:TGridPanel;
+            panelParent:TWinControl;
+            cellField:TCellField;
+            rowCount, columnCount:integer);
+        var
+            i:integer;
+            testCell:TPanel;
+        begin
+            cellGrid := TGridPanel.Create(panelParent);
+            cellGrid.parent := panelParent;
+            cellGrid.Align := alClient;
+
+            cellGrid.RowCollection.BeginUpdate;
+            cellGrid.ColumnCollection.BeginUpdate;
+            // info: cannot clear if there are controls
+            // clear any Controls
+            for i := 0 to cellGrid.ControlCount - 1 do
+                cellGrid.Controls[0].Free;
+            cellGrid.RowCollection.Clear;
+            cellGrid.ColumnCollection.Clear;
+
+            // for every row
+            for i := 0 to rowCount - 1 do
+                with cellGrid.RowCollection.Add do
+                begin
+                    SizeStyle := ssPercent;
+                    Value := 100 / rowCount; // each cell is evently spaced out
+                end;
+            // for every column
+            for i := 0 to columnCount - 1 do
+                with cellGrid.ColumnCollection.Add do
+                begin
+                    SizeStyle := ssPercent;
+                    Value := 100 / columnCount; // each cell is evently spaced out
+                end;
+
+            // creation of cells
+            createCells(
+                cellField,
+                cellGrid,
+                rowCount,
+                columnCount
+            );
+
+            cellGrid.RowCollection.EndUpdate;
+            cellGrid.ColumnCollection.EndUpdate;
+        end;
+
+        {
             Gives each panel its position and size,
             relativ to the width and height of the FMain size
 
@@ -98,8 +182,8 @@ unit UFunctions;
                     panelRightSideInfo: the panel with info text
                     panelButtons: the panel on the right side with buttons
                     cellField: array with cells (TCellField)
-                    cellRowLength: the cell row count
-                    cellColumnLength: the column count of cells
+                    rowCount: the cell row count
+                    columnCount: the column count of cells
         }
         procedure panelRedraw(
             mainWidth, mainHeight:integer;
@@ -109,10 +193,12 @@ unit UFunctions;
             var panelRightSideInfo:TPanel;
             var panelButtons:TPanel;
             var cellField:TCellField;
-            cellRowLength, cellColumnLength:integer);
+            rowCount, columnCount:integer);
 
             var
-                i, j, tempHeight, cellSideLength, cellFirstTopPos, cellFirstLeftPos:integer;
+                i, j, tempHeight, 
+                cellSideLength, cellFirstTopPos, cellFirstLeftPos,
+                cellXWithOffset, cellYWithOffset:integer;
             begin
                 // panelGameArea
                 setDimentions(
@@ -141,8 +227,8 @@ unit UFunctions;
                 // panelRightSideInfo
                 setDimentions(
                     panelRightSideInfo,
-                    0, // top of FMain
-                    0, // 80% of the Width
+                    0, // top-
+                    0, // left corner
                     panelRightSideArea.Width,
                     (panelRightSideArea.Height * 33) div 100 // 33% height of panelRightSideArea
                 );
@@ -155,58 +241,36 @@ unit UFunctions;
                     (panelRightSideArea.Height * 67) div 100 // 67% height of panelRightSideArea
                 );
 
+
                 // cells
                 // calculates the sideLength of cells
-                if (cellRowLength > cellColumnLength) then begin
-                    cellSideLength := round(panelGamefield.Width / cellRowLength);
-                    cellFirstTopPos := 0;
-                    cellFirstLeftPos := (panelGamefield.Width - (cellSideLength * cellColumnLength)) div 2;
+                if (rowCount > columnCount) then begin
+                    cellSideLength := round(panelGamefield.Width / rowCount);
+                    // cellFirstTopPos := 0;
+                    // cellFirstLeftPos := (panelGamefield.Width - (cellSideLength * columnCount)) div 2;
                 end else begin
-                    cellSideLength := round(panelGamefield.Width / cellColumnLength);
-                    cellFirstTopPos := (panelGamefield.Height - (cellSideLength * cellRowLength)) div 2;
-                    cellFirstLeftPos := 0;
+                    cellSideLength := round(panelGamefield.Width / columnCount);
+                    // cellFirstTopPos := (panelGamefield.Height - (cellSideLength * rowCount)) div 2;
+                    // cellFirstLeftPos := 0;
                 end;
+                // cellXWithOffset := cellSideLength + cellFirstTopPos;
+                // cellYWithOffset := cellSideLength + cellFirstLeftPos;
 
                 // for each cell in cellField
-                for i := 0 to cellRowLength - 1 do
-                    for j := 0 to cellColumnLength - 1 do
-                        setDimentions(
-                            cellField[i][j],
-                            i * cellSideLength + cellFirstTopPos,
-                            j * cellSideLength + cellFirstLeftPos,
-                            cellSideLength,
-                            cellSideLength
-                        );
-            end;
+                for i := 0 to rowCount - 1 do
+                    for j := 0 to columnCount - 1 do
+                    begin
+                        // cellField[i][j].Width := cellSideLength;
+                        // cellField[i][j].Height := cellSideLength;
 
-        {
-            creates a field (rows * columns) of TCellField
-
-            @param  cellField the field of TPanel
-                    panelGamefield the parent of cellField
-                    cellRowLength the row-count
-                    cellColumnLength the column-count
-        }
-        procedure createCells(
-            var cellField:TCellField;
-            panelGamefield:TPanel;
-            cellRowLength:integer;
-            cellColumnLength:integer);
-
-            var
-                i, j:integer;
-
-            begin
-                // create the array-field with the needed length
-                setLength(cellField, cellRowLength, cellColumnLength);
-                // create cells
-                for i := 0 to cellRowLength - 1 do
-                    for j := 0 to cellColumnLength - 1 do
-                        panelSetup(
-                            cellField[i][j],
-                            panelGamefield,
-                            'cellx' + inttostr(i) + 'y' + inttostr(j)
-                        );
+                        // setDimentions(
+                        //     cellField[i][j],
+                        //     i * cellXWithOffset,
+                        //     j * cellYWithOffset,
+                        //     cellSideLength,
+                        //     cellSideLength
+                        // );
+                    end;
             end;
 
     end.

@@ -36,6 +36,8 @@ type
             panelButtons:TPanel;
             panelGamefield:TPanel;
 
+            // ---gamefield---
+            cellGrid:TGridPanel;
             // gamefield cells
             cellField:TCellField;
             cellRowLength:integer;
@@ -106,34 +108,32 @@ procedure TFMain.FormCreate(Sender: TObject);
 var
     t:TTimer;
 begin
+    cellRowLength := DEFAULT_CELL_ROW_COUNT;
+    cellColumnLength := DEFAULT_CELL_COLUMN_COUNT;
     cellAnimationTickRate := DEFAULT_CELL_TICK_RATE;
+
     // fix testweise
     t := TTimer.Create(FMain);
     t.Interval := cellAnimationTickRate;
     t.OnTimer := FMain.cellQueueHandler;
     t.Enabled := True;
 
-
-
     // FMain setup
     FMain.Constraints.MinWidth := MAIN_FORM_MIN_WIDTH;
     FMain.Constraints.MinHeight := MAIN_FORM_MIN_HEIGHT;
-
     // create panel-layout
     // panel game area
     panelSetup(panelGameArea, FMain, 'panelGameArea');
     // panel gamefield
     panelSetup(panelGamefield, panelGameArea, 'panelGamefield');
+    // gridpanel cellGrid
+    createCellGrid(cellGrid, panelGamefield, cellField, cellRowLength, cellColumnLength);
     // panel right side area
     panelSetup(panelRightSideArea, FMain, 'panelSetup');
     // panel Right side info
     panelSetup(panelRightSideInfo, panelRightSideArea, 'panelRightSideInfo');
     // panel Right side info
     panelSetup(panelButtons, panelRightSideArea, 'panelButtons');
-
-    cellRowLength := 10;
-    cellColumnLength := 10;
-    createCells(cellField, panelGamefield, cellRowLength, cellColumnLength);
 
     updateLayout();
 end;
