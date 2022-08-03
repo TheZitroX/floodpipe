@@ -27,6 +27,7 @@ type
         procedure FormResize(Sender: TObject);
         procedure updateLayout();
         procedure cellQueueHandler(Sender: TObject);
+        procedure cellQueueHandlerFinalize();
 
         public
             // panel
@@ -73,6 +74,11 @@ begin
     );
 end;
 
+procedure TFMain.cellQueueHandlerFinalize();
+begin
+    // todo enable all buttons for user
+end;
+
 {
     Works through the positionQueueList
 
@@ -82,8 +88,6 @@ procedure TFMain.cellQueueHandler(Sender: TObject);
 var
     outputString:TStringBuilder;
 begin
-    // Nur ein durchlauf
-    (Sender as TTimer).Enabled := false;
 
     outputString := TStringBuilder.Create;
     try
@@ -95,6 +99,13 @@ begin
         showmessage(outputString.toString());
     finally
         outputString.Free;
+    end;
+
+    // if animationFinished() then
+    begin
+        // timer stoppen
+        (Sender as TTimer).Enabled := false;
+        cellQueueHandlerFinalize();
     end;
 end;
 
