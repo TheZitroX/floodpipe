@@ -67,10 +67,7 @@ begin
         panelGamefield,
         panelRightSideArea,
         panelRightSideInfo,
-        panelButtons,
-        cellField,
-        cellRowLength,
-        cellColumnLength
+        panelButtons
     );
 end;
 
@@ -122,6 +119,9 @@ begin
     cellRowLength := DEFAULT_CELL_ROW_COUNT;
     cellColumnLength := DEFAULT_CELL_COLUMN_COUNT;
     cellAnimationTickRate := DEFAULT_CELL_TICK_RATE;
+
+    // for randomniss
+    randomize;
 
     // todo aufruf bei animation
     // t := TTimer.Create(FMain);

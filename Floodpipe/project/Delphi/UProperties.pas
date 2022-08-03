@@ -16,15 +16,15 @@ interface
 
     const
         // window
-            MAIN_FORM_MIN_WIDTH = 800;
-            MAIN_FORM_MIN_HEIGHT = 450;
-            // aspect ratio 9 / 16
-            MAIN_FORM_ASPECT_RATIO = MAIN_FORM_MIN_HEIGHT / MAIN_FORM_MIN_WIDTH;
+        MAIN_FORM_MIN_WIDTH = 800;
+        MAIN_FORM_MIN_HEIGHT = 450;
+        // aspect ratio 9 / 16
+        MAIN_FORM_ASPECT_RATIO = MAIN_FORM_MIN_HEIGHT / MAIN_FORM_MIN_WIDTH;
 
         // cells
-            DEFAULT_CELL_ROW_COUNT = 10;
-            DEFAULT_CELL_COLUMN_COUNT = 10;
-            DEFAULT_CELL_TICK_RATE = 1000; // (in ms)
+        DEFAULT_CELL_ROW_COUNT = 10;
+        DEFAULT_CELL_COLUMN_COUNT = 10;
+        DEFAULT_CELL_TICK_RATE = 1000; // (in ms)
 
         // ===PIXELFUNCTIONS===
         PIXEL_FORMAT = pf24bit;

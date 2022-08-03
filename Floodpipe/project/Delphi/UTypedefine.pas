@@ -17,10 +17,6 @@ interface
         UProperties;
 
     type
-        // cells
-        TCell = TImage;
-        TCellField = array of array of TCell;
-
         // cell item
         TCellItem = (
             EMPTY,
@@ -36,12 +32,22 @@ interface
             SECOND,
             THIRD
         );
-
         // position einer Celle
         TPosition = record
             x:integer;
             y:integer;
         end;
+        TAttachedList = array of TPosition;
+        // cell
+        TCell = record
+            image:TImage;
+            cellItem:TCellItem;
+            cellRotation:TCellRotation;
+            position:TPosition;
+            attachedList:TAttachedList;
+        end;
+        TCellField = array of array of TCell;
+
         // liste von positionen
         TPositionList = array of TPosition;
 

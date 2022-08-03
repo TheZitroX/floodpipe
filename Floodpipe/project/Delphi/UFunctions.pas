@@ -34,9 +34,7 @@ unit UFunctions;
         var panelGamefield:TPanel;
         var panelRightSideArea:TPanel;
         var panelRightSideInfo:TPanel;
-        var panelButtons:TPanel;
-        var cellField:TCellField;
-        rowCount, columnCount:integer);
+        var panelButtons:TPanel);
     
     procedure createCells(
         var cellField:TCellField;
@@ -101,9 +99,9 @@ unit UFunctions;
             newParent:TWinControl;
             newName:string);
         begin
-            cell := TCell.Create(newParent);
+            cell.image := TImage.Create(newParent);
             try
-                with cell do
+                with cell.image do
                 begin
                     Parent := newParent;
                     Name := newName;
@@ -118,13 +116,15 @@ unit UFunctions;
         procedure setCellToItem(
             var cell:TCell;
             cellItem:TCellItem;
-            cellPhase:TCellRotation);
+            cellRotation:TCellRotation);
         begin
             loadPictureFromBitmap(
                 cell,
                 cellItem,
-                cellPhase
+                cellRotation
             );
+            cell.cellItem := cellItem;
+            cell.cellRotation := cellRotation;
         end;
 
         {
@@ -153,7 +153,7 @@ unit UFunctions;
                         newParent,
                         'cellx' + inttostr(i) + 'y' + inttostr(j)
                     );
-                    cellField[i][j].Align := alClient;
+                    cellField[i][j].image.Align := alClient;
                     setCellToItem(
                         cellField[i][j],
                         // TCellItem.PIPE_EMPTY,
@@ -223,9 +223,6 @@ unit UFunctions;
                     panelRightsideArea: the panel on the right side
                     panelRightSideInfo: the panel with info text
                     panelButtons: the panel on the right side with buttons
-                    cellField: array with cells (TCellField)
-                    rowCount: the cell row count
-                    columnCount: the column count of cells
         }
         procedure panelRedraw(
             mainWidth, mainHeight:integer;
@@ -233,9 +230,7 @@ unit UFunctions;
             var panelGamefield:TPanel;
             var panelRightSideArea:TPanel;
             var panelRightSideInfo:TPanel;
-            var panelButtons:TPanel;
-            var cellField:TCellField;
-            rowCount, columnCount:integer);
+            var panelButtons:TPanel);
 
             var
                 tempHeight:integer;

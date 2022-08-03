@@ -21,7 +21,7 @@ interface
 procedure loadPictureFromBitmap(
     var cell:TCell;
     cellItem:TCellItem;
-    cellPhase:TCellRotation);
+    cellRotation:TCellRotation);
 
 implementation
 
@@ -29,13 +29,13 @@ implementation
         @brief  gets a selected tile from the tilemapBitmap
         @param  tilemapBitmap the resource
                 cellItem the item
-                cellPhase selects the rotated variant of cellItem
+                cellRotation selects the rotated variant of cellItem
         @return the tile as TBitmap
     }
     function getTileFromTilemap(
         tilemapBitmap:TBitmap;
         cellItem:TCellItem;
-        cellPhase:TCellRotation):TBitmap;
+        cellRotation:TCellRotation):TBitmap;
     var
         tileBitmap:TBitmap;
         posX, posY:integer;
@@ -48,7 +48,7 @@ implementation
         case cellItem of
             EMPTY:;
             else begin
-                posX := TILEMAP_TILE_SIDE_LENGTH * integer(cellPhase);
+                posX := TILEMAP_TILE_SIDE_LENGTH * integer(cellRotation);
                 posY := TILEMAP_TILE_SIDE_LENGTH * (integer(cellItem) - 1);
             end;
         end;
@@ -69,7 +69,7 @@ implementation
     procedure loadPictureFromBitmap(
         var cell:TCell;
         cellItem:TCellItem;
-        cellPhase:TCellRotation);
+        cellRotation:TCellRotation);
     var
         stream:TResourceStream;
         tilemapBitmap:TBitmap;
@@ -88,10 +88,10 @@ implementation
                 tilemapBitmap.LoadFromStream(stream);
                 // use this when debuging the image resource
                 //// tilemapBitmap.LoadFromFile('tilemap.bmp');
-                cell.Picture.Bitmap := getTileFromTilemap(
+                cell.image.Picture.Bitmap := getTileFromTilemap(
                     tilemapBitmap,
                     cellItem,
-                    cellPhase
+                    cellRotation
                 );
             finally
                 stream.free;
