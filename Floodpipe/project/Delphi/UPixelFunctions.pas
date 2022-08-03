@@ -1,4 +1,4 @@
-{
+﻿{
     file:       UPixelFunctions.pas
     author:     John Lienau
     title:      Generates pictures and styles them
@@ -45,8 +45,13 @@ implementation
         tileBitmap.Width := TILEMAP_TILE_SIDE_LENGTH;
         tileBitmap.Height := TILEMAP_TILE_SIDE_LENGTH;
 
-        posX := TILEMAP_TILE_SIDE_LENGTH * integer(cellItem);
-        posY := TILEMAP_TILE_SIDE_LENGTH * integer(cellPhase);
+        case cellItem of
+            EMPTY:;
+            else begin
+                posX := TILEMAP_TILE_SIDE_LENGTH * integer(cellPhase);
+                posY := TILEMAP_TILE_SIDE_LENGTH * (integer(cellItem) - 1);
+            end;
+        end;
         
         tileBitmap.Canvas.CopyRect(
             Rect(0, 0, TILEMAP_TILE_SIDE_LENGTH, TILEMAP_TILE_SIDE_LENGTH),
@@ -72,7 +77,12 @@ implementation
         tilemapBitmap := TBitmap.Create();
         try
             tilemapBitmap.PixelFormat := PIXEL_FORMAT;
-            stream := TResourceStream.Create(HInstance, 'pipesEmptyTilemap', RT_RCDATA);
+            // get the right tilemap
+            case cellItem of
+                PIPE_EMPTY, PIPE_LID_EMPTY, PIPE_TSPLITS_EMPTY, PIPE_CURVES_EMPTY:
+                    stream := TResourceStream.Create(HInstance, 'pipesEmptyTilemap', RT_RCDATA);
+                else assert(true, 'no ressourcestream loaded');
+            end;
             try
                 // load bitmap from resource
                 tilemapBitmap.LoadFromStream(stream);

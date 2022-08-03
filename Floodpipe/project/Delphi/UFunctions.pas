@@ -120,14 +120,11 @@ unit UFunctions;
             cellItem:TCellItem;
             cellPhase:TCellRotation);
         begin
-            case cellItem of
-                EMPTY: loadPictureFromBitmap(
-                    cell,
-                    cellItem,
-                    cellPhase
-                );
-                else ;
-            end;
+            loadPictureFromBitmap(
+                cell,
+                cellItem,
+                cellPhase
+            );
         end;
 
         {
@@ -159,8 +156,10 @@ unit UFunctions;
                     cellField[i][j].Align := alClient;
                     setCellToItem(
                         cellField[i][j],
-                        TCellItem.EMPTY,
-                        TCellRotation.NONE
+                        // TCellItem.PIPE_EMPTY,
+                        TCellItem(Random(Succ(Ord(High(TCellItem)) - 1)) + 1),
+                        // TCellRotation.NONE
+                        TCellRotation(Random(Succ(Ord(High(TCellRotation)))))
                     );
                 end;
         end;

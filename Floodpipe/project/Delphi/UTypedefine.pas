@@ -24,9 +24,12 @@ interface
         // cell item
         TCellItem = (
             EMPTY,
-            PIPE
+            PIPE_LID_EMPTY,
+            PIPE_EMPTY,
+            PIPE_TSPLITS_EMPTY,
+            PIPE_CURVES_EMPTY
         );
-        // rotation of cell
+        // rotation of a cell
         TCellRotation = (
             NONE,
             FIRST,
