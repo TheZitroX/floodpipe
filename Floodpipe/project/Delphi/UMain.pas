@@ -88,6 +88,12 @@ procedure TFMain.cellQueueHandler(Sender: TObject);
 var
     outputString:TStringBuilder;
 begin
+    // if animationFinished() then
+    // begin
+        // timer stoppen
+        (Sender as TTimer).Enabled := false;
+        cellQueueHandlerFinalize();
+    // end;
 
     outputString := TStringBuilder.Create;
     try
@@ -101,12 +107,6 @@ begin
         outputString.Free;
     end;
 
-    // if animationFinished() then
-    begin
-        // timer stoppen
-        (Sender as TTimer).Enabled := false;
-        cellQueueHandlerFinalize();
-    end;
 end;
 
 {
@@ -123,11 +123,11 @@ begin
     cellColumnLength := DEFAULT_CELL_COLUMN_COUNT;
     cellAnimationTickRate := DEFAULT_CELL_TICK_RATE;
 
-    // fix testweise
-    t := TTimer.Create(FMain);
-    t.Interval := cellAnimationTickRate;
-    t.OnTimer := FMain.cellQueueHandler;
-    t.Enabled := True;
+    // todo aufruf bei animation
+    // t := TTimer.Create(FMain);
+    // t.Interval := cellAnimationTickRate;
+    // t.OnTimer := FMain.cellQueueHandler;
+    // t.Enabled := True;
 
     // FMain setup
     FMain.Constraints.MinWidth := MAIN_FORM_MIN_WIDTH;

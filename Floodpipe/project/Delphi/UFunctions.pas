@@ -16,7 +16,7 @@ unit UFunctions;
     uses 
         vcl.Forms, sysutils, vcl.extctrls, vcl.controls,
 
-        UTypedefine;
+        UTypedefine, UPixelfunctions, UProperties;
 
     // public functions
     procedure panelSetup(
@@ -91,6 +91,46 @@ unit UFunctions;
             end;
 
         {
+            Creates a cell with name and parant
+            @param  cell as target
+                    newParent the parant of target
+                    newName the name of target
+        }
+        procedure cellSetup(
+            var cell:TCell;
+            newParent:TWinControl;
+            newName:string);
+        begin
+            cell := TCell.Create(newParent);
+            try
+                with cell do
+                begin
+                    Parent := newParent;
+                    Name := newName;
+                    Stretch := true; // to fill the whole cell
+                end;
+            except
+                // todo fehler beim schreiben?
+                // muss das überall so?
+            end;
+        end;
+
+        procedure setCellToItem(
+            var cell:TCell;
+            cellItem:TCellItem;
+            cellPhase:TCellRotation);
+        begin
+            case cellItem of
+                EMPTY: loadPictureFromBitmap(
+                    cell,
+                    cellItem,
+                    cellPhase
+                );
+                else ;
+            end;
+        end;
+
+        {
             creates a field (rows * columns) of TCellField
 
             @param  cellField the field of TPanel
@@ -103,8 +143,7 @@ unit UFunctions;
             newParent:TWinControl;
             rowCount, columnCount:integer);
         var
-            i, j,
-            cellSideLength:integer;
+            i, j:integer;
         begin
             // create the array-field with the needed length
             setLength(cellField, rowCount, columnCount);
@@ -112,12 +151,17 @@ unit UFunctions;
             for i := 0 to rowCount - 1 do
                 for j := 0 to columnCount - 1 do
                 begin
-                    panelSetup(
+                    cellSetup(
                         cellField[i][j],
                         newParent,
                         'cellx' + inttostr(i) + 'y' + inttostr(j)
                     );
                     cellField[i][j].Align := alClient;
+                    setCellToItem(
+                        cellField[i][j],
+                        TCellItem.EMPTY,
+                        TCellRotation.NONE
+                    );
                 end;
         end;
 
@@ -128,7 +172,6 @@ unit UFunctions;
             rowCount, columnCount:integer);
         var
             i:integer;
-            testCell:TPanel;
         begin
             cellGrid := TGridPanel.Create(panelParent);
             cellGrid.parent := panelParent;
@@ -196,9 +239,7 @@ unit UFunctions;
             rowCount, columnCount:integer);
 
             var
-                i, j, tempHeight, 
-                cellSideLength, cellFirstTopPos, cellFirstLeftPos,
-                cellXWithOffset, cellYWithOffset:integer;
+                tempHeight:integer;
             begin
                 // panelGameArea
                 setDimentions(
@@ -240,37 +281,6 @@ unit UFunctions;
                     panelRightSideArea.Width,
                     (panelRightSideArea.Height * 67) div 100 // 67% height of panelRightSideArea
                 );
-
-
-                // cells
-                // calculates the sideLength of cells
-                if (rowCount > columnCount) then begin
-                    cellSideLength := round(panelGamefield.Width / rowCount);
-                    // cellFirstTopPos := 0;
-                    // cellFirstLeftPos := (panelGamefield.Width - (cellSideLength * columnCount)) div 2;
-                end else begin
-                    cellSideLength := round(panelGamefield.Width / columnCount);
-                    // cellFirstTopPos := (panelGamefield.Height - (cellSideLength * rowCount)) div 2;
-                    // cellFirstLeftPos := 0;
-                end;
-                // cellXWithOffset := cellSideLength + cellFirstTopPos;
-                // cellYWithOffset := cellSideLength + cellFirstLeftPos;
-
-                // for each cell in cellField
-                for i := 0 to rowCount - 1 do
-                    for j := 0 to columnCount - 1 do
-                    begin
-                        // cellField[i][j].Width := cellSideLength;
-                        // cellField[i][j].Height := cellSideLength;
-
-                        // setDimentions(
-                        //     cellField[i][j],
-                        //     i * cellXWithOffset,
-                        //     j * cellYWithOffset,
-                        //     cellSideLength,
-                        //     cellSideLength
-                        // );
-                    end;
             end;
 
     end.

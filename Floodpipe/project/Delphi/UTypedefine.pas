@@ -10,23 +10,37 @@
 }
 
 unit UTypedefine;
-    interface
-        uses
-            sysutils, vcl.extctrls, vcl.stdctrls,
+interface
+    uses
+        sysutils, vcl.extctrls, vcl.stdctrls,
 
-            UProperties;
+        UProperties;
 
-        type
-            // cells
-            TCellField = array of array of TPanel;
+    type
+        // cells
+        TCell = TImage;
+        TCellField = array of array of TCell;
 
-            // position einer Celle
-            TPosition = record
-                x:integer;
-                y:integer;
-            end;
-            // liste von positionen
-            TPositionList = array of TPosition;
+        // cell item
+        TCellItem = (
+            EMPTY,
+            PIPE
+        );
+        // rotation of cell
+        TCellRotation = (
+            NONE,
+            FIRST,
+            SECOND,
+            THIRD
+        );
 
-    implementation
-    end.
+        // position einer Celle
+        TPosition = record
+            x:integer;
+            y:integer;
+        end;
+        // liste von positionen
+        TPositionList = array of TPosition;
+
+implementation
+end.
