@@ -11,6 +11,7 @@ unit UPixelFunctions;
 
     // Bitmap file with all tiles in a 4 by 4 (à 58px) grid
     {$R resources/pipesEmptyTilemap.RES}
+    {$R resources/pipesWaterTilemap.RES}
 
 interface
     uses
@@ -18,10 +19,7 @@ interface
 
         UTypedefine, UProperties;
 
-procedure loadPictureFromBitmap(
-    var cell:TCell;
-    cellItem:TCellItem;
-    cellRotation:TCellRotation);
+procedure loadPictureFromBitmap(var cell:TCell);
 
 implementation
 
@@ -45,13 +43,12 @@ implementation
         tileBitmap.Width := TILEMAP_TILE_SIDE_LENGTH;
         tileBitmap.Height := TILEMAP_TILE_SIDE_LENGTH;
 
-        case cellItem of
-            EMPTY:;
-            else begin
+        // case cellItem of
+        //     else begin
                 posX := TILEMAP_TILE_SIDE_LENGTH * integer(cellRotation);
                 posY := TILEMAP_TILE_SIDE_LENGTH * (integer(cellItem) - 1);
-            end;
-        end;
+            // end;
+        // end;
         
         tileBitmap.Canvas.CopyRect(
             Rect(0, 0, TILEMAP_TILE_SIDE_LENGTH, TILEMAP_TILE_SIDE_LENGTH),
@@ -66,23 +63,36 @@ implementation
         @param resource-bitmap the ressource bitmap
                 tileIndex the selected tile
     }
-    procedure loadPictureFromBitmap(
-        var cell:TCell;
-        cellItem:TCellItem;
-        cellRotation:TCellRotation);
+    procedure loadPictureFromBitmap(var cell:TCell);
     var
         stream:TResourceStream;
         tilemapBitmap:TBitmap;
+        resourceStreamSource:string;
     begin
         tilemapBitmap := TBitmap.Create();
         try
             tilemapBitmap.PixelFormat := PIXEL_FORMAT;
+
             // get the right tilemap
-            case cellItem of
-                PIPE_EMPTY, PIPE_LID_EMPTY, PIPE_TSPLITS_EMPTY, PIPE_CURVES_EMPTY:
-                    stream := TResourceStream.Create(HInstance, 'pipesEmptyTilemap', RT_RCDATA);
-                else assert(true, 'no ressourcestream loaded');
+            case cell.cellType of
+                TYPE_WALL:;
+                TYPE_PIPE: resourceStreamSource := 'pipes';
+                else assert(true, 'ERROR from UPixelFunctions: no such TCellType');
             end;
+
+            // if not a wall then add the content of a pipe
+            if not (cell.cellType = TCellType.TYPE_WALL) then
+                case cell.cellContent of
+                    CONTENT_EMPTY: resourceStreamSource := resourceStreamSource + 'Empty';
+                    CONTENT_WATER: resourceStreamSource := resourceStreamSource + 'Water';
+                    else assert(true, 'ERROR from UPixelFunctions: no such TCellContent');
+                end;
+
+            resourceStreamSource := resourceStreamSource + 'Tilemap';
+            
+            // load the stream from resourceStreamSource
+            stream := TResourceStream.Create(HInstance, resourceStreamSource, RT_RCDATA);
+
             try
                 // load bitmap from resource
                 tilemapBitmap.LoadFromStream(stream);
@@ -90,8 +100,8 @@ implementation
                 //// tilemapBitmap.LoadFromFile('tilemap.bmp');
                 cell.image.Picture.Bitmap := getTileFromTilemap(
                     tilemapBitmap,
-                    cellItem,
-                    cellRotation
+                    cell.cellItem,
+                    cell.cellRotation
                 );
             finally
                 stream.free;

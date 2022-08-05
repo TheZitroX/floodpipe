@@ -17,13 +17,21 @@ interface
         UProperties;
 
     type
-        // cell item
+        // cell types (pipe, wall);
+        TCellType = (
+            TYPE_WALL,
+            TYPE_PIPE
+        );
         TCellItem = (
-            EMPTY,
-            PIPE_LID_EMPTY,
-            PIPE_EMPTY,
-            PIPE_TSPLITS_EMPTY,
-            PIPE_CURVES_EMPTY
+            PIPE,
+            PIPE_LID,
+            PIPE_TSPLIT,
+            PIPE_CURVES
+        );
+        // can be expanded with other fluids
+        TCellContent = (
+            CONTENT_EMPTY,
+            CONTENT_WATER
         );
         // rotation of a cell
         TCellRotation = (
@@ -41,7 +49,9 @@ interface
         // cell
         TCell = record
             image:TImage;
+            cellType:TCellType;
             cellItem:TCellItem;
+            cellContent:TCellContent;
             cellRotation:TCellRotation;
             position:TPosition;
             attachedList:TAttachedList;

@@ -115,16 +115,19 @@ unit UFunctions;
 
         procedure setCellToItem(
             var cell:TCell;
-            cellItem:TCellItem;
-            cellRotation:TCellRotation);
+            newCellType:TCellType;
+            newCellItem:TCellItem;
+            newCellContent:TCellContent;
+            newCellRotation:TCellRotation);
         begin
-            loadPictureFromBitmap(
-                cell,
-                cellItem,
-                cellRotation
-            );
-            cell.cellItem := cellItem;
-            cell.cellRotation := cellRotation;
+            with cell do
+            begin
+                cellType := newCellType;
+                cellItem := newCellItem;
+                cellContent := newCellContent;
+                cellRotation := newCellRotation;
+            end;
+            loadPictureFromBitmap(cell);
         end;
 
         {
@@ -156,9 +159,10 @@ unit UFunctions;
                     cellField[i][j].image.Align := alClient;
                     setCellToItem(
                         cellField[i][j],
-                        // TCellItem.PIPE_EMPTY,
-                        TCellItem(Random(Succ(Ord(High(TCellItem)) - 1)) + 1),
-                        // TCellRotation.NONE
+                        // debug just random types for testing
+                        TCellType.TYPE_PIPE,
+                        TCellItem(Random(Succ(Ord(High(TCellItem)))) + 1),
+                        TCellContent(Random(Succ(Ord(High(TCellContent))))),
                         TCellRotation(Random(Succ(Ord(High(TCellRotation)))))
                     );
                 end;
