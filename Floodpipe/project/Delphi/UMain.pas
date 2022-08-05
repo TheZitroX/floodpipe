@@ -28,6 +28,7 @@ type
         procedure updateLayout();
         procedure cellQueueHandler(Sender: TObject);
         procedure cellQueueHandlerFinalize();
+        procedure onCellClick(Sender: TObject);
 
         public
             // panel
@@ -53,6 +54,11 @@ var
 implementation
 
 {$R *.dfm}
+
+procedure TFMain.onCellClick(Sender: TObject);
+begin
+    showmessage('Hello World!');
+end;
 
 {
     Calles the panelRedraw procedure to update all positions and sizes
@@ -138,7 +144,11 @@ begin
     // panel gamefield
     panelSetup(panelGamefield, panelGameArea, 'panelGamefield');
     // gridpanel cellGrid
-    createCellGrid(cellGrid, panelGamefield, cellField, cellRowLength, cellColumnLength);
+    createCellGrid(
+        cellGrid, panelGamefield, cellField,
+        cellRowLength, cellColumnLength,
+        onCellClick
+    );
     // panel right side area
     panelSetup(panelRightSideArea, FMain, 'panelSetup');
     // panel Right side info

@@ -14,7 +14,7 @@ unit UFunctions;
     interface
 
     uses 
-        vcl.Forms, sysutils, vcl.extctrls, vcl.controls,
+        vcl.Forms, sysutils, vcl.extctrls, vcl.controls, system.classes,
 
         UTypedefine, UPixelfunctions, UProperties;
 
@@ -27,7 +27,8 @@ unit UFunctions;
         var cellGrid:TGridPanel;
         panelParent:TWinControl;
         cellField:TCellField;
-        rowCount, columnCount:integer);
+        rowCount, columnCount:integer;
+        onCellClick:TNotifyEvent);
     procedure panelRedraw(
         mainWidth, mainHeight:integer;
         var panelGameArea:TPanel;
@@ -39,7 +40,8 @@ unit UFunctions;
     procedure createCells(
         var cellField:TCellField;
         newParent:TWinControl;
-        rowCount, columnCount:integer);
+        rowCount, columnCount:integer;
+        onCellClick:TNotifyEvent);
 
     implementation
 
@@ -141,7 +143,8 @@ unit UFunctions;
         procedure createCells(
             var cellField:TCellField;
             newParent:TWinControl;
-            rowCount, columnCount:integer);
+            rowCount, columnCount:integer;
+            onCellClick:TNotifyEvent);
         var
             i, j:integer;
         begin
@@ -165,14 +168,26 @@ unit UFunctions;
                         TCellContent(Random(Succ(Ord(High(TCellContent))))),
                         TCellRotation(Random(Succ(Ord(High(TCellRotation)))))
                     );
+                    cellField[i][j].image.OnClick := onCellClick;
                 end;
         end;
 
+        {
+            Creates a panelgrid with rowCount and columnCount dimentions,
+            sets the cells and spaces them evently out
+
+            IN/OUT:     cellGrid
+            IN:         panelParent the parent of cellGrid
+                        cellField field of all cells
+                        rowCount and columnCount the dimentions of the field
+                        onCellClick the clickevent of the cells
+        }
         procedure createCellGrid(
             var cellGrid:TGridPanel;
             panelParent:TWinControl;
             cellField:TCellField;
-            rowCount, columnCount:integer);
+            rowCount, columnCount:integer;
+            onCellClick:TNotifyEvent);
         var
             i:integer;
         begin
@@ -209,7 +224,8 @@ unit UFunctions;
                 cellField,
                 cellGrid,
                 rowCount,
-                columnCount
+                columnCount,
+                onCellClick
             );
 
             cellGrid.RowCollection.EndUpdate;
