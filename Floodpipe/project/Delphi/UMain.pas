@@ -17,7 +17,7 @@ uses
 	Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
 	Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls,
 
-	UProperties, UFunctions, UTypedefine;
+	UProperties, UFunctions, UTypedefine, UCellFunctions;
 
 type
 	TFMain = class(TForm)
@@ -57,7 +57,8 @@ implementation
 
 procedure TFMain.onCellClick(Sender: TObject);
 begin
-    showmessage('Hello World!');
+    // showmessage('Hello World!');
+    rotateCellClockwise(cellField[0][0]);
 end;
 
 {
