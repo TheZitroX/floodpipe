@@ -56,9 +56,15 @@ implementation
 {$R *.dfm}
 
 procedure TFMain.onCellClick(Sender: TObject);
+var
+    position:TPosition;
+    cell:TCell;
 begin
-    // showmessage('Hello World!');
-    rotateCellClockwise(cellField[0][0]);
+    cell.image := TImage(Sender);
+    position := getPositionFromName(TImage(Sender).name);
+    showmessage('Hello from: ' + inttostr(position.x) + '|' + inttostr(position.y));
+    // todo hier weiter
+    rotateCellClockwise(cellField[position.x, position.y]);
 end;
 
 {

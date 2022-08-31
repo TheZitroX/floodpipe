@@ -29,6 +29,8 @@ interface
 
     procedure rotateCellClockwise(var cell:TCell);
 
+    function getPositionFromName(name:string):TPosition;
+
 implementation
 
     {
@@ -92,8 +94,8 @@ implementation
         // create the array-field with the needed length
         setLength(cellField, rowCount, columnCount);
         // create cells
-        for i := 0 to rowCount - 1 do
-            for j := 0 to columnCount - 1 do
+        for j := 0 to columnCount - 1 do
+            for i := 0 to rowCount - 1 do
             begin
                 cellSetup(
                     cellField[i][j],
@@ -116,7 +118,46 @@ implementation
     procedure rotateCellClockwise(var cell:TCell);
     begin
         // todo rotation
-        assert(true, 'Not implemented function');
     end;
 
+    function getPositionFromName(name:string):TPosition;
+        {
+            @brief  to get the x-integer-value of the Cell-name
+                    (exmp.) name = c0x1y4
+                            -> x = 1
+
+            @param name is the Cell-name
+            @return x as integer
+        }
+        function getXFromCellName(name:string):integer;
+        var
+            posX, posY:integer;
+        begin
+            posX := pos('x', name) + 1;
+            posY := pos('y', name);
+            getXFromCellName := strtoint(copy(name, posX, posY - posX));
+        end;
+        {
+            @brief  to get the y-integer-value of the Cell-name
+                    (exmp.) name = c0x1y4
+                            -> y = 4
+
+            @param name is the Cell-name
+            @return y as integer
+        }
+        function getYFromCellName(name:string):integer;
+        var
+            posY:integer;
+        begin
+            posY := pos('y', name) + 1;
+            getYFromCellName := strtoint(copy(name, posY));
+        end;
+
+    var
+        position:TPosition;
+    begin
+        position.x := getXFromCellName(name);
+        position.y := getYFromCellName(name);
+        getPositionFromName := position;
+    end;
 end.
