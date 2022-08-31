@@ -26,7 +26,7 @@ interface
     procedure createCellGrid(
         var cellGrid:TGridPanel;
         panelParent:TWinControl;
-        cellField:TCellField;
+        var cellField:TCellField;
         rowCount, columnCount:integer;
         onCellClick:TNotifyEvent);
     procedure panelRedraw(
@@ -90,15 +90,16 @@ implementation
         sets the cells and spaces them evently out
 
         IN/OUT:     cellGrid
-        IN:         panelParent the parent of cellGrid
                     cellField field of all cells
+
+        IN:         panelParent the parent of cellGrid
                     rowCount and columnCount the dimentions of the field
                     onCellClick the clickevent of the cells
     }
     procedure createCellGrid(
         var cellGrid:TGridPanel;
         panelParent:TWinControl;
-        cellField:TCellField;
+        var cellField:TCellField;
         rowCount, columnCount:integer;
         onCellClick:TNotifyEvent);
     var

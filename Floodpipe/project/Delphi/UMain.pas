@@ -62,8 +62,7 @@ var
 begin
     cell.image := TImage(Sender);
     position := getPositionFromName(TImage(Sender).name);
-    showmessage('Hello from: ' + inttostr(position.x) + '|' + inttostr(position.y));
-    // todo hier weiter
+    // showmessage('Hello from: ' + inttostr(position.x) + '|' + inttostr(position.y));
     rotateCellClockwise(cellField[position.x, position.y]);
 end;
 

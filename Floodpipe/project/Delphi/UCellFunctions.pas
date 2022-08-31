@@ -115,11 +115,26 @@ implementation
             end;
     end;
 
+    {
+        @brief  increments the rotational state of a cell
+                and updates the bitmap of it
+        
+        @param  IN/OUT: TCell the rotated cell
+    }
     procedure rotateCellClockwise(var cell:TCell);
     begin
-        // todo rotation
+        if (cell.cellRotation = high(TCellRotation)) then
+            cell.cellRotation := low(TCellRotation)
+        else inc(cell.cellRotation);
+        loadPictureFromBitmap(cell);
     end;
 
+    {
+        @brief  gets the position of a cell name
+
+        @param  IN:     string the cell name
+                OUT:    TPosition with the x and y values of the name
+    }
     function getPositionFromName(name:string):TPosition;
         {
             @brief  to get the x-integer-value of the Cell-name
