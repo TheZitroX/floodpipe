@@ -15,7 +15,7 @@ interface
 
 uses
 	Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-	Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls,
+	Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls,
 
 	UProperties, UFunctions, UTypedefine, UCellFunctions;
 
@@ -37,6 +37,12 @@ type
             panelRightSideInfo:TPanel;
             panelButtons:TPanel;
             panelGamefield:TPanel;
+
+            // buttons
+            newGameButton:TButton;
+            loadGameButton:TButton;
+            saveGameButton:TButton;
+            exitGameButton:TButton;
 
             // ---gamefield---
             cellGrid:TGridPanel;
@@ -160,7 +166,15 @@ begin
     // panel Right side info
     panelSetup(panelRightSideInfo, panelRightSideArea, 'panelRightSideInfo');
     // panel Right side info
-    panelSetup(panelButtons, panelRightSideArea, 'panelButtons');
+    panelSetup(panelButtons,panelRightSideArea, 'panelButtons');
+    // buttons with panelButtons as parent
+    createButtons(
+        newGameButton,
+        loadGameButton,
+        saveGameButton,
+        exitGameButton,
+        panelButtons
+    );
 
     updateLayout();
 end;

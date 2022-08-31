@@ -14,7 +14,7 @@ unit UFunctions;
 interface
 
     uses 
-        vcl.Forms, sysutils, vcl.extctrls, vcl.controls, system.classes,
+        vcl.Forms, sysutils, vcl.extctrls, vcl.controls, system.classes, Vcl.StdCtrls,
 
         UTypedefine, UPixelfunctions, UProperties, UCellFunctions;
 
@@ -22,20 +22,27 @@ interface
     procedure panelSetup(
         var panel:TPanel;
         panelParent:TWinControl;
-        panelName:string);
+        panelName:string
+    );
     procedure createCellGrid(
         var cellGrid:TGridPanel;
         panelParent:TWinControl;
         var cellField:TCellField;
         rowCount, columnCount:integer;
-        onCellClick:TNotifyEvent);
+        onCellClick:TNotifyEvent
+    );
     procedure panelRedraw(
         mainWidth, mainHeight:integer;
         var panelGameArea:TPanel;
         var panelGamefield:TPanel;
         var panelRightSideArea:TPanel;
         var panelRightSideInfo:TPanel;
-        var panelButtons:TPanel);
+        var panelButtons:TPanel
+    );
+    procedure createButtons(
+        var b1,b2,b3,b4:TButton;
+        parent:TWinControl
+    );
 
 implementation
 
@@ -210,5 +217,92 @@ implementation
                 (panelRightSideArea.Height * 67) div 100 // 67% height of panelRightSideArea
             );
         end;
+
+    procedure createButtons(
+        var b1,b2,b3,b4:TButton;
+        parent:TWinControl
+    );
+    const
+        OPTION_BUTTON_HEIGHT = 50;
+        OPTION_BUTTON_WIDTH = 100;
+    var
+        i, topPosition, leftPosition:integer;
+
+        {
+            @brief  Creates a Button with passed positions, names and onclick fucntioncall
+
+            @param  button as the Changed button
+                    topPos and leftPos as integer
+                    buttonName, buttonCaption as string
+                    functionPointer as TNotifyEvent
+        }
+        procedure createOptionButton(
+            var button:TButton;
+            parent:TWinControl;
+            topPos, leftPos:integer;
+            buttonName, buttonCaption:string;
+            functionPointer:TNotifyEvent
+        );
+        begin
+            button := TButton.Create(parent);
+            with button do begin
+                Parent := parent;
+                Top := topPos;
+                Left := leftPos;
+                Width := OPTION_BUTTON_WIDTH;
+                Height := OPTION_BUTTON_HEIGHT;
+                Name := buttonName;
+                Caption := buttonCaption;
+                OnClick := functionPointer;
+            end;
+        end;
+
+    begin
+        // leftPosition is calculated to get the buttons in the center of optionButtonsPanel
+        leftPosition := 0;//(parent.Width div 2) - (OPTION_BUTTON_WIDTH div 2);
+        // for the spacing on topPosition
+        for i := 0 to 3 do begin
+            // topPosition is calculated to get the buttonspacing
+            topPosition := 0;//(OPTION_BUTTON_HEIGHT div 3) * (i + 1) + (OPTION_BUTTON_HEIGHT * i);
+            case i of
+                0:  createOptionButton(
+                        b1,
+                        parent,
+                        topPosition,
+                        leftPosition,
+                        'newGameButton',
+                        'New',
+                        nil
+                    );
+                1:  createOptionButton(
+                        b2,
+                        parent,
+                        topPosition,
+                        leftPosition,
+                        'loadGameButton',
+                        'Load',
+                        nil
+                    );
+                2:  createOptionButton(
+                        b3,
+                        parent,
+                        topPosition,
+                        leftPosition,
+                        'saveGameButton',
+                        'Save',
+                        nil 
+                    );
+                3:  createOptionButton(
+                        b4,
+                        parent,
+                        topPosition,
+                        leftPosition,
+                        'quitGameButton',
+                        'Quit',
+                        nil
+                    );
+            end;
+        end;
+    end;
 
 end.
