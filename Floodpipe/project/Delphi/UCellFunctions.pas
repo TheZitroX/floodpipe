@@ -92,7 +92,7 @@ implementation
         i, j:integer;
     begin
         // create the array-field with the needed length
-        setLength(cellField, rowCount, columnCount);
+        setLength(cellField, columnCount, rowCount);
         // create cells
         for j := 0 to columnCount - 1 do
             for i := 0 to rowCount - 1 do
