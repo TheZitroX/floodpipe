@@ -62,13 +62,9 @@ implementation
 {$R *.dfm}
 
 procedure TFMain.onCellClick(Sender: TObject);
-var
-    position:TPosition;
-    cell:TCell;
+var position:TPosition;
 begin
-    cell.image := TImage(Sender);
     position := getPositionFromName(TImage(Sender).name);
-    // showmessage('Hello from: ' + inttostr(position.x) + '|' + inttostr(position.y));
     rotateCellClockwise(cellField[position.x, position.y]);
 end;
 
@@ -152,9 +148,17 @@ begin
     FMain.Constraints.MinHeight := MAIN_FORM_MIN_HEIGHT;
     // create panel-layout
     // panel game area
-    panelSetup(panelGameArea, FMain, 'panelGameArea');
+    panelSetup(
+        panelGameArea,
+        FMain,
+        'panelGameArea'
+    );
     // panel gamefield
-    panelSetup(panelGamefield, panelGameArea, 'panelGamefield');
+    panelSetup(
+        panelGamefield,
+        panelGameArea,
+        'panelGamefield'
+    );
     // gridpanel cellGrid
     createCellGrid(
         cellGrid, panelGamefield, cellField,
@@ -162,11 +166,23 @@ begin
         onCellClick
     );
     // panel right side area
-    panelSetup(panelRightSideArea, FMain, 'panelSetup');
+    panelSetup(
+        panelRightSideArea,
+        FMain,
+        'panelSetup'
+    );
     // panel Right side info
-    panelSetup(panelRightSideInfo, panelRightSideArea, 'panelRightSideInfo');
+    panelSetup(
+        panelRightSideInfo,
+        panelRightSideArea,
+        'panelRightSideInfo'
+    );
     // panel Right side info
-    panelSetup(panelButtons,panelRightSideArea, 'panelButtons');
+    panelSetup(
+        panelButtons,
+        panelRightSideArea,
+        'panelButtons'
+    );
     // buttons with panelButtons as parent
     createButtons(
         newGameButton,

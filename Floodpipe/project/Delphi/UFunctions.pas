@@ -40,8 +40,11 @@ interface
         var panelButtons:TPanel
     );
     procedure createButtons(
-        var b1,b2,b3,b4:TButton;
-        parent:TWinControl
+        var b1:TButton;
+        var b2:TButton;
+        var b3:TButton;
+        var b4:TButton;
+        var parent:TPanel
     );
 
 implementation
@@ -219,90 +222,103 @@ implementation
         end;
 
     procedure createButtons(
-        var b1,b2,b3,b4:TButton;
-        parent:TWinControl
+        var b1:TButton;
+        var b2:TButton;
+        var b3:TButton;
+        var b4:TButton;
+        var parent:TPanel
     );
     const
-        OPTION_BUTTON_HEIGHT = 50;
-        OPTION_BUTTON_WIDTH = 100;
+        OPTION_BUTTON_HEIGHT = 20;
+        OPTION_BUTTON_WIDTH = 20;
     var
         i, topPosition, leftPosition:integer;
 
-        {
-            @brief  Creates a Button with passed positions, names and onclick fucntioncall
+    {
+        @brief  Creates a Button with passed positions, names and onclick fucntioncall
 
-            @param  button as the Changed button
-                    topPos and leftPos as integer
-                    buttonName, buttonCaption as string
-                    functionPointer as TNotifyEvent
-        }
-        procedure createOptionButton(
-            var button:TButton;
-            parent:TWinControl;
-            topPos, leftPos:integer;
-            buttonName, buttonCaption:string;
-            functionPointer:TNotifyEvent
-        );
-        begin
-            button := TButton.Create(parent);
-            with button do begin
-                Parent := parent;
-                Top := topPos;
-                Left := leftPos;
-                Width := OPTION_BUTTON_WIDTH;
-                Height := OPTION_BUTTON_HEIGHT;
-                Name := buttonName;
-                Caption := buttonCaption;
-                OnClick := functionPointer;
-            end;
-        end;
-
+        @param  button as the Changed button
+                topPos and leftPos as integer
+                buttonName, buttonCaption as string
+                functionPointer as TNotifyEvent
+    }
+    procedure createOptionButton(
+        var button:TButton;
+        var parent:TPanel;
+        topPos, leftPos:integer;
+        buttonName, buttonCaption:string;
+        functionPointer:TNotifyEvent
+    );
     begin
-        // leftPosition is calculated to get the buttons in the center of optionButtonsPanel
-        leftPosition := 0;//(parent.Width div 2) - (OPTION_BUTTON_WIDTH div 2);
-        // for the spacing on topPosition
-        for i := 0 to 3 do begin
-            // topPosition is calculated to get the buttonspacing
-            topPosition := 0;//(OPTION_BUTTON_HEIGHT div 3) * (i + 1) + (OPTION_BUTTON_HEIGHT * i);
-            case i of
-                0:  createOptionButton(
-                        b1,
-                        parent,
-                        topPosition,
-                        leftPosition,
-                        'newGameButton',
-                        'New',
-                        nil
-                    );
-                1:  createOptionButton(
-                        b2,
-                        parent,
-                        topPosition,
-                        leftPosition,
-                        'loadGameButton',
-                        'Load',
-                        nil
-                    );
-                2:  createOptionButton(
-                        b3,
-                        parent,
-                        topPosition,
-                        leftPosition,
-                        'saveGameButton',
-                        'Save',
-                        nil 
-                    );
-                3:  createOptionButton(
-                        b4,
-                        parent,
-                        topPosition,
-                        leftPosition,
-                        'quitGameButton',
-                        'Quit',
-                        nil
-                    );
-            end;
+        button := TButton.Create(parent);
+        with button do begin
+            Parent := parent;
+            // Top := topPos;
+            // Left := leftPos;
+            // Width := OPTION_BUTTON_WIDTH;
+            // Height := OPTION_BUTTON_HEIGHT;
+            Name := buttonName;
+            Caption := buttonCaption;
+            OnClick := functionPointer;
+            Align := alTop;
         end;
     end;
 
+    begin
+        // ! why isnt it working?
+        createOptionButton(
+            b1,
+            parent,
+            0, 0,
+            'test',
+            'testshow',
+            nil
+        );
+
+        // leftPosition is calculated to get the buttons in the center of optionButtonsPanel
+        leftPosition := 0;//(parent.Width div 2) - (OPTION_BUTTON_WIDTH div 2);
+        // for the spacing on topPosition
+        // for i := 0 to 3 do begin
+        //     // topPosition is calculated to get the buttonspacing
+        //     topPosition := 0;//(OPTION_BUTTON_HEIGHT div 3) * (i + 1) + (OPTION_BUTTON_HEIGHT * i);
+        //     case i of
+        //         0:  createOptionButton(
+        //                 b1,
+        //                 parent,
+        //                 topPosition,
+        //                 leftPosition,
+        //                 'newGameButton',
+        //                 'New',
+        //                 nil
+        //             );
+        //         1:  createOptionButton(
+        //                 b2,
+        //                 parent,
+        //                 topPosition,
+        //                 leftPosition,
+        //                 'loadGameButton',
+        //                 'Load',
+        //                 nil
+        //             );
+        //         2:  createOptionButton(
+        //                 b3,
+        //                 parent,
+        //                 topPosition,
+        //                 leftPosition,
+        //                 'saveGameButton',
+        //                 'Save',
+        //                 nil 
+        //             );
+        //         3:  createOptionButton(
+        //                 b4,
+        //                 parent,
+        //                 topPosition,
+        //                 leftPosition,
+        //                 'quitGameButton',
+        //                 'Quit',
+        //                 nil
+        //             );
+        //     end;
+        // end;
+    end;
 end.
