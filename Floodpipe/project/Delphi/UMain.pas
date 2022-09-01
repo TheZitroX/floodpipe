@@ -14,15 +14,16 @@ unit UMain;
 interface
 
 uses
-	Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-	Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls,
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+    System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls,
 
-	UProperties, UFunctions, UTypedefine, UCellFunctions;
+    UProperties, UFunctions, UTypedefine, UCellFunctions;
 
 type
-	TFMain = class(TForm)
-        procedure FormCanResize(Sender: TObject; var NewWidth,
-                NewHeight: Integer; var Resize: Boolean);
+    TFMain = class(TForm)
+        procedure FormCanResize(Sender: TObject;
+          var NewWidth, NewHeight: Integer; var Resize: Boolean);
         procedure FormCreate(Sender: TObject);
         procedure FormResize(Sender: TObject);
         procedure updateLayout();
@@ -30,39 +31,40 @@ type
         procedure cellQueueHandlerFinalize();
         procedure onCellClick(Sender: TObject);
 
-        public
-            // panel
-            panelGameArea:TPanel;
-            panelRightSideArea:TPanel;
-            panelRightSideInfo:TPanel;
-            panelButtons:TPanel;
-            panelGamefield:TPanel;
+    public
+        // panel
+        panelGameArea: TPanel;
+        panelRightSideArea: TPanel;
+        panelRightSideInfo: TPanel;
+        panelButtons: TPanel;
+        panelGamefield: TPanel;
 
-            // buttons
-            newGameButton:TButton;
-            loadGameButton:TButton;
-            saveGameButton:TButton;
-            exitGameButton:TButton;
+        // buttons
+        newGameButton: TButton;
+        loadGameButton: TButton;
+        saveGameButton: TButton;
+        exitGameButton: TButton;
 
-            // ---gamefield---
-            cellGrid:TGridPanel;
-            // gamefield cells
-            cellField:TCellField;
-            cellRowLength:integer;
-            cellColumnLength:integer;
-	end;
+        // ---gamefield---
+        cellGrid: TGridPanel;
+        // gamefield cells
+        cellField: TCellField;
+        cellRowLength: Integer;
+        cellColumnLength: Integer;
+    end;
 
 var
-	FMain: TFMain;
-    cellAnimationTickRate:integer;
-    positionQueueList:TPositionList;
+    FMain: TFMain;
+    cellAnimationTickRate: Integer;
+    positionQueueList: TPositionList;
 
 implementation
 
 {$R *.dfm}
 
 procedure TFMain.onCellClick(Sender: TObject);
-var position:TPosition;
+var
+    position: TPosition;
 begin
     position := getPositionFromName(TImage(Sender).name);
     rotateCellClockwise(cellField[position.x, position.y]);
@@ -74,15 +76,8 @@ end;
 procedure TFMain.updateLayout();
 begin
     // update positions
-    panelRedraw(
-        FMain.ClientWidth,
-        FMain.ClientHeight,
-        panelGameArea,
-        panelGamefield,
-        panelRightSideArea,
-        panelRightSideInfo,
-        panelButtons
-    );
+    panelRedraw(FMain.ClientWidth, FMain.ClientHeight, panelGameArea,
+      panelGamefield, panelRightSideArea, panelRightSideInfo, panelButtons);
 end;
 
 procedure TFMain.cellQueueHandlerFinalize();
@@ -97,13 +92,13 @@ end;
 }
 procedure TFMain.cellQueueHandler(Sender: TObject);
 var
-    outputString:TStringBuilder;
+    outputString: TStringBuilder;
 begin
     // if animationFinished() then
     // begin
-        // timer stoppen
-        (Sender as TTimer).Enabled := false;
-        cellQueueHandlerFinalize();
+    // timer stoppen
+    (Sender as TTimer).Enabled := false;
+    cellQueueHandlerFinalize();
     // end;
 
     outputString := TStringBuilder.Create;
@@ -128,7 +123,7 @@ end;
 }
 procedure TFMain.FormCreate(Sender: TObject);
 var
-    t:TTimer;
+    t: TTimer;
 begin
     cellRowLength := DEFAULT_CELL_ROW_COUNT;
     cellColumnLength := DEFAULT_CELL_COLUMN_COUNT;
@@ -148,49 +143,21 @@ begin
     FMain.Constraints.MinHeight := MAIN_FORM_MIN_HEIGHT;
     // create panel-layout
     // panel game area
-    panelSetup(
-        panelGameArea,
-        FMain,
-        'panelGameArea'
-    );
+    panelSetup(panelGameArea, FMain, 'panelGameArea');
     // panel gamefield
-    panelSetup(
-        panelGamefield,
-        panelGameArea,
-        'panelGamefield'
-    );
+    panelSetup(panelGamefield, panelGameArea, 'panelGamefield');
     // gridpanel cellGrid
-    createCellGrid(
-        cellGrid, panelGamefield, cellField,
-        cellRowLength, cellColumnLength,
-        onCellClick
-    );
+    createCellGrid(cellGrid, panelGamefield, cellField, cellRowLength,
+      cellColumnLength, onCellClick);
     // panel right side area
-    panelSetup(
-        panelRightSideArea,
-        FMain,
-        'panelSetup'
-    );
+    panelSetup(panelRightSideArea, FMain, 'panelSetup');
     // panel Right side info
-    panelSetup(
-        panelRightSideInfo,
-        panelRightSideArea,
-        'panelRightSideInfo'
-    );
+    panelSetup(panelRightSideInfo, panelRightSideArea, 'panelRightSideInfo');
     // panel Right side info
-    panelSetup(
-        panelButtons,
-        panelRightSideArea,
-        'panelButtons'
-    );
+    panelSetup(panelButtons, panelRightSideArea, 'panelButtons');
     // buttons with panelButtons as parent
-    createButtons(
-        newGameButton,
-        loadGameButton,
-        saveGameButton,
-        exitGameButton,
-        panelButtons
-    );
+    createButtons(newGameButton, loadGameButton, saveGameButton, exitGameButton,
+      panelButtons);
 
     updateLayout();
 end;
