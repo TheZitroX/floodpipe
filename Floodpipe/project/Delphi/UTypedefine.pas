@@ -23,8 +23,8 @@ interface
             TYPE_PIPE
         );
         TCellItem = (
-            PIPE,
             PIPE_LID,
+            PIPE,
             PIPE_TSPLIT,
             PIPE_CURVES
         );
@@ -45,18 +45,6 @@ interface
             x:integer;
             y:integer;
         end;
-        TAttachedList = array of TPosition;
-        // cell
-        TCell = record
-            image:TImage;
-            cellType:TCellType;
-            cellItem:TCellItem;
-            cellContent:TCellContent;
-            cellRotation:TCellRotation;
-            position:TPosition;
-            attachedList:TAttachedList;
-        end;
-        TCellField = array of array of TCell;
 
         // Position list
         PPositionNode = ^TPositionNode;
@@ -64,6 +52,17 @@ interface
             position:TPosition;
             next:PPositionNode;
         end;
+
+        // cell
+        TCell = record
+            image:TImage;
+            cellType:TCellType;
+            cellItem:TCellItem;
+            cellContent:TCellContent;
+            cellRotation:TCellRotation;
+            openings:PPositionNode;
+        end;
+        TCellField = array of array of TCell;
 
 implementation
 end.

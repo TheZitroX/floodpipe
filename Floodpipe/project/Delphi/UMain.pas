@@ -104,10 +104,6 @@ begin
     if isPositionQueueListEmpty(positionQueueList) then begin
         cellQueueHandlerFinalize();
     end else begin
-        showmessage(
-            inttostr(positionQueueList^.position.x) + ' ' +
-            inttostr(positionQueueList^.position.y)
-        );
         delFirstPositionNode(positionQueueList);
 
         // continiue animation
@@ -125,6 +121,9 @@ procedure TFMain.FormCreate(Sender: TObject);
 var
     fluidTimer: TTimer;
 begin
+    // inizialize
+    positionQueueList := nil;
+    
     // set default values
     cellRowLength := DEFAULT_CELL_ROW_COUNT;
     cellColumnLength := DEFAULT_CELL_COLUMN_COUNT;
@@ -135,7 +134,6 @@ begin
 
     // todo aufruf bei animation
     appendPosition(positionQueueList, 0, 0);
-    appendPosition(positionQueueList, 1, 0);
     fluidTimer := TTimer.Create(FMain);
     with fluidTimer do begin
         Interval := cellAnimationTickRate;
@@ -160,6 +158,7 @@ begin
     panelSetup(panelRightSideInfo, panelRightSideArea, 'panelRightSideInfo');
     // panel Right side info
     panelSetup(panelButtons, panelRightSideArea, 'panelButtons');
+
     // buttons with panelButtons as parent
     createButtons(newGameButton, loadGameButton, saveGameButton, exitGameButton,
       panelButtons);

@@ -14,7 +14,7 @@ interface
     uses
         vcl.Forms, sysutils, vcl.extctrls, vcl.controls, system.classes,
 
-        UTypedefine, UPixelfunctions, UProperties;
+        UTypedefine, UPixelfunctions, UProperties, UFluid;
 
     procedure cellSetup(
         var cell:TCell;
@@ -74,6 +74,24 @@ implementation
         end;
         loadPictureFromBitmap(cell);
     end;
+                
+    procedure setOpeningsFromRotation(var cell:TCell);
+    begin
+        with cell do begin
+            case cellType of
+                TYPE_WALL:; //todo
+                TYPE_PIPE:  case cellItem of
+                                PIPE:;
+                                PIPE_LID: begin
+                                    appendPosition(openings, 1, 0);
+                                    appendPosition(openings, -1, 0);
+                                end;
+                                PIPE_TSPLIT:;
+                                PIPE_CURVES:;
+                            end;
+            end;
+        end;
+    end;
 
     {
         creates a field (rows * columns) of TCellField
@@ -95,22 +113,24 @@ implementation
         setLength(cellField, columnCount, rowCount);
         // create cells
         for j := 0 to columnCount - 1 do
-            for i := 0 to rowCount - 1 do
-            begin
+            for i := 0 to rowCount - 1 do begin
                 cellSetup(
-                    cellField[i][j],
+                    cellField[i, j],
                     newParent,
                     'cellx' + inttostr(i) + 'y' + inttostr(j)
                 );
                 cellField[i][j].image.Align := alClient;
                 setCellToItem(
-                    cellField[i][j],
+                    cellField[i, j],
                     // debug just random types for testing
                     TCellType.TYPE_PIPE,
-                    TCellItem(Random(Succ(Ord(High(TCellItem)))) + 1),
+                    // TCellItem(Random(Succ(Ord(High(TCellItem))))),
+                    TCellItem.PIPE,
                     TCellContent(Random(Succ(Ord(High(TCellContent))))),
                     TCellRotation(Random(Succ(Ord(High(TCellRotation)))))
                 );
+                cellField[i, j].openings := nil;
+                setOpeningsFromRotation(cellField[i, j]);
                 cellField[i][j].image.OnClick := onCellClick;
             end;
     end;

@@ -46,7 +46,7 @@ implementation
         // case cellItem of
         //     else begin
                 posX := TILEMAP_TILE_SIDE_LENGTH * integer(cellRotation);
-                posY := TILEMAP_TILE_SIDE_LENGTH * (integer(cellItem) - 1);
+                posY := TILEMAP_TILE_SIDE_LENGTH * integer(cellItem);
             // end;
         // end;
         
