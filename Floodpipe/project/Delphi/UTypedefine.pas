@@ -58,8 +58,12 @@ interface
         end;
         TCellField = array of array of TCell;
 
-        // liste von positionen
-        TPositionList = array of TPosition;
+        // Position list
+        PPositionNode = ^TPositionNode;
+        TPositionNode = record
+            position:TPosition;
+            next:PPositionNode;
+        end;
 
 implementation
 end.

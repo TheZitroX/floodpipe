@@ -18,7 +18,7 @@ uses
     System.Classes, Vcl.Graphics,
     Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls,
 
-    UProperties, UFunctions, UTypedefine, UCellFunctions;
+    UProperties, UFunctions, UTypedefine, UCellFunctions, UFluid;
 
 type
     TFMain = class(TForm)
@@ -56,7 +56,8 @@ type
 var
     FMain: TFMain;
     cellAnimationTickRate: Integer;
-    positionQueueList: TPositionList;
+    positionQueueList: PPositionNode;
+    timerCount: integer;
 
 implementation
 
@@ -83,6 +84,7 @@ end;
 procedure TFMain.cellQueueHandlerFinalize();
 begin
     // todo enable all buttons for user
+    showmessage('Simulation finished');
 end;
 
 {
@@ -94,25 +96,23 @@ procedure TFMain.cellQueueHandler(Sender: TObject);
 var
     outputString: TStringBuilder;
 begin
-    // if animationFinished() then
-    // begin
-    // timer stoppen
+    // disable to get no overflow
     (Sender as TTimer).Enabled := false;
-    cellQueueHandlerFinalize();
-    // end;
 
-    outputString := TStringBuilder.Create;
-    try
-        outputString := outputString.Append('Hello World!');
-        outputString := outputString.Append(sLineBreak);
-        outputString := outputString.Append('positionQueueList:');
-        outputString := outputString.Append(sLineBreak);
+    fluidMove(positionQueueList);
+    // stop animation when finished
+    if isPositionQueueListEmpty(positionQueueList) then begin
+        cellQueueHandlerFinalize();
+    end else begin
+        showmessage(
+            inttostr(positionQueueList^.position.x) + ' ' +
+            inttostr(positionQueueList^.position.y)
+        );
+        delFirstPositionNode(positionQueueList);
 
-        showmessage(outputString.toString());
-    finally
-        outputString.Free;
+        // continiue animation
+        (Sender as TTimer).Enabled := true;
     end;
-
 end;
 
 {
@@ -123,8 +123,9 @@ end;
 }
 procedure TFMain.FormCreate(Sender: TObject);
 var
-    t: TTimer;
+    fluidTimer: TTimer;
 begin
+    // set default values
     cellRowLength := DEFAULT_CELL_ROW_COUNT;
     cellColumnLength := DEFAULT_CELL_COLUMN_COUNT;
     cellAnimationTickRate := DEFAULT_CELL_TICK_RATE;
@@ -133,10 +134,14 @@ begin
     randomize;
 
     // todo aufruf bei animation
-    // t := TTimer.Create(FMain);
-    // t.Interval := cellAnimationTickRate;
-    // t.OnTimer := FMain.cellQueueHandler;
-    // t.Enabled := True;
+    appendPosition(positionQueueList, 0, 0);
+    appendPosition(positionQueueList, 1, 0);
+    fluidTimer := TTimer.Create(FMain);
+    with fluidTimer do begin
+        Interval := cellAnimationTickRate;
+        OnTimer := FMain.cellQueueHandler;
+        Enabled := True;
+    end;
 
     // FMain setup
     FMain.Constraints.MinWidth := MAIN_FORM_MIN_WIDTH;
