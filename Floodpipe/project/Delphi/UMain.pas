@@ -3,7 +3,7 @@
     author:     John Lienau
     title:      Main unit of project Floodpipe
     version:    v1.0
-    date:       29.07.2022
+    date:       03.08.2022
     copyright:  Copyright (c) 2022
 
     brief:      Main implementations of all units of the project Floodpipe
@@ -14,39 +14,75 @@ unit UMain;
 interface
 
 uses
-	Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-	Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls,
+    Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
+    System.Classes, Vcl.Graphics,
+    Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls,
 
-	UProperties, UFunctions, UTypedefine;
+    UProperties, UFunctions, UTypedefine, UCellFunctions, UFluid, UPositionFunctions;
 
 type
-	TFMain = class(TForm)
-        procedure FormCanResize(Sender: TObject; var NewWidth,
-                NewHeight: Integer; var Resize: Boolean);
+    TFMain = class(TForm)
+        procedure FormCanResize(Sender: TObject;
+          var NewWidth, NewHeight: Integer; var Resize: Boolean);
         procedure FormCreate(Sender: TObject);
         procedure FormResize(Sender: TObject);
         procedure updateLayout();
+        procedure cellQueueHandler(Sender: TObject);
+        procedure cellQueueHandlerFinalize();
+        procedure onCellClick(Sender: TObject);
 
-        public
-            // panel
-            panelGameArea:TPanel;
-            panelRightSideArea:TPanel;
-            panelRightSideInfo:TPanel;
-            panelButtons:TPanel;
-            panelGamefield:TPanel;
+    public
+        // panel
+        panelGameArea: TPanel;
+        panelRightSideArea: TPanel;
+        panelRightSideInfo: TPanel;
+        panelButtons: TPanel;
+        panelGamefield: TPanel;
 
-            // gamefield cells
-            cellField:TCellField;
-            cellRowLength:integer;
-            cellColumnLength:integer;
-	end;
+        // buttons
+        newGameButton: TButton;
+        loadGameButton: TButton;
+        saveGameButton: TButton;
+        exitGameButton: TButton;
+
+        // ---gamefield---
+        cellGrid: TGridPanel;
+        // gamefield cells
+        cellField: TCellField;
+        cellRowLength: Integer;
+        cellColumnLength: Integer;
+    end;
 
 var
-	FMain: TFMain;
+    FMain: TFMain;
+    cellAnimationTickRate: Integer;
+    positionQueueList: PPositionNode;
+    timerCount: integer;
 
 implementation
 
 {$R *.dfm}
+
+procedure TFMain.onCellClick(Sender: TObject);
+var
+    position: TPosition;
+begin
+    position := getPositionFromName(TImage(Sender).name);
+    rotateCellClockwise(
+        cellField[
+            position.x,
+            position.y
+        ]
+    );
+    // showmessage(
+    //     cellOpeningsToString(
+    //         cellField[
+    //             position.x,
+    //             position.y
+    //         ]
+    //     )
+    // );
+end;
 
 {
     Calles the panelRedraw procedure to update all positions and sizes
@@ -54,18 +90,36 @@ implementation
 procedure TFMain.updateLayout();
 begin
     // update positions
-    panelRedraw(
-        FMain.ClientWidth,
-        FMain.ClientHeight,
-        panelGameArea,
-        panelGamefield,
-        panelRightSideArea,
-        panelRightSideInfo,
-        panelButtons,
-        cellField,
-        cellRowLength,
-        cellColumnLength
-    );
+    panelRedraw(FMain.ClientWidth, FMain.ClientHeight, panelGameArea,
+      panelGamefield, panelRightSideArea, panelRightSideInfo, panelButtons);
+end;
+
+procedure TFMain.cellQueueHandlerFinalize();
+begin
+    // todo enable all buttons for user
+    showmessage('Simulation finished');
+end;
+
+{
+    Works through the positionQueueList
+
+    Global: positionQueueList die abzuarbeiten ist
+}
+procedure TFMain.cellQueueHandler(Sender: TObject);
+var
+    outputString: TStringBuilder;
+begin
+    // disable to get no overflow
+    (Sender as TTimer).Enabled := false;
+
+    // stop animation when finished
+    if isPositionListEmpty(positionQueueList) then begin
+        cellQueueHandlerFinalize();
+    end else begin
+        fluidMove(cellField, positionQueueList);
+        // continiue animation
+        (Sender as TTimer).Enabled := true;
+    end;
 end;
 
 {
@@ -75,16 +129,31 @@ end;
     @param  Sender: not used
 }
 procedure TFMain.FormCreate(Sender: TObject);
+var
+    fluidTimer: TTimer;
 begin
+    // inizialize
+    positionQueueList := nil;
+    
+    // set default values
+    cellRowLength := DEFAULT_CELL_ROW_COUNT;
+    cellColumnLength := DEFAULT_CELL_COLUMN_COUNT;
+    cellAnimationTickRate := DEFAULT_CELL_TICK_RATE;
+
+    // for randomniss
+    randomize;
+
     // FMain setup
     FMain.Constraints.MinWidth := MAIN_FORM_MIN_WIDTH;
     FMain.Constraints.MinHeight := MAIN_FORM_MIN_HEIGHT;
-
     // create panel-layout
     // panel game area
     panelSetup(panelGameArea, FMain, 'panelGameArea');
     // panel gamefield
     panelSetup(panelGamefield, panelGameArea, 'panelGamefield');
+    // gridpanel cellGrid
+    createCellGrid(cellGrid, panelGamefield, cellField, cellRowLength,
+      cellColumnLength, onCellClick);
     // panel right side area
     panelSetup(panelRightSideArea, FMain, 'panelSetup');
     // panel Right side info
@@ -92,11 +161,22 @@ begin
     // panel Right side info
     panelSetup(panelButtons, panelRightSideArea, 'panelButtons');
 
-    cellRowLength := 10;
-    cellColumnLength := 10;
-    createCells(cellField, panelGamefield, cellRowLength, cellColumnLength);
+    // buttons with panelButtons as parent
+    createButtons(newGameButton, loadGameButton, saveGameButton, exitGameButton,
+      panelButtons);
 
     updateLayout();
+
+    // todo aufruf bei animation
+    // flow start
+    fillCellWithContent(cellField[25, 25], TCellContent.CONTENT_WATER);
+    appendPosition(positionQueueList, 25, 25);
+    fluidTimer := TTimer.Create(FMain);
+    with fluidTimer do begin
+        Interval := cellAnimationTickRate;
+        OnTimer := FMain.cellQueueHandler;
+        Enabled := True;
+    end;
 end;
 
 procedure TFMain.FormResize(Sender: TObject);

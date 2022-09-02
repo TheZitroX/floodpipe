@@ -11,202 +11,278 @@
 
 unit UFunctions;
 
-    interface
+interface
 
     uses 
-        vcl.Forms, sysutils, vcl.extctrls, vcl.controls,
+        vcl.Forms, sysutils, vcl.extctrls, vcl.controls, system.classes, Vcl.StdCtrls,
 
-        UTypedefine;
+        UTypedefine, UPixelfunctions, UProperties, UCellFunctions;
 
     // public functions
     procedure panelSetup(
         var panel:TPanel;
         panelParent:TWinControl;
-        panelName:string);
+        panelName:string
+    );
+    procedure createCellGrid(
+        var cellGrid:TGridPanel;
+        panelParent:TWinControl;
+        var cellField:TCellField;
+        rowCount, columnCount:integer;
+        onCellClick:TNotifyEvent
+    );
     procedure panelRedraw(
         mainWidth, mainHeight:integer;
         var panelGameArea:TPanel;
         var panelGamefield:TPanel;
         var panelRightSideArea:TPanel;
         var panelRightSideInfo:TPanel;
-        var panelButtons:TPanel;
+        var panelButtons:TPanel
+    );
+    procedure createButtons(
+        var b1:TButton;
+        var b2:TButton;
+        var b3:TButton;
+        var b4:TButton;
+        var newParent:TPanel
+    );
+
+implementation
+
+    {
+        Sets the position anad side length of a panel
+
+        @param  panel the changed panel
+                newTop the top position
+                newLeft the left position
+                newWidth the width
+                newHeight the height
+    }
+    procedure setDimentions(
+        var panel:TPanel;
+        newTop, newLeft, newWidth, newHeight:integer);
+        begin
+            with panel do
+            begin
+                Top := newTop;
+                Left := newLeft;
+                Width := newWidth;
+                Height := newHeight;
+            end;
+        end;
+
+    {
+        setup for the panel
+        parent and name to variables
+        and the caption to empty
+
+        @param  panel the target
+                panelParent the parent of target panel
+                parentName the name of the target panel
+    }
+    procedure panelSetup(
+        var panel:TPanel;
+        panelParent:TWinControl;
+        panelName:string);
+        begin
+            panel := TPanel.Create(panelParent);
+            with panel do
+            begin
+                Parent := panelParent;
+                Name := panelName;
+                caption := '';
+            end;
+        end;
+
+
+    {
+        Creates a panelgrid with rowCount and columnCount dimentions,
+        sets the cells and spaces them evently out
+
+        IN/OUT:     cellGrid
+                    cellField field of all cells
+
+        IN:         panelParent the parent of cellGrid
+                    rowCount and columnCount the dimentions of the field
+                    onCellClick the clickevent of the cells
+    }
+    procedure createCellGrid(
+        var cellGrid:TGridPanel;
+        panelParent:TWinControl;
         var cellField:TCellField;
-        cellRowLength, cellColumnLength:integer);
-    
-    procedure createCells(
-        var cellField:TCellField;
-        panelGamefield:TPanel;
-        cellRowLength:integer;
-        cellColumnLength:integer);
+        rowCount, columnCount:integer;
+        onCellClick:TNotifyEvent);
+    var
+        i:integer;
+    begin
+        cellGrid := TGridPanel.Create(panelParent);
+        cellGrid.parent := panelParent;
+        cellGrid.Align := alClient;
 
-    implementation
+        cellGrid.RowCollection.BeginUpdate;
+        cellGrid.ColumnCollection.BeginUpdate;
+        // info: cannot clear if there are controls
+        // clear any Controls
+        for i := 0 to cellGrid.ControlCount - 1 do
+            cellGrid.Controls[0].Free;
+        cellGrid.RowCollection.Clear;
+        cellGrid.ColumnCollection.Clear;
 
-        {
-            Sets the position anad side length of a panel
-
-            @param  panel the changed panel
-                    newTop the top position
-                    newLeft the left position
-                    newWidth the width
-                    newHeight the height
-        }
-        procedure setDimentions(
-            var panel:TPanel;
-            newTop, newLeft, newWidth, newHeight:integer);
+        // for every row
+        for i := 0 to rowCount - 1 do
+            with cellGrid.RowCollection.Add do
             begin
-                with panel do
-                begin
-                    Top := newTop;
-                    Left := newLeft;
-                    Width := newWidth;
-                    Height := newHeight;
-                end;
+                SizeStyle := ssPercent;
+                Value := 100 / rowCount; // each cell is evently spaced out
+            end;
+        // for every column
+        for i := 0 to columnCount - 1 do
+            with cellGrid.ColumnCollection.Add do
+            begin
+                SizeStyle := ssPercent;
+                Value := 100 / columnCount; // each cell is evently spaced out
             end;
 
+        // creation of cells
+        createCells(
+            cellField,
+            cellGrid,
+            rowCount,
+            columnCount,
+            onCellClick
+        );
+
+        cellGrid.RowCollection.EndUpdate;
+        cellGrid.ColumnCollection.EndUpdate;
+    end;
+
+    {
+        Gives each panel its position and size,
+        relativ to the width and height of the FMain size
+
+        @param  mainWidth: width of FMain
+                mainHeight: newHeight of FMain
+                panelGameArea: the Gamearea panel
+                panelGamefield: the field for the cells
+                panelRightsideArea: the panel on the right side
+                panelRightSideInfo: the panel with info text
+                panelButtons: the panel on the right side with buttons
+    }
+    procedure panelRedraw(
+        mainWidth, mainHeight:integer;
+        var panelGameArea:TPanel;
+        var panelGamefield:TPanel;
+        var panelRightSideArea:TPanel;
+        var panelRightSideInfo:TPanel;
+        var panelButtons:TPanel);
+
+        var
+            tempHeight:integer;
+        begin
+            // panelGameArea
+            setDimentions(
+                panelGameArea,
+                0, 0, // pos(0, 0)
+                (mainWidth * 80) div 100, // 80% of the Width
+                mainHeight
+            );
+            // panelGamefield
+            tempHeight := (mainHeight * 80) div 100; // 80% of Height
+            setDimentions(
+                panelGamefield,
+                panelGameArea.Height - tempHeight, // height of panelGamearea - height of panelGamefield
+                (panelGameArea.Width - tempHeight) div 2, // (width of panelGamearea - height of panelGamefield) / 2
+                tempHeight,
+                tempHeight
+            );
+            // panelRightSideArea
+            setDimentions(
+                panelRightSideArea,
+                0, // top of FMain
+                (mainWidth * 80) div 100, // 80% of the Width
+                (mainWidth * 20) div 100, // 20% of the Width
+                mainHeight
+            );
+            // panelRightSideInfo
+            setDimentions(
+                panelRightSideInfo,
+                0, // top-
+                0, // left corner
+                panelRightSideArea.Width,
+                (panelRightSideArea.Height * 33) div 100 // 33% height of panelRightSideArea
+            );
+            // panelRightSideInfo
+            setDimentions(
+                panelButtons,
+                (panelRightSideArea.Height * 33) div 100, // 33% height of panelRightSideArea
+                0,
+                panelRightSideArea.Width,
+                (panelRightSideArea.Height * 67) div 100 // 67% height of panelRightSideArea
+            );
+        end;
+
+    procedure createButtons(
+        var b1:TButton;
+        var b2:TButton;
+        var b3:TButton;
+        var b4:TButton;
+        var newParent:TPanel
+    );
+    const
+        OPTION_BUTTON_HEIGHT = 20;
+        OPTION_BUTTON_WIDTH = 20;
         {
-            setup for the panel
-            parent and name to variables
-            and the caption to empty
+            @brief  Creates a Button with passed positions, names and onclick fucntioncall
 
-            @param  panel the target
-                    panelParent the parent of target panel
-                    parentName the name of the target panel
+            @param  button as the Changed button
+                    topPos and leftPos as integer
+                    buttonName, buttonCaption as string
+                    functionPointer as TNotifyEvent
         }
-        procedure panelSetup(
-            var panel:TPanel;
-            panelParent:TWinControl;
-            panelName:string);
-            begin
-                panel := TPanel.Create(panelParent);
-                with panel do
-                begin
-                    Parent := panelParent;
-                    Name := panelName;
-                    caption := '';
-                end;
+        procedure createOptionButton(
+            var button:TButton;
+            var newParent:TPanel;
+            buttonName, buttonCaption:string;
+            functionPointer:TNotifyEvent
+        );
+        begin
+            button := TButton.Create(newParent);
+            with button do begin
+                Parent := newParent;
+                Name := buttonName;
+                Caption := buttonCaption;
+                OnClick := functionPointer;
+                Align := alTop;
             end;
-
-        {
-            Gives each panel its position and size,
-            relativ to the width and height of the FMain size
-
-            @param  mainWidth: width of FMain
-                    mainHeight: newHeight of FMain
-                    panelGameArea: the Gamearea panel
-                    panelGamefield: the field for the cells
-                    panelRightsideArea: the panel on the right side
-                    panelRightSideInfo: the panel with info text
-                    panelButtons: the panel on the right side with buttons
-                    cellField: array with cells (TCellField)
-                    cellRowLength: the cell row count
-                    cellColumnLength: the column count of cells
-        }
-        procedure panelRedraw(
-            mainWidth, mainHeight:integer;
-            var panelGameArea:TPanel;
-            var panelGamefield:TPanel;
-            var panelRightSideArea:TPanel;
-            var panelRightSideInfo:TPanel;
-            var panelButtons:TPanel;
-            var cellField:TCellField;
-            cellRowLength, cellColumnLength:integer);
-
-            var
-                i, j, tempHeight, cellSideLength, cellFirstTopPos, cellFirstLeftPos:integer;
-            begin
-                // panelGameArea
-                setDimentions(
-                    panelGameArea,
-                    0, 0, // pos(0, 0)
-                    (mainWidth * 80) div 100, // 80% of the Width
-                    mainHeight
-                );
-                // panelGamefield
-                tempHeight := (mainHeight * 80) div 100; // 80% of Height
-                setDimentions(
-                    panelGamefield,
-                    panelGameArea.Height - tempHeight, // height of panelGamearea - height of panelGamefield
-                    (panelGameArea.Width - tempHeight) div 2, // (width of panelGamearea - height of panelGamefield) / 2
-                    tempHeight,
-                    tempHeight
-                );
-                // panelRightSideArea
-                setDimentions(
-                    panelRightSideArea,
-                    0, // top of FMain
-                    (mainWidth * 80) div 100, // 80% of the Width
-                    (mainWidth * 20) div 100, // 20% of the Width
-                    mainHeight
-                );
-                // panelRightSideInfo
-                setDimentions(
-                    panelRightSideInfo,
-                    0, // top of FMain
-                    0, // 80% of the Width
-                    panelRightSideArea.Width,
-                    (panelRightSideArea.Height * 33) div 100 // 33% height of panelRightSideArea
-                );
-                // panelRightSideInfo
-                setDimentions(
-                    panelButtons,
-                    (panelRightSideArea.Height * 33) div 100, // 33% height of panelRightSideArea
-                    0,
-                    panelRightSideArea.Width,
-                    (panelRightSideArea.Height * 67) div 100 // 67% height of panelRightSideArea
-                );
-
-                // cells
-                // calculates the sideLength of cells
-                if (cellRowLength > cellColumnLength) then begin
-                    cellSideLength := round(panelGamefield.Width / cellRowLength);
-                    cellFirstTopPos := 0;
-                    cellFirstLeftPos := (panelGamefield.Width - (cellSideLength * cellColumnLength)) div 2;
-                end else begin
-                    cellSideLength := round(panelGamefield.Width / cellColumnLength);
-                    cellFirstTopPos := (panelGamefield.Height - (cellSideLength * cellRowLength)) div 2;
-                    cellFirstLeftPos := 0;
-                end;
-
-                // for each cell in cellField
-                for i := 0 to cellRowLength - 1 do
-                    for j := 0 to cellColumnLength - 1 do
-                        setDimentions(
-                            cellField[i][j],
-                            i * cellSideLength + cellFirstTopPos,
-                            j * cellSideLength + cellFirstLeftPos,
-                            cellSideLength,
-                            cellSideLength
-                        );
-            end;
-
-        {
-            creates a field (rows * columns) of TCellField
-
-            @param  cellField the field of TPanel
-                    panelGamefield the parent of cellField
-                    cellRowLength the row-count
-                    cellColumnLength the column-count
-        }
-        procedure createCells(
-            var cellField:TCellField;
-            panelGamefield:TPanel;
-            cellRowLength:integer;
-            cellColumnLength:integer);
-
-            var
-                i, j:integer;
-
-            begin
-                // create the array-field with the needed length
-                setLength(cellField, cellRowLength, cellColumnLength);
-                // create cells
-                for i := 0 to cellRowLength - 1 do
-                    for j := 0 to cellColumnLength - 1 do
-                        panelSetup(
-                            cellField[i][j],
-                            panelGamefield,
-                            'cellx' + inttostr(i) + 'y' + inttostr(j)
-                        );
-            end;
-
-    end.
+        end;
+    begin
+        createOptionButton(
+            b1,
+            newParent,
+            'newGameButton',
+            'New',
+            nil
+        );
+        createOptionButton(
+            b2,
+            newParent,
+            'loadGameButton',
+            'Load',
+            nil
+        );
+        createOptionButton(
+            b3,
+            newParent,
+            'saveGameButton',
+            'Save',
+            nil 
+        );
+        createOptionButton(
+            b4,
+            newParent,
+            'quitGameButton',
+            'Quit',
+            nil
+        );
+    end;
+end.
