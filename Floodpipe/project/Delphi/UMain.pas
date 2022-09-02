@@ -68,20 +68,20 @@ var
     position: TPosition;
 begin
     position := getPositionFromName(TImage(Sender).name);
-    // rotateCellClockwise(
-    //     cellField[
-    //         position.x,
-    //         position.y
-    //     ]
-    // );
-        showmessage(
-            cellOpeningsToString(
-                cellField[
-                    position.x,
-                    position.y
-                ]
-            )
-        );
+    rotateCellClockwise(
+        cellField[
+            position.x,
+            position.y
+        ]
+    );
+    showmessage(
+        cellOpeningsToString(
+            cellField[
+                position.x,
+                position.y
+            ]
+        )
+    );
 end;
 
 {
