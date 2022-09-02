@@ -17,6 +17,7 @@ interface
     procedure rotatePosition(var position:TPosition);
     procedure rotatePositions(var cell:TCell);
     procedure rotatePositionsByCellRotation(var cell:TCell);
+    function addPositions(position1, position2:TPosition):TPosition;
 
 implementation
     {
@@ -78,5 +79,17 @@ implementation
     begin
         for i := 1 to integer(cell.cellRotation) do
             rotatePositions(cell);
-    end; 
+    end;
+
+    {
+        adds two positions with eachother
+        
+        @param  IN:     position1(2) added with eachother
+                RETURN: added positions
+    }
+    function addPositions(position1, position2:TPosition):TPosition;
+    begin
+        addPositions.x := position1.x +  position2.x;
+        addPositions.y := position1.y +  position2.y;
+    end;
 end.

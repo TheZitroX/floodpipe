@@ -112,7 +112,7 @@ begin
     // disable to get no overflow
     (Sender as TTimer).Enabled := false;
 
-    fluidMove(positionQueueList);
+    fluidMove(cellField, positionQueueList);
     // stop animation when finished
     if isPositionQueueListEmpty(positionQueueList) then begin
         cellQueueHandlerFinalize();
@@ -145,16 +145,6 @@ begin
     // for randomniss
     randomize;
 
-    // todo aufruf bei animation
-    // // flow start
-    // appendPosition(positionQueueList, 0, 0);
-    fluidTimer := TTimer.Create(FMain);
-    with fluidTimer do begin
-        Interval := cellAnimationTickRate;
-        OnTimer := FMain.cellQueueHandler;
-        Enabled := True;
-    end;
-
     // FMain setup
     FMain.Constraints.MinWidth := MAIN_FORM_MIN_WIDTH;
     FMain.Constraints.MinHeight := MAIN_FORM_MIN_HEIGHT;
@@ -178,6 +168,23 @@ begin
       panelButtons);
 
     updateLayout();
+
+    // todo aufruf bei animation
+    // flow start
+    setCellToItem(
+        cellField[0, 0],
+        TCellType.TYPE_PIPE,
+        TCellItem.PIPE,
+        TCellContent.CONTENT_WATER,
+        TCellRotation.NONE
+    );
+    appendPosition(positionQueueList, 0, 0);
+    fluidTimer := TTimer.Create(FMain);
+    with fluidTimer do begin
+        Interval := cellAnimationTickRate;
+        OnTimer := FMain.cellQueueHandler;
+        Enabled := True;
+    end;
 end;
 
 procedure TFMain.FormResize(Sender: TObject);

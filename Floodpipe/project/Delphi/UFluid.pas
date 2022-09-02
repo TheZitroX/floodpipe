@@ -15,7 +15,7 @@ interface
 
     uses UTypedefine;
 
-    procedure fluidMove(var positionQueueList:PPositionNode);
+    procedure fluidMove(var cellField:TCellField; var positionQueueList:PPositionNode);
     function isPositionQueueListEmpty(positionQueueList:PPositionNode):boolean;
     procedure appendPositionNode(var positionList:PPositionNode; positionNode:PPositionNode);
     procedure appendPosition(var positionList:PPositionNode; positionX, positionY:integer);
@@ -82,7 +82,7 @@ implementation
         end;
     end;
 
-    procedure fluidMove(var positionQueueList:PPositionNode);
+    procedure fluidMove(var cellField:TCellField; var positionQueueList:PPositionNode);
     begin
     end;
 

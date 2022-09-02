@@ -19,19 +19,24 @@ interface
     procedure cellSetup(
         var cell:TCell;
         newParent:TWinControl;
-        newName:string);
-
+        newName:string
+    );
     procedure createCells(
         var cellField:TCellField;
         newParent:TWinControl;
         rowCount, columnCount:integer;
-        onCellClick:TNotifyEvent);
-
+        onCellClick:TNotifyEvent
+    );
     procedure rotateCellClockwise(var cell:TCell);
-
     function getPositionFromName(name:string):TPosition;
-
     function cellOpeningsToString(cell:TCell):string;
+    procedure setCellToItem(
+        var cell:TCell;
+        newCellType:TCellType;
+        newCellItem:TCellItem;
+        newCellContent:TCellContent;
+        newCellRotation:TCellRotation
+    );
 
 implementation
 
@@ -60,12 +65,20 @@ implementation
         end;
     end;
 
+    {
+        sets a cell to the passed types
+
+        @param  IN/OUT: the target cell
+                IN:     celltype, cellitem,
+                        cellContent and cellRotation
+    }
     procedure setCellToItem(
         var cell:TCell;
         newCellType:TCellType;
         newCellItem:TCellItem;
         newCellContent:TCellContent;
-        newCellRotation:TCellRotation);
+        newCellRotation:TCellRotation
+    );
     begin
         with cell do
         begin
@@ -129,8 +142,8 @@ implementation
         // create the array-field with the needed length
         setLength(cellField, columnCount, rowCount);
         // create cells
-        for j := 0 to columnCount - 1 do
-            for i := 0 to rowCount - 1 do begin
+        for j := 0 to rowCount - 1 do
+            for i := 0 to columnCount - 1 do begin
                 cellSetup(
                     cellField[i, j],
                     newParent,
@@ -141,11 +154,12 @@ implementation
                     cellField[i, j],
                     // debug just random types for testing
                     TCellType.TYPE_PIPE,
-                    TCellItem(Random(Succ(Ord(High(TCellItem))))),
-                    // TCellItem.PIPE_TSPLIT,
-                    TCellContent(Random(Succ(Ord(High(TCellContent))))),
-                    TCellRotation(Random(Succ(Ord(High(TCellRotation)))))
-                    // TCellRotation.NONE
+                    // TCellItem(Random(Succ(Ord(High(TCellItem))))),
+                    TCellItem.PIPE,
+                    // TCellContent(Random(Succ(Ord(High(TCellContent))))),
+                    TCellContent.CONTENT_EMPTY,
+                    // TCellRotation(Random(Succ(Ord(High(TCellRotation)))))
+                    TCellRotation.NONE
                 );
                 cellField[i, j].openings := nil;
                 setOpeningsFromRotation(cellField[i, j]);
