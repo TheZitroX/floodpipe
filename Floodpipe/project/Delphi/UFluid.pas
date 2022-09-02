@@ -30,14 +30,18 @@ implementation
                 IN:     positionNode the appendend node
     }
     procedure appendPositionNode(var positionList:PPositionNode; positionNode:PPositionNode);
+    var
+        positionListRunner:PPositionNode;
     begin
+        // set positionList when beginning doesnt exist
         if (positionList = nil) then begin
             positionList := positionNode;
         end else begin
+            positionListRunner := positionList;
             // get last element
-            while (positionList^.next <> nil) do 
-                positionList := positionList^.next;
-            positionList^.next := positionNode;
+            while (positionListRunner^.next <> nil) do 
+                positionListRunner := positionListRunner^.next;
+            positionListRunner^.next := positionNode;
         end;
     end;
 

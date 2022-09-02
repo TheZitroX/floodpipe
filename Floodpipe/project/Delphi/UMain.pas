@@ -104,6 +104,14 @@ begin
     if isPositionQueueListEmpty(positionQueueList) then begin
         cellQueueHandlerFinalize();
     end else begin
+        showmessage(
+            cellOpeningsToString(
+                cellField[
+                    positionQueueList^.position.X,
+                    positionQueueList^.position.Y
+                ]
+            )
+        );
         delFirstPositionNode(positionQueueList);
 
         // continiue animation

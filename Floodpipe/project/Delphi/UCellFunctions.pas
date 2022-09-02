@@ -1,4 +1,4 @@
-{
+﻿{
     file:       UCellFunctions.pas
     author:     John Lienau
     date:       05.08.2022
@@ -30,6 +30,8 @@ interface
     procedure rotateCellClockwise(var cell:TCell);
 
     function getPositionFromName(name:string):TPosition;
+
+    function cellOpeningsToString(cell:TCell):string;
 
 implementation
 
@@ -75,19 +77,33 @@ implementation
         loadPictureFromBitmap(cell);
     end;
                 
+    {
+        sets the openings from type and rotation of a cell
+
+        @param  IN/OUT: target cell
+    }
     procedure setOpeningsFromRotation(var cell:TCell);
     begin
         with cell do begin
             case cellType of
                 TYPE_WALL:; //todo
                 TYPE_PIPE:  case cellItem of
-                                PIPE:;
-                                PIPE_LID: begin
+                                PIPE: begin
                                     appendPosition(openings, 1, 0);
                                     appendPosition(openings, -1, 0);
                                 end;
-                                PIPE_TSPLIT:;
-                                PIPE_CURVES:;
+                                PIPE_LID: begin
+                                    appendPosition(openings, 1, 0);
+                                end;
+                                PIPE_TSPLIT: begin;
+                                    appendPosition(openings, 1, 0);
+                                    appendPosition(openings, 0, 1);
+                                    appendPosition(openings, 0, -1);
+                                end;
+                                PIPE_CURVES: begin;
+                                    appendPosition(openings, -1, 0);
+                                    appendPosition(openings, 0, 1);
+                                end;
                             end;
             end;
         end;
@@ -125,9 +141,10 @@ implementation
                     // debug just random types for testing
                     TCellType.TYPE_PIPE,
                     // TCellItem(Random(Succ(Ord(High(TCellItem))))),
-                    TCellItem.PIPE,
+                    TCellItem.PIPE_TSPLIT,
                     TCellContent(Random(Succ(Ord(High(TCellContent))))),
-                    TCellRotation(Random(Succ(Ord(High(TCellRotation)))))
+                    // TCellRotation(Random(Succ(Ord(High(TCellRotation)))))
+                    TCellRotation.NONE
                 );
                 cellField[i, j].openings := nil;
                 setOpeningsFromRotation(cellField[i, j]);
@@ -194,5 +211,31 @@ implementation
         position.x := getXFromCellName(name);
         position.y := getYFromCellName(name);
         getPositionFromName := position;
+    end;
+
+    {
+        gets all openings of a pipe and makes a string from it
+
+        @param  IN:     the target cell
+                OUT:    a string with all openings of the pipe
+    }
+    function cellOpeningsToString(cell:TCell):string;
+    var
+        stringBuilder:TStringBuilder;
+        openingsRunner:PPositionNode;
+    begin
+        stringBuilder := TStringBuilder.create();
+        openingsRunner := cell.openings;
+        while(openingsRunner <> nil) do begin
+            stringBuilder := stringBuilder.append(
+                '(' +
+                inttostr(openingsRunner^.position.X) +
+                '|' +
+                inttostr(openingsRunner^.position.Y) +
+                ') '
+            );
+            openingsRunner := openingsRunner^.next;
+        end;
+        cellOpeningsToString := stringBuilder.toString();
     end;
 end.
