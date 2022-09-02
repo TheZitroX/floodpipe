@@ -18,7 +18,7 @@ uses
     System.Classes, Vcl.Graphics,
     Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls,
 
-    UProperties, UFunctions, UTypedefine, UCellFunctions, UFluid;
+    UProperties, UFunctions, UTypedefine, UCellFunctions, UFluid, UPositionFunctions;
 
 type
     TFMain = class(TForm)
@@ -74,14 +74,14 @@ begin
             position.y
         ]
     );
-    showmessage(
-        cellOpeningsToString(
-            cellField[
-                position.x,
-                position.y
-            ]
-        )
-    );
+    // showmessage(
+    //     cellOpeningsToString(
+    //         cellField[
+    //             position.x,
+    //             position.y
+    //         ]
+    //     )
+    // );
 end;
 
 {
@@ -97,7 +97,7 @@ end;
 procedure TFMain.cellQueueHandlerFinalize();
 begin
     // todo enable all buttons for user
-    // showmessage('Simulation finished');
+    showmessage('Simulation finished');
 end;
 
 {
@@ -112,13 +112,11 @@ begin
     // disable to get no overflow
     (Sender as TTimer).Enabled := false;
 
-    fluidMove(cellField, positionQueueList);
     // stop animation when finished
-    if isPositionQueueListEmpty(positionQueueList) then begin
+    if isPositionListEmpty(positionQueueList) then begin
         cellQueueHandlerFinalize();
     end else begin
-        delFirstPositionNode(positionQueueList);
-
+        fluidMove(cellField, positionQueueList);
         // continiue animation
         (Sender as TTimer).Enabled := true;
     end;
@@ -171,14 +169,8 @@ begin
 
     // todo aufruf bei animation
     // flow start
-    setCellToItem(
-        cellField[0, 0],
-        TCellType.TYPE_PIPE,
-        TCellItem.PIPE,
-        TCellContent.CONTENT_WATER,
-        TCellRotation.NONE
-    );
-    appendPosition(positionQueueList, 0, 0);
+    fillCellWithContent(cellField[25, 25], TCellContent.CONTENT_WATER);
+    appendPosition(positionQueueList, 25, 25);
     fluidTimer := TTimer.Create(FMain);
     with fluidTimer do begin
         Interval := cellAnimationTickRate;

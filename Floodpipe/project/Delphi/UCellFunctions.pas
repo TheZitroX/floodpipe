@@ -14,7 +14,7 @@ interface
     uses
         vcl.Forms, sysutils, vcl.extctrls, vcl.controls, system.classes,
 
-        UTypedefine, UPixelfunctions, UProperties, UFluid, UPositionFunctions;
+        UTypedefine, UPixelfunctions, UProperties, UPositionFunctions;
 
     procedure cellSetup(
         var cell:TCell;
@@ -37,6 +37,8 @@ interface
         newCellContent:TCellContent;
         newCellRotation:TCellRotation
     );
+    procedure fillCellWithContent(var cell:TCell; content:TCellContent);
+    function isCellEmpty(cell:TCell):boolean;
 
 implementation
 
@@ -154,12 +156,12 @@ implementation
                     cellField[i, j],
                     // debug just random types for testing
                     TCellType.TYPE_PIPE,
-                    // TCellItem(Random(Succ(Ord(High(TCellItem))))),
-                    TCellItem.PIPE,
+                    TCellItem(Random(Succ(Ord(High(TCellItem))))),
+                    // TCellItem.PIPE,
                     // TCellContent(Random(Succ(Ord(High(TCellContent))))),
                     TCellContent.CONTENT_EMPTY,
-                    // TCellRotation(Random(Succ(Ord(High(TCellRotation)))))
-                    TCellRotation.NONE
+                    TCellRotation(Random(Succ(Ord(High(TCellRotation)))))
+                    // TCellRotation.NONE
                 );
                 cellField[i, j].openings := nil;
                 setOpeningsFromRotation(cellField[i, j]);
@@ -253,5 +255,28 @@ implementation
             openingsRunner := openingsRunner^.next;
         end;
         cellOpeningsToString := stringBuilder.toString();
+    end;
+
+    {
+        fills a cell with content
+
+        @param  IN/OUT: target cell
+                IN:     content type
+    }
+    procedure fillCellWithContent(var cell:TCell; content:TCellContent);
+    begin
+        cell.cellContent := content;
+        loadPictureFromBitmap(cell);
+    end;
+
+    {
+        returns true when a cell is empty
+
+        @param  IN:     the target cell
+                RETURN: true when cell is empty
+    }
+    function isCellEmpty(cell:TCell):boolean;
+    begin
+        isCellEmpty := cell.cellContent = TCellContent.CONTENT_EMPTY;
     end;
 end.

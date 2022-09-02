@@ -13,81 +13,49 @@ unit UFluid;
 
 interface
 
-    uses UTypedefine;
+    uses UTypedefine, UPositionFunctions, UCellfunctions;
 
     procedure fluidMove(var cellField:TCellField; var positionQueueList:PPositionNode);
-    function isPositionQueueListEmpty(positionQueueList:PPositionNode):boolean;
-    procedure appendPositionNode(var positionList:PPositionNode; positionNode:PPositionNode);
-    procedure appendPosition(var positionList:PPositionNode; positionX, positionY:integer);
-    procedure delFirstPositionNode(var positionList:PPositionNode);
+
 
 implementation
-    {
-        @brief: appends a positionNode to the end of the positionList
-                Creates the positionList when empty
 
-        @param: IN/OUT: positionList with the beginning of the list
-                IN:     positionNode the appendend node
-    }
-    procedure appendPositionNode(var positionList:PPositionNode; positionNode:PPositionNode);
+    procedure moveFluidACell(var cellField:TCellField; positionQueueList:PPositionNode);
     var
-        positionListRunner:PPositionNode;
+        openingsRunner:PPositionNode;
+        position, cellPosition:TPosition;
+        cell:TCell;
     begin
-        // set positionList when beginning doesnt exist
-        if (positionList = nil) then begin
-            positionList := positionNode;
-        end else begin
-            positionListRunner := positionList;
-            // get last element
-            while (positionListRunner^.next <> nil) do 
-                positionListRunner := positionListRunner^.next;
-            positionListRunner^.next := positionNode;
+        cellPosition.x := positionQueueList^.position.x;
+        cellPosition.y := positionQueueList^.position.y;
+        cell := cellField[
+            cellPosition.x,
+            cellPosition.y];
+
+        openingsRunner := cell.openings;
+        while(openingsRunner <> nil) do begin
+            position := addPositions(
+                openingsRunner^.position,
+                cellPosition
+            );
+            if positionInField(cellField, position) and isCellEmpty(cellField[position.x, position.y]) then begin
+                fillCellWithContent(
+                    cellField[
+                        position.x,
+                        position.y
+                    ],
+                    TCellContent.CONTENT_WATER
+                );
+                appendPosition(positionQueueList, position.x, position.y);
+            end;
+            openingsRunner := openingsrunner^.next;
         end;
     end;
-
-    {
-        @brief: appends a new positionNode to the positionList
-                creates the positionlist when empty
-
-        @param: IN/OUT: positionList with the beginning of the list
-                IN:     positionX (Y) with the positions
-    }
-    procedure appendPosition(var positionList:PPositionNode; positionX, positionY:integer);
-    var
-        position:TPosition;
-        positionNode:PPositionNode;
-    begin
-        position.x := positionX;
-        position.y := positionY;
-        new(positionNode);
-        positionNode^.position := position;
-        positionNode^.next := nil;
-        appendPositionNode(positionList, positionNode);
-    end;
-
-    {
-        @brief: deletes a positionNode from the beginning of the list
-
-        @param: IN/OUT: positionList with the new beginning of the list
-    }
-    procedure delFirstPositionNode(var positionList:PPositionNode);
-    var
-        tempPositionNode:PPositionNode;
-    begin
-        // ignore when already empty
-        if (positionList <> nil) then begin
-            tempPositionNode := positionList;
-            positionList := positionList^.next;
-            dispose(tempPositionNode);
-        end;
-    end;
-
+    
     procedure fluidMove(var cellField:TCellField; var positionQueueList:PPositionNode);
     begin
+        moveFluidACell(cellField, positionQueueList);
+        delFirstPositionNode(positionQueueList);
     end;
 
-    function isPositionQueueListEmpty(positionQueueList:PPositionNode):boolean;
-    begin
-        isPositionQueueListEmpty := positionQueueList = nil;
-    end;
 end.
