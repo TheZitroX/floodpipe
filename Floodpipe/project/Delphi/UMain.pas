@@ -68,7 +68,20 @@ var
     position: TPosition;
 begin
     position := getPositionFromName(TImage(Sender).name);
-    rotateCellClockwise(cellField[position.x, position.y]);
+    // rotateCellClockwise(
+    //     cellField[
+    //         position.x,
+    //         position.y
+    //     ]
+    // );
+        showmessage(
+            cellOpeningsToString(
+                cellField[
+                    position.x,
+                    position.y
+                ]
+            )
+        );
 end;
 
 {
@@ -84,7 +97,7 @@ end;
 procedure TFMain.cellQueueHandlerFinalize();
 begin
     // todo enable all buttons for user
-    showmessage('Simulation finished');
+    // showmessage('Simulation finished');
 end;
 
 {
@@ -104,14 +117,6 @@ begin
     if isPositionQueueListEmpty(positionQueueList) then begin
         cellQueueHandlerFinalize();
     end else begin
-        showmessage(
-            cellOpeningsToString(
-                cellField[
-                    positionQueueList^.position.X,
-                    positionQueueList^.position.Y
-                ]
-            )
-        );
         delFirstPositionNode(positionQueueList);
 
         // continiue animation
@@ -141,7 +146,8 @@ begin
     randomize;
 
     // todo aufruf bei animation
-    appendPosition(positionQueueList, 0, 0);
+    // // flow start
+    // appendPosition(positionQueueList, 0, 0);
     fluidTimer := TTimer.Create(FMain);
     with fluidTimer do begin
         Interval := cellAnimationTickRate;
