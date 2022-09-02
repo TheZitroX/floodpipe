@@ -83,18 +83,62 @@ implementation
         @param  IN/OUT: target cell
     }
     procedure setOpeningsFromRotation(var cell:TCell);
+        {
+            rotates all openings by cell rotation
+
+            @param  IN/OUT: target cell
+        }
+        procedure rotatePositions(var cell:TCell);
+            {
+                Rotates position clockwise (90°)
+                only (1, 0),(0,-1),(-1,0) and (0,-1) accepted!
+
+                @param  IN/OUT: the position vector
+            }
+            procedure rotatePosition(var position:TPosition);
+            begin
+                case position.x of
+                    1: begin
+                        position.x := 0;
+                        position.y := 1;
+                    end;
+                    0:  begin
+                        if position.y = 1 then begin
+                            position.x := -1;
+                            position.y := 0;
+                        end else begin
+                            position.x := 1;
+                            position.y := 0;
+                        end;
+                    end;
+                    -1: begin
+                        position.x := 0;
+                        position.y := -1;
+                    end;
+                    else assert(true, 'ERROR cant rotate such position!');
+                end;
+            end;
+        var
+            i:integer;
+            openingsRunner:PPositionNode;
+        begin
+            openingsRunner := cell.openings;
+            while(openingsRunner <> nil) do begin
+                for i := 1 to integer(cell.cellRotation) do
+                    rotatePosition(openingsRunner^.position);
+                openingsRunner := openingsRunner^.next;
+            end;
+        end;
     begin
         with cell do begin
             case cellType of
-                TYPE_WALL:; //todo
+                TYPE_WALL:;// do nothing
                 TYPE_PIPE:  case cellItem of
                                 PIPE: begin
                                     appendPosition(openings, 1, 0);
                                     appendPosition(openings, -1, 0);
                                 end;
-                                PIPE_LID: begin
-                                    appendPosition(openings, 1, 0);
-                                end;
+                                PIPE_LID: appendPosition(openings, 1, 0);
                                 PIPE_TSPLIT: begin;
                                     appendPosition(openings, 1, 0);
                                     appendPosition(openings, 0, 1);
@@ -105,7 +149,9 @@ implementation
                                     appendPosition(openings, 0, 1);
                                 end;
                             end;
+                else assert(true, 'ERROR cant set openings from this type');
             end;
+            rotatePositions(cell);
         end;
     end;
 
@@ -140,11 +186,11 @@ implementation
                     cellField[i, j],
                     // debug just random types for testing
                     TCellType.TYPE_PIPE,
-                    // TCellItem(Random(Succ(Ord(High(TCellItem))))),
-                    TCellItem.PIPE_TSPLIT,
+                    TCellItem(Random(Succ(Ord(High(TCellItem))))),
+                    // TCellItem.PIPE_TSPLIT,
                     TCellContent(Random(Succ(Ord(High(TCellContent))))),
-                    // TCellRotation(Random(Succ(Ord(High(TCellRotation)))))
-                    TCellRotation.NONE
+                    TCellRotation(Random(Succ(Ord(High(TCellRotation)))))
+                    // TCellRotation.NONE
                 );
                 cellField[i, j].openings := nil;
                 setOpeningsFromRotation(cellField[i, j]);
