@@ -56,7 +56,7 @@ type
 var
     FMain: TFMain;
     cellAnimationTickRate: Integer;
-    positionQueueList: PPositionNode;
+    positionQueueList: TPositionList;
     timerCount: integer;
 
 implementation
@@ -106,8 +106,6 @@ end;
     Global: positionQueueList die abzuarbeiten ist
 }
 procedure TFMain.cellQueueHandler(Sender: TObject);
-var
-    outputString: TStringBuilder;
 begin
     // disable to get no overflow
     (Sender as TTimer).Enabled := false;
@@ -133,7 +131,7 @@ var
     fluidTimer: TTimer;
 begin
     // inizialize
-    positionQueueList := nil;
+    positionQueueList.firstNode := nil;
     
     // set default values
     cellRowLength := DEFAULT_CELL_ROW_COUNT;

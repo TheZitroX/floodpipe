@@ -39,6 +39,7 @@ interface
     );
     procedure fillCellWithContent(var cell:TCell; content:TCellContent);
     function isCellEmpty(cell:TCell):boolean;
+    function getCellFromPosition(cellField:TCellField; position:TPosition):TCell;
 
 implementation
 
@@ -163,7 +164,7 @@ implementation
                     TCellRotation(Random(Succ(Ord(High(TCellRotation)))))
                     // TCellRotation.NONE
                 );
-                cellField[i, j].openings := nil;
+                cellField[i, j].openings.firstNode := nil;
                 setOpeningsFromRotation(cellField[i, j]);
                 cellField[i][j].image.OnClick := onCellClick;
             end;
@@ -243,7 +244,7 @@ implementation
         openingsRunner:PPositionNode;
     begin
         stringBuilder := TStringBuilder.create();
-        openingsRunner := cell.openings;
+        openingsRunner := cell.openings.firstNode;
         while(openingsRunner <> nil) do begin
             stringBuilder := stringBuilder.append(
                 '(' +
@@ -278,5 +279,20 @@ implementation
     function isCellEmpty(cell:TCell):boolean;
     begin
         isCellEmpty := cell.cellContent = TCellContent.CONTENT_EMPTY;
+    end;
+
+    {
+        gets a cell from position
+
+        @param  IN:     cellField with all cells
+                        position (has to be in field!)
+                RETURN: the cell on the position in field
+    }
+    function getCellFromPosition(cellField:TCellField; position:TPosition):TCell;
+    begin
+        getCellFromPosition := cellField[
+            position.x,
+            position.y
+        ];
     end;
 end.

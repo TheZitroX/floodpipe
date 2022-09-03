@@ -15,24 +15,21 @@ interface
 
     uses UTypedefine, UPositionFunctions, UCellfunctions;
 
-    procedure fluidMove(var cellField:TCellField; var positionQueueList:PPositionNode);
+    procedure fluidMove(var cellField:TCellField; var positionQueueList:TPositionList);
 
 
 implementation
 
-    procedure moveFluidACell(var cellField:TCellField; positionQueueList:PPositionNode);
+    procedure moveFluidInConnections(var cellField:TCellField; var positionQueueList:TPositionList);
     var
         openingsRunner:PPositionNode;
         position, cellPosition:TPosition;
         cell:TCell;
     begin
-        cellPosition.x := positionQueueList^.position.x;
-        cellPosition.y := positionQueueList^.position.y;
-        cell := cellField[
-            cellPosition.x,
-            cellPosition.y];
+        cellPosition := positionQueueList.firstNode^.position;
+        cell := getCellFromPosition(cellField, cellPosition);
 
-        openingsRunner := cell.openings;
+        openingsRunner := cell.openings.firstNode;
         while(openingsRunner <> nil) do begin
             position := addPositions(
                 openingsRunner^.position,
@@ -52,9 +49,9 @@ implementation
         end;
     end;
     
-    procedure fluidMove(var cellField:TCellField; var positionQueueList:PPositionNode);
+    procedure fluidMove(var cellField:TCellField; var positionQueueList:TPositionList);
     begin
-        moveFluidACell(cellField, positionQueueList);
+        moveFluidInConnections(cellField, positionQueueList);
         delFirstPositionNode(positionQueueList);
     end;
 

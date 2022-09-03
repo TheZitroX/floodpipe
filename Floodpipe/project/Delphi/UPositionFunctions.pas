@@ -15,10 +15,10 @@ interface
     uses UTypedefine;
 
     procedure rotatePosition(var position:TPosition);
-    function isPositionListEmpty(positionQueueList:PPositionNode):boolean;
-    procedure appendPositionNode(var positionList:PPositionNode; positionNode:PPositionNode);
-    procedure appendPosition(var positionList:PPositionNode; positionX, positionY:integer);
-    procedure delFirstPositionNode(var positionList:PPositionNode);
+    function isPositionListEmpty(positionList:TPositionList):boolean;
+    procedure appendPositionNode(var positionList:TPositionList; positionNode:PPositionNode);
+    procedure appendPosition(var positionList:TPositionList; positionX, positionY:integer);
+    procedure delFirstPositionNode(var positionList:TPositionList);
     procedure rotatePositions(var cell:TCell);
     procedure rotatePositionsByCellRotation(var cell:TCell);
     function addPositions(position1, position2:TPosition):TPosition;
@@ -27,24 +27,20 @@ interface
 implementation
     {
         @brief: appends a positionNode to the end of the positionList
-                Creates the positionList when empty
 
         @param: IN/OUT: positionList with the beginning of the list
                 IN:     positionNode the appendend node
     }
-    procedure appendPositionNode(var positionList:PPositionNode; positionNode:PPositionNode);
-    var
-        positionListRunner:PPositionNode;
+    procedure appendPositionNode(var positionList:TPositionList; positionNode:PPositionNode);
     begin
         // set positionList when beginning doesnt exist
-        if (positionList = nil) then begin
-            positionList := positionNode;
+        if (positionList.firstNode = nil) then begin
+            positionList.firstNode := positionNode;
+            positionList.lastNode := positionNode;
         end else begin
-            positionListRunner := positionList;
-            // get last element
-            while (positionListRunner^.next <> nil) do 
-                positionListRunner := positionListRunner^.next;
-            positionListRunner^.next := positionNode;
+            // set last element
+            positionList.lastNode^.next := positionNode;
+            positionList.lastNode := positionNode;
         end;
     end;
 
@@ -55,7 +51,7 @@ implementation
         @param: IN/OUT: positionList with the beginning of the list
                 IN:     positionX (Y) with the positions
     }
-    procedure appendPosition(var positionList:PPositionNode; positionX, positionY:integer);
+    procedure appendPosition(var positionList:TPositionList; positionX, positionY:integer);
     var
         position:TPosition;
         positionNode:PPositionNode;
@@ -73,14 +69,14 @@ implementation
 
         @param: IN/OUT: positionList with the new beginning of the list
     }
-    procedure delFirstPositionNode(var positionList:PPositionNode);
+    procedure delFirstPositionNode(var positionList:TPositionList);
     var
         tempPositionNode:PPositionNode;
     begin
         // ignore when already empty
-        if (positionList <> nil) then begin
-            tempPositionNode := positionList;
-            positionList := positionList^.next;
+        if (positionList.firstNode <> nil) then begin
+            tempPositionNode := positionList.firstNode;
+            positionList.firstNode := positionList.firstNode^.next;
             dispose(tempPositionNode);
         end;
     end;
@@ -91,9 +87,9 @@ implementation
         @param  IN:     positionList
                 RETURN: true when empty
     }
-    function isPositionListEmpty(positionQueueList:PPositionNode):boolean;
+    function isPositionListEmpty(positionList:TPositionList):boolean;
     begin
-        isPositionListEmpty := positionQueueList = nil;
+        isPositionListEmpty := positionList.firstNode = nil;
     end;
 
     {
@@ -134,10 +130,9 @@ implementation
     }
     procedure rotatePositions(var cell:TCell);
     var
-        i:integer;
         openingsRunner:PPositionNode;
     begin
-        openingsRunner := cell.openings;
+        openingsRunner := cell.openings.firstNode;
         while(openingsRunner <> nil) do begin
             rotatePosition(openingsRunner^.position);
             openingsRunner := openingsRunner^.next;
@@ -165,8 +160,8 @@ implementation
     }
     function addPositions(position1, position2:TPosition):TPosition;
     begin
-        addPositions.x := position1.x +  position2.x;
-        addPositions.y := position1.y +  position2.y;
+        addPositions.x := position1.x + position2.x;
+        addPositions.y := position1.y + position2.y;
     end;
 
     {

@@ -52,6 +52,11 @@ interface
             position:TPosition;
             next:PPositionNode;
         end;
+        // List structure
+        TPositionList = record
+            firstNode:PPositionNode;
+            lastNode:PPositionNode;
+        end;
 
         // cell
         TCell = record
@@ -60,7 +65,7 @@ interface
             cellItem:TCellItem;
             cellContent:TCellContent;
             cellRotation:TCellRotation;
-            openings:PPositionNode;
+            openings:TPositionList;
         end;
         TCellField = array of array of TCell;
 
