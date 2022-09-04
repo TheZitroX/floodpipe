@@ -39,6 +39,8 @@ interface
     );
     procedure fillCellWithContent(var cell:TCell; content:TCellContent);
     function isCellEmpty(cell:TCell):boolean;
+    function getCellFromPosition(cellField:TCellField; position:TPosition):TCell;
+    function isCellConnected(cell:TCell; position:TPosition):boolean;
 
 implementation
 
@@ -163,7 +165,7 @@ implementation
                     TCellRotation(Random(Succ(Ord(High(TCellRotation)))))
                     // TCellRotation.NONE
                 );
-                cellField[i, j].openings := nil;
+                cellField[i, j].openings.firstNode := nil;
                 setOpeningsFromRotation(cellField[i, j]);
                 cellField[i][j].image.OnClick := onCellClick;
             end;
@@ -243,7 +245,7 @@ implementation
         openingsRunner:PPositionNode;
     begin
         stringBuilder := TStringBuilder.create();
-        openingsRunner := cell.openings;
+        openingsRunner := cell.openings.firstNode;
         while(openingsRunner <> nil) do begin
             stringBuilder := stringBuilder.append(
                 '(' +
@@ -278,5 +280,47 @@ implementation
     function isCellEmpty(cell:TCell):boolean;
     begin
         isCellEmpty := cell.cellContent = TCellContent.CONTENT_EMPTY;
+    end;
+
+    {
+        gets a cell from position
+
+        @param  IN:     cellField with all cells
+                        position (has to be in field!)
+                RETURN: the cell on the position in field
+    }
+    function getCellFromPosition(cellField:TCellField; position:TPosition):TCell;
+    begin
+        getCellFromPosition := cellField[
+            position.x,
+            position.y
+        ];
+    end;
+
+    {
+        tells if a cell is connected to a position
+
+        @param  IN:     cell the target cell
+                        position of expected connection
+    }
+    function isCellConnected(cell:TCell; position:TPosition):boolean;
+    var
+        openingsRunner:PPositionNode;
+        isConnected:boolean;
+    begin
+        isConnected := false;
+        openingsRunner := cell.openings.firstNode;
+        while((openingsRunner <> nil) and not isConnected) do begin
+            isConnected := positionEquals(
+                position,
+                addPositions(
+                    openingsRunner^.position,
+                    getPositionFromName(cell.image.name)
+                )
+            );
+            openingsRunner := openingsRunner^.next;
+        end;
+
+        isCellConnected := isConnected;
     end;
 end.

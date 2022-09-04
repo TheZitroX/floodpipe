@@ -41,6 +41,7 @@ interface
     );
     procedure createButtons(
         var b1:TButton;
+        b1Procedure:TNotifyEvent;
         var b2:TButton;
         var b3:TButton;
         var b4:TButton;
@@ -223,6 +224,7 @@ implementation
 
     procedure createButtons(
         var b1:TButton;
+        b1Procedure:TNotifyEvent;
         var b2:TButton;
         var b3:TButton;
         var b4:TButton;
@@ -261,7 +263,7 @@ implementation
             newParent,
             'newGameButton',
             'New',
-            nil
+            b1Procedure
         );
         createOptionButton(
             b2,
