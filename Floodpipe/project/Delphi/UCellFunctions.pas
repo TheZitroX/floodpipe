@@ -40,6 +40,7 @@ interface
     procedure fillCellWithContent(var cell:TCell; content:TCellContent);
     function isCellEmpty(cell:TCell):boolean;
     function getCellFromPosition(cellField:TCellField; position:TPosition):TCell;
+    function isCellConnected(cell:TCell; position:TPosition):boolean;
 
 implementation
 
@@ -294,5 +295,32 @@ implementation
             position.x,
             position.y
         ];
+    end;
+
+    {
+        tells if a cell is connected to a position
+
+        @param  IN:     cell the target cell
+                        position of expected connection
+    }
+    function isCellConnected(cell:TCell; position:TPosition):boolean;
+    var
+        openingsRunner:PPositionNode;
+        isConnected:boolean;
+    begin
+        isConnected := false;
+        openingsRunner := cell.openings.firstNode;
+        while((openingsRunner <> nil) and not isConnected) do begin
+            isConnected := positionEquals(
+                position,
+                addPositions(
+                    openingsRunner^.position,
+                    getPositionFromName(cell.image.name)
+                )
+            );
+            openingsRunner := openingsRunner^.next;
+        end;
+
+        isCellConnected := isConnected;
     end;
 end.

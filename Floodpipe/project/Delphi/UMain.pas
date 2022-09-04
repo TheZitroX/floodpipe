@@ -30,6 +30,7 @@ type
         procedure cellQueueHandler(Sender: TObject);
         procedure cellQueueHandlerFinalize();
         procedure onCellClick(Sender: TObject);
+        procedure onNewButtonClick(Sender: TObject);
 
     public
         // panel
@@ -58,30 +59,33 @@ var
     cellAnimationTickRate: Integer;
     positionQueueList: TPositionList;
     timerCount: integer;
+    fluidTimer: TTimer;
 
 implementation
 
 {$R *.dfm}
 
+procedure TFMain.onNewButtonClick(Sender: TObject);
+begin
+    fluidTimer.Enabled := true;
+end;
+
 procedure TFMain.onCellClick(Sender: TObject);
 var
     position: TPosition;
 begin
-    position := getPositionFromName(TImage(Sender).name);
-    rotateCellClockwise(
-        cellField[
-            position.x,
-            position.y
-        ]
-    );
-    // showmessage(
-    //     cellOpeningsToString(
-    //         cellField[
-    //             position.x,
-    //             position.y
-    //         ]
-    //     )
+    // position := getPositionFromName(TImage(Sender).name);
+    // rotateCellClockwise(
+    //     cellField[
+    //         position.x,
+    //         position.y
+    //     ]
     // );
+    if setWaterSource(
+        cellField,
+        positionQueueList,
+        getPositionFromName(TImage(Sender).name)
+    ) then;
 end;
 
 {
@@ -97,7 +101,8 @@ end;
 procedure TFMain.cellQueueHandlerFinalize();
 begin
     // todo enable all buttons for user
-    showmessage('Simulation finished');
+    // showmessage('Simulation finished');
+    // todo set leak positions on field
 end;
 
 {
@@ -127,8 +132,6 @@ end;
     @param  Sender: not used
 }
 procedure TFMain.FormCreate(Sender: TObject);
-var
-    fluidTimer: TTimer;
 begin
     // inizialize
     positionQueueList.firstNode := nil;
@@ -160,17 +163,20 @@ begin
     panelSetup(panelButtons, panelRightSideArea, 'panelButtons');
 
     // buttons with panelButtons as parent
-    createButtons(newGameButton, loadGameButton, saveGameButton, exitGameButton,
-      panelButtons);
+    createButtons(
+        newGameButton, onNewButtonClick,
+        loadGameButton,
+        saveGameButton,
+        exitGameButton,
+        panelButtons
+    );
 
     updateLayout();
 
     // todo aufruf bei animation
     // flow start
-    if setWaterSource(cellField, positionQueueList, getPosition(0, 0)) then showmessage('Placed source');
-    if setWaterSource(cellField, positionQueueList, getPosition(10, 10)) then showmessage('Placed source');
-    if setWaterSource(cellField, positionQueueList, getPosition(0, 10)) then showmessage('Placed source');
-    if setWaterSource(cellField, positionQueueList, getPosition(10, 0)) then showmessage('Placed source');
+    // fix testwise
+    // if setWaterSource(cellField, positionQueueList, getPosition(5, 5)) then;
     fluidTimer := TTimer.Create(FMain);
     with fluidTimer do begin
         Interval := cellAnimationTickRate;

@@ -24,7 +24,7 @@ interface
         // cells
         DEFAULT_CELL_ROW_COUNT = 11;
         DEFAULT_CELL_COLUMN_COUNT = 11;
-        DEFAULT_CELL_TICK_RATE = 1; // (in ms)
+        DEFAULT_CELL_TICK_RATE = 500; // (in ms)
 
         // ===PIXELFUNCTIONS===
         PIXEL_FORMAT = pf24bit;

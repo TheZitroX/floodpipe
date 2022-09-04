@@ -24,6 +24,7 @@ interface
     procedure rotatePositionsByCellRotation(var cell:TCell);
     function addPositions(position1, position2:TPosition):TPosition;
     function positionInField(cellField:TCellField; position:TPosition):boolean;
+    function positionEquals(position1, position2:TPosition):boolean;
 
 implementation
     {
@@ -191,5 +192,19 @@ implementation
             (position.y >= 0) and
             (position.x < length(cellField)) and
             (position.y < length(cellField[0]));
+    end;
+
+    {
+        tells if two positions points to the same
+
+        @param  IN:     position1(2) the checked positions
+                RETURN: true when they point to the same location
+    }
+    function positionEquals(position1, position2:TPosition):boolean;
+    begin
+        positionEquals := (
+            (position1.x = position2.x) and
+            (position1.y = position2.y)
+        );
     end;
 end.

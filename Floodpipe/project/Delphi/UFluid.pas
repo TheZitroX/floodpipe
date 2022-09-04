@@ -25,7 +25,9 @@ interface
 
 implementation
 
-    procedure moveFluidInConnections(var cellField:TCellField; var positionQueueList:TPositionList);
+    procedure moveFluidInConnections(
+        var cellField:TCellField;
+        var positionQueueList, newPositionQueueList:TPositionList);
     var
         openingsRunner:PPositionNode;
         position, cellPosition:TPosition;
@@ -40,24 +42,43 @@ implementation
                 openingsRunner^.position,
                 cellPosition
             );
-            if positionInField(cellField, position) and isCellEmpty(cellField[position.x, position.y]) then begin
-                fillCellWithContent(
-                    cellField[
-                        position.x,
-                        position.y
-                    ],
-                    TCellContent.CONTENT_WATER
-                );
-                appendPosition(positionQueueList, position.x, position.y);
+            if (positionInField(cellField, position) and
+                isCellEmpty(cellField[position.x, position.y]) and
+                isCellConnected(cellField[position.x, position.y], cellPosition)) then begin
+                    fillCellWithContent(
+                        cellField[
+                            position.x,
+                            position.y
+                        ],
+                        TCellContent.CONTENT_WATER
+                    );
+                    appendPosition(newPositionQueueList, position.x, position.y);
             end;
             openingsRunner := openingsrunner^.next;
         end;
     end;
     
+    {
+        processes each position in positionQueueList, fills it with new when finished
+
+        @param  IN/OUT: the cellField (gets changed when fluid is moving in pipes)
+                        the positionQueueList is worked empty and fill when new positions are found
+    }
     procedure fluidMove(var cellField:TCellField; var positionQueueList:TPositionList);
+    var
+        newPositionQueueList:TPositionList;
     begin
-        moveFluidInConnections(cellField, positionQueueList);
-        delFirstPositionNode(positionQueueList);
+        newPositionQueueList.firstNode := nil;
+        while (not isPositionListEmpty(positionQueueList)) do begin
+            moveFluidInConnections(
+                cellField,
+                positionQueueList,
+                newPositionQueueList
+            );
+            delFirstPositionNode(positionQueueList);
+        end;
+
+        positionQueueList := newPositionQueueList;
     end;
 
     {
@@ -81,5 +102,4 @@ implementation
             appendPosition(positionQueueList, position.x, position.y);
         end else setWaterSource := false;
     end;
-
 end.
