@@ -167,8 +167,10 @@ begin
 
     // todo aufruf bei animation
     // flow start
-    fillCellWithContent(cellField[25, 25], TCellContent.CONTENT_WATER);
-    appendPosition(positionQueueList, 25, 25);
+    if setWaterSource(cellField, positionQueueList, getPosition(0, 0)) then showmessage('Placed source');
+    if setWaterSource(cellField, positionQueueList, getPosition(10, 10)) then showmessage('Placed source');
+    if setWaterSource(cellField, positionQueueList, getPosition(0, 10)) then showmessage('Placed source');
+    if setWaterSource(cellField, positionQueueList, getPosition(10, 0)) then showmessage('Placed source');
     fluidTimer := TTimer.Create(FMain);
     with fluidTimer do begin
         Interval := cellAnimationTickRate;

@@ -14,6 +14,7 @@ interface
 
     uses UTypedefine;
 
+    function getPosition(posX, posY:integer):TPosition;
     procedure rotatePosition(var position:TPosition);
     function isPositionListEmpty(positionList:TPositionList):boolean;
     procedure appendPositionNode(var positionList:TPositionList; positionNode:PPositionNode);
@@ -25,6 +26,18 @@ interface
     function positionInField(cellField:TCellField; position:TPosition):boolean;
 
 implementation
+    {
+        makes a TPosition from input positions
+
+        @param  IN:     posX(Y) the positions
+                RETURN: a position type from input
+    }
+    function getPosition(posX, posY:integer):TPosition;
+    begin
+        getPosition.x := posX;
+        getPosition.y := posY;
+    end;
+
     {
         @brief: appends a positionNode to the end of the positionList
 
