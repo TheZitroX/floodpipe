@@ -31,6 +31,8 @@ type
         procedure cellQueueHandlerFinalize();
         procedure onCellClick(Sender: TObject);
         procedure onNewButtonClick(Sender: TObject);
+        procedure animationStart();
+        procedure finalizeAnimation();
 
     public
         // panel
@@ -60,6 +62,7 @@ var
     positionQueueList: TPositionList;
     timerCount: integer;
     fluidTimer: TTimer;
+    isSimulating: boolean;
 
 implementation
 
@@ -67,25 +70,28 @@ implementation
 
 procedure TFMain.onNewButtonClick(Sender: TObject);
 begin
-    fluidTimer.Enabled := true;
+    animationStart();
 end;
 
 procedure TFMain.onCellClick(Sender: TObject);
 var
     position: TPosition;
 begin
-    // position := getPositionFromName(TImage(Sender).name);
-    // rotateCellClockwise(
-    //     cellField[
-    //         position.x,
-    //         position.y
-    //     ]
-    // );
-    if setWaterSource(
-        cellField,
-        positionQueueList,
-        getPositionFromName(TImage(Sender).name)
-    ) then;
+    if isSimulating then begin
+    end else begin
+        // position := getPositionFromName(TImage(Sender).name);
+        // rotateCellClockwise(
+        //     cellField[
+        //         position.x,
+        //         position.y
+        //     ]
+        // );
+        if setWaterSource(
+            cellField,
+            positionQueueList,
+            getPositionFromName(TImage(Sender).name)
+        ) then;
+    end;
 end;
 
 {
@@ -100,8 +106,7 @@ end;
 
 procedure TFMain.cellQueueHandlerFinalize();
 begin
-    // todo enable all buttons for user
-    // showmessage('Simulation finished');
+    finalizeAnimation();
     // todo set leak positions on field
 end;
 
@@ -112,7 +117,7 @@ end;
 }
 procedure TFMain.cellQueueHandler(Sender: TObject);
 begin
-    // disable to get no overflow
+    // disable to get no overflow when waiting for fluidMove(...)
     (Sender as TTimer).Enabled := false;
 
     // stop animation when finished
@@ -181,7 +186,7 @@ begin
     with fluidTimer do begin
         Interval := cellAnimationTickRate;
         OnTimer := FMain.cellQueueHandler;
-        Enabled := True;
+        Enabled := false;
     end;
 end;
 
@@ -205,6 +210,31 @@ procedure TFMain.FormCanResize(
     var Resize: Boolean);
 begin
     newHeight:=round(MAIN_FORM_ASPECT_RATIO * newWidth);
+end;
+
+procedure TFMain.animationStart();
+    procedure deactivateUserInteraction();
+    begin
+        newGameButton.enabled := false;
+        loadGameButton.enabled := false;
+        saveGameButton.enabled := false;
+    end;
+begin
+    isSimulating := true;
+    deactivateUserInteraction();
+    fluidTimer.Enabled := true;
+end;
+
+procedure TFMain.finalizeAnimation();
+    procedure activateUserInteraction();
+    begin
+        newGameButton.enabled := true;
+        loadGameButton.enabled := true;
+        saveGameButton.enabled := true;
+    end;
+begin
+    isSimulating := false;
+    activateUserInteraction();
 end;
 
 end.
