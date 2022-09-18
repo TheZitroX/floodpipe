@@ -18,7 +18,8 @@ uses
     System.Classes, Vcl.Graphics,
     Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls,
 
-    UProperties, UFunctions, UTypedefine, UCellFunctions, UFluid, UPositionFunctions;
+    UProperties, UFunctions, UTypedefine, UCellFunctions, UFluid, UPositionFunctions,
+    UGameGeneration;
 
 type
     TFMain = class(TForm)
@@ -33,6 +34,7 @@ type
         procedure onNewButtonClick(Sender: TObject);
         procedure animationStart();
         procedure finalizeAnimation();
+        procedure formSetup();
 
     public
         // panel
@@ -130,13 +132,7 @@ begin
     end;
 end;
 
-{
-    Setup before the FMain shows
-    Panels, buttons and the game is setup here
-
-    @param  Sender: not used
-}
-procedure TFMain.FormCreate(Sender: TObject);
+procedure TFMain.formSetup();
 begin
     // inizialize
     positionQueueList.firstNode := nil;
@@ -188,6 +184,21 @@ begin
         OnTimer := FMain.cellQueueHandler;
         Enabled := false;
     end;
+end;
+
+{
+    Setup before the FMain shows
+    Panels, buttons and the game is setup here
+
+    @param  Sender: not used
+}
+procedure TFMain.FormCreate(Sender: TObject);
+begin
+    formSetup();
+
+    generateGame(
+        cellField, cellRowLength, cellColumnLength
+    );
 end;
 
 procedure TFMain.FormResize(Sender: TObject);

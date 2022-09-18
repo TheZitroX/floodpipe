@@ -20,6 +20,7 @@ interface
     procedure appendPositionNode(var positionList:TPositionList; positionNode:PPositionNode);
     procedure appendPosition(var positionList:TPositionList; positionX, positionY:integer);
     procedure delFirstPositionNode(var positionList:TPositionList);
+    procedure delPositionList(var positionList:TPositionList);
     procedure rotatePositions(var cell:TCell);
     procedure rotatePositionsByCellRotation(var cell:TCell);
     function addPositions(position1, position2:TPosition):TPosition;
@@ -93,6 +94,18 @@ implementation
             positionList.firstNode := positionList.firstNode^.next;
             dispose(tempPositionNode);
         end;
+    end;
+
+    {
+        deletes every position in the list
+
+        @param  IN/OUT: the positionList to be cleared
+    }
+    procedure delPositionList(var positionList:TPositionList);
+    begin
+        while (not isPositionListEmpty(positionList)) do
+            delFirstPositionNode(positionList);
+        positionList.lastNode := nil;
     end;
 
     {
