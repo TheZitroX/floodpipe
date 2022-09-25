@@ -26,6 +26,7 @@ interface
     function addPositions(position1, position2:TPosition):TPosition;
     function positionInField(cellField:TCellField; position:TPosition):boolean;
     function positionEquals(position1, position2:TPosition):boolean;
+    function hasPosition(positionList:TPositionList; position:TPosition):boolean;
 
 implementation
     {
@@ -66,7 +67,10 @@ implementation
         @param: IN/OUT: positionList with the beginning of the list
                 IN:     positionX (Y) with the positions
     }
-    procedure appendPosition(var positionList:TPositionList; positionX, positionY:integer);
+    procedure appendPosition(
+        var positionList:TPositionList;
+        positionX, positionY:integer
+    );
     var
         position:TPosition;
         positionNode:PPositionNode;
@@ -219,5 +223,29 @@ implementation
             (position1.x = position2.x) and
             (position1.y = position2.y)
         );
+    end;
+
+    {
+        tells if a position is in the positionList
+
+        @param: IN:     positionList with all positions
+                        position the position check against the positionList
+                RETURN: true when found and false when not found
+    }
+    function hasPosition(positionList:TPositionList; position:TPosition):boolean;
+    var
+        positionListRunner:PPositionNode;
+        found:boolean;
+    begin
+        positionListRunner := positionList.firstNode;
+        found := false;
+        while((positionListRunner <> nil) and not found) do begin
+            found := positionEquals(
+                positionListRunner.position,
+                position
+            );
+            positionListRunner := positionListRunner^.next;
+        end;
+        hasPosition := found;
     end;
 end.

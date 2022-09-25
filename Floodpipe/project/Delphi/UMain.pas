@@ -1,12 +1,12 @@
 {
-    file:       UMain.pas
-    author:     John Lienau
-    title:      Main unit of project Floodpipe
-    version:    v1.0
-    date:       03.08.2022
-    copyright:  Copyright (c) 2022
+  file:       UMain.pas
+  author:     John Lienau
+  title:      Main unit of project Floodpipe
+  version:    v1.0
+  date:       03.08.2022
+  copyright:  Copyright (c) 2022
 
-    brief:      Main implementations of all units of the project Floodpipe
+  brief:      Main implementations of all units of the project Floodpipe
 }
 
 unit UMain;
@@ -18,7 +18,8 @@ uses
     System.Classes, Vcl.Graphics,
     Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls,
 
-    UProperties, UFunctions, UTypedefine, UCellFunctions, UFluid, UPositionFunctions,
+    UProperties, UFunctions, UTypedefine, UCellFunctions, UFluid,
+    UPositionFunctions,
     UGameGeneration;
 
 type
@@ -62,9 +63,9 @@ var
     FMain: TFMain;
     cellAnimationTickRate: Integer;
     positionQueueList: TPositionList;
-    timerCount: integer;
+    timerCount: Integer;
     fluidTimer: TTimer;
-    isSimulating: boolean;
+    isSimulating: Boolean;
 
 implementation
 
@@ -79,25 +80,25 @@ procedure TFMain.onCellClick(Sender: TObject);
 var
     position: TPosition;
 begin
-    if isSimulating then begin
-    end else begin
+    if isSimulating then
+    begin
+    end
+    else
+    begin
         // position := getPositionFromName(TImage(Sender).name);
         // rotateCellClockwise(
-        //     cellField[
-        //         position.x,
-        //         position.y
-        //     ]
+        // cellField[
+        // position.x,
+        // position.y
+        // ]
         // );
-        if setWaterSource(
-            cellField,
-            positionQueueList,
-            getPositionFromName(TImage(Sender).name)
-        ) then;
+        if setWaterSource(cellField, positionQueueList,
+          getPositionFromName(TImage(Sender).name)) then;
     end;
 end;
 
 {
-    Calles the panelRedraw procedure to update all positions and sizes
+  Calles the panelRedraw procedure to update all positions and sizes
 }
 procedure TFMain.updateLayout();
 begin
@@ -113,9 +114,9 @@ begin
 end;
 
 {
-    Works through the positionQueueList
+  Works through the positionQueueList
 
-    Global: positionQueueList die abzuarbeiten ist
+  Global: positionQueueList die abzuarbeiten ist
 }
 procedure TFMain.cellQueueHandler(Sender: TObject);
 begin
@@ -123,9 +124,12 @@ begin
     (Sender as TTimer).Enabled := false;
 
     // stop animation when finished
-    if isPositionListEmpty(positionQueueList) then begin
+    if isPositionListEmpty(positionQueueList) then
+    begin
         cellQueueHandlerFinalize();
-    end else begin
+    end
+    else
+    begin
         fluidMove(cellField, positionQueueList);
         // continiue animation
         (Sender as TTimer).Enabled := true;
@@ -136,7 +140,7 @@ procedure TFMain.formSetup();
 begin
     // inizialize
     positionQueueList.firstNode := nil;
-    
+
     // set default values
     cellRowLength := DEFAULT_CELL_ROW_COUNT;
     cellColumnLength := DEFAULT_CELL_COLUMN_COUNT;
@@ -164,13 +168,8 @@ begin
     panelSetup(panelButtons, panelRightSideArea, 'panelButtons');
 
     // buttons with panelButtons as parent
-    createButtons(
-        newGameButton, onNewButtonClick,
-        loadGameButton,
-        saveGameButton,
-        exitGameButton,
-        panelButtons
-    );
+    createButtons(newGameButton, onNewButtonClick, loadGameButton,
+      saveGameButton, exitGameButton, panelButtons);
 
     updateLayout();
 
@@ -179,7 +178,8 @@ begin
     // fix testwise
     // if setWaterSource(cellField, positionQueueList, getPosition(5, 5)) then;
     fluidTimer := TTimer.Create(FMain);
-    with fluidTimer do begin
+    with fluidTimer do
+    begin
         Interval := cellAnimationTickRate;
         OnTimer := FMain.cellQueueHandler;
         Enabled := false;
@@ -187,18 +187,16 @@ begin
 end;
 
 {
-    Setup before the FMain shows
-    Panels, buttons and the game is setup here
+  Setup before the FMain shows
+  Panels, buttons and the game is setup here
 
-    @param  Sender: not used
+  @param  Sender: not used
 }
 procedure TFMain.FormCreate(Sender: TObject);
 begin
     formSetup();
 
-    generateGame(
-        cellField, cellRowLength, cellColumnLength
-    );
+    generateGame(cellField, cellRowLength, cellColumnLength);
 end;
 
 procedure TFMain.FormResize(Sender: TObject);
@@ -207,29 +205,28 @@ begin
 end;
 
 {
-    On Resize the aspect ratio will be maintained
-    // fixme Horizontal sizing is not possible
+  On Resize the aspect ratio will be maintained
+  // fixme Horizontal sizing is not possible
 
-    @param  Sender: not used
-            var NewWidth: used to get the Width
-            var NewHeight: changed the height of the form
-            var Resize: not used
+  @param  Sender: not used
+  var NewWidth: used to get the Width
+  var NewHeight: changed the height of the form
+  var Resize: not used
 }
-procedure TFMain.FormCanResize(
-    Sender: TObject;
-    var newWidth, newHeight: Integer;
-    var Resize: Boolean);
+procedure TFMain.FormCanResize(Sender: TObject;
+  var NewWidth, NewHeight: Integer; var Resize: Boolean);
 begin
-    newHeight:=round(MAIN_FORM_ASPECT_RATIO * newWidth);
+    NewHeight := round(MAIN_FORM_ASPECT_RATIO * NewWidth);
 end;
 
 procedure TFMain.animationStart();
     procedure deactivateUserInteraction();
     begin
-        newGameButton.enabled := false;
-        loadGameButton.enabled := false;
-        saveGameButton.enabled := false;
+        newGameButton.Enabled := false;
+        loadGameButton.Enabled := false;
+        saveGameButton.Enabled := false;
     end;
+
 begin
     isSimulating := true;
     deactivateUserInteraction();
@@ -239,10 +236,11 @@ end;
 procedure TFMain.finalizeAnimation();
     procedure activateUserInteraction();
     begin
-        newGameButton.enabled := true;
-        loadGameButton.enabled := true;
-        saveGameButton.enabled := true;
+        newGameButton.Enabled := true;
+        loadGameButton.Enabled := true;
+        saveGameButton.Enabled := true;
     end;
+
 begin
     isSimulating := false;
     activateUserInteraction();
