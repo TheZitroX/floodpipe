@@ -6,7 +6,7 @@ unit UGameGeneration;
 
 interface
 
-uses UTypedefine, UPositionFunctions, UCellFunctions, UPipeTypeFunctions;
+uses UTypedefine, UPositionFunctions, UCellFunctions, UPipeTypeFunctions, Vcl.Dialogs;
 
 procedure generateGame(cellField: TCellField;
   cellRowLength, cellColumnLength: integer);
@@ -66,6 +66,7 @@ begin
     getRandomType(pipeTypeList, tempCell.cellItem, tempCell.cellRotation);
     setCellToItem(cell, TCellType.TYPE_PIPE, tempCell.cellItem,
         TCellContent.CONTENT_EMPTY, tempCell.cellRotation);
+    delPipeTypeList(pipeTypeList);
 end;
 
 procedure generateGame(cellField: TCellField;
@@ -104,15 +105,21 @@ begin
                   not positionEqualsType(cellField, position,
                   TCellType.TYPE_WALL)) then
                 begin
-                    appendPosition(possibleDirectionList, position.x - i,
-                      position.y - j);
                     if isCellConnected(cellField[position.x, position.y],
                       getPosition(i, j)) then
+                    begin
+                        appendPosition(possibleDirectionList, position.x - i,
+                            position.y - j);
                         appendPosition(needToHaveDirectionList, position.x - i,
                           position.y - j);
+                    end else if positionEqualsType(cellField, position, TCellType.TYPE_NONE) then
+                        appendPosition(possibleDirectionList, position.x - i,
+                            position.y - j);
                 end;
             end;
 
+            // if (possibleDirectionList.firstNode = nil) then showmessage('possible: empty');
+            // if (needToHaveDirectionList.firstNode = nil) then showmessage('needed: empty');
             setRandomPossibleType(cellField[i, j], possibleDirectionList,
               needToHaveDirectionList);
 

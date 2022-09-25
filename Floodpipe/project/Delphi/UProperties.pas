@@ -22,8 +22,8 @@ interface
         MAIN_FORM_ASPECT_RATIO = MAIN_FORM_MIN_HEIGHT / MAIN_FORM_MIN_WIDTH;
 
         // cells
-        DEFAULT_CELL_ROW_COUNT = 60;
-        DEFAULT_CELL_COLUMN_COUNT = 60;
+        DEFAULT_CELL_ROW_COUNT = 30;
+        DEFAULT_CELL_COLUMN_COUNT = 30;
         DEFAULT_CELL_TICK_RATE = 1; // (in ms)
 
         // ===PIXELFUNCTIONS===

@@ -88,25 +88,28 @@ var
     i, listLength:integer;
     pipeTypeListRunner:PPipeTypeNode;
 begin
-    listLength := 0;
-    pipeTypeListRunner := pipeTypeList.firstNode;
-    while (pipeTypeListRunner <> nil) do
+    if (pipeTypeList.firstNode <> nil) then
     begin
-        inc(listLength);
-        pipeTypeListRunner := pipeTypeListRunner^.next;
-    end;
+        listLength := 0;
+        pipeTypeListRunner := pipeTypeList.firstNode;
+        while (pipeTypeListRunner <> nil) do
+        begin
+            inc(listLength);
+            pipeTypeListRunner := pipeTypeListRunner^.next;
+        end;
 
-    // get random of listlength
-    i := random(listLength);
-    pipeTypeListRunner := pipeTypeList.firstNode;
-    while (i > 0) do
-    begin
-        pipeTypeListRunner := pipeTypeListRunner^.next;
-        dec(i);
-    end;
+        // get random of listlength
+        i := random(listLength);
+        pipeTypeListRunner := pipeTypeList.firstNode;
+        while ((pipeTypeListRunner <> nil) and (i > 0)) do
+        begin
+            pipeTypeListRunner := pipeTypeListRunner^.next;
+            dec(i);
+        end;
 
-    cellItem := pipeTypeListrunner^.cellItem;
-    cellrotation := pipeTypeListrunner^.cellRotation;
+        cellItem := pipeTypeListrunner^.cellItem;
+        cellrotation := pipeTypeListrunner^.cellRotation;
+    end;
 end;
 
 end.
