@@ -24,48 +24,61 @@ var
     cellOkay: boolean;
     positionListRunner: PPositionNode;
 begin
-    tempCell.cellType := TYPE_PIPE;
     tempCell.openings.firstNode := nil;
     pipeTypeList.firstNode := nil;
 
-    // all variations with needed openings
-    for cellItem := TCellItem.PIPE to high(TCellItem) do
+    tempCell.cellType := TYPE_PIPE;
+    if (positionListLength(possibleDirectionList) = 1) then
     begin
-        tempCell.cellItem := cellItem;
-        for cellRotation := low(TCellRotation) to high(TCellRotation) do
+        tempCell.cellItem := TCellItem.PIPE_LID;
+        tempCell.cellRotation := TCellRotation.NONE;
+        setCellToItem(cell, TCellType.TYPE_PIPE, tempCell.cellItem,
+            TCellContent.CONTENT_EMPTY, tempCell.cellRotation);
+        while (not hasPosition(cell.openings, possibleDirectionList.firstNode.position)) do
         begin
-            tempCell.cellRotation := cellRotation;
-            setOpeningsFromRotation(tempCell);
+            rotateCellClockwise(cell);
+        end;
+    end else
+    begin
+        // all variations with needed openings
+        for cellItem := TCellItem.PIPE to high(TCellItem) do
+        begin
+            tempCell.cellItem := cellItem;
+            for cellRotation := low(TCellRotation) to high(TCellRotation) do
+            begin
+                tempCell.cellRotation := cellRotation;
+                setOpeningsFromRotation(tempCell);
 
-            // checking tempCell to have all needed openings
-            cellOkay := true;
-            neededPositionListRunner := needToHaveDirectionList.firstNode;
-            while ((neededPositionListRunner <> nil) and cellOkay) do
-            begin
-                cellOkay := hasPosition(tempCell.openings,
-                    neededPositionListRunner^.position);
-                neededPositionListRunner := neededPositionListRunner^.next;
-            end;
-            // tempCell with possible extra openings
-            positionListRunner := tempCell.openings.firstNode;
-            while((positionListRunner <> nil) and cellOkay) do
-            begin
-                cellOkay := hasPosition(possibleDirectionList,
-                    positionListRunner^.position);
-                positionListRunner := positionListRunner^.next;
-            end;
+                // checking tempCell to have all needed openings
+                cellOkay := true;
+                neededPositionListRunner := needToHaveDirectionList.firstNode;
+                while ((neededPositionListRunner <> nil) and cellOkay) do
+                begin
+                    cellOkay := hasPosition(tempCell.openings,
+                        neededPositionListRunner^.position);
+                    neededPositionListRunner := neededPositionListRunner^.next;
+                end;
+                // tempCell with possible extra openings
+                positionListRunner := tempCell.openings.firstNode;
+                while((positionListRunner <> nil) and cellOkay) do
+                begin
+                    cellOkay := hasPosition(possibleDirectionList,
+                        positionListRunner^.position);
+                    positionListRunner := positionListRunner^.next;
+                end;
 
-            // add to possible (pipetypeList) when cellOkay
-            if (cellOkay) then
-            begin
-                appendPipeType(pipeTypeList, tempCell.cellItem, tempCell.cellRotation);
+                // add to possible (pipetypeList) when cellOkay
+                if (cellOkay) then
+                begin
+                    appendPipeType(pipeTypeList, tempCell.cellItem, tempCell.cellRotation);
+                end;
             end;
         end;
+        getRandomType(pipeTypeList, tempCell.cellItem, tempCell.cellRotation);
+        setCellToItem(cell, TCellType.TYPE_PIPE, tempCell.cellItem,
+            TCellContent.CONTENT_EMPTY, tempCell.cellRotation);
     end;
 
-    getRandomType(pipeTypeList, tempCell.cellItem, tempCell.cellRotation);
-    setCellToItem(cell, TCellType.TYPE_PIPE, tempCell.cellItem,
-        TCellContent.CONTENT_EMPTY, tempCell.cellRotation);
     delPipeTypeList(pipeTypeList);
 end;
 

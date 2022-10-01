@@ -22,6 +22,7 @@ procedure delPipeTypeList(var pipeTypeList: TPipeTypeList);
 function isPipeTypeListEmpty(pipeTypeList: TPipeTypeList): boolean;
 procedure delFirstPipeTypeNode(var pipeTypeList: TPipeTypeList);
 procedure getRandomType(pipeTypeList: TPipeTypeList; var cellItem:TCellItem; var cellRotation:TCellRotation);
+function pipeTypeListLength(pipeTypeList: TPipeTypeList):integer;
 
 implementation
 
@@ -90,13 +91,7 @@ var
 begin
     if (pipeTypeList.firstNode <> nil) then
     begin
-        listLength := 0;
-        pipeTypeListRunner := pipeTypeList.firstNode;
-        while (pipeTypeListRunner <> nil) do
-        begin
-            inc(listLength);
-            pipeTypeListRunner := pipeTypeListRunner^.next;
-        end;
+        listLength := pipeTypeListLength(pipeTypeList);
 
         // get random of listlength
         i := random(listLength);
@@ -112,4 +107,24 @@ begin
     end;
 end;
 
+{
+    gets the length of the pipetypeList
+
+    @param  IN:     the pipeetypelist
+            RETURN: length of the list
+}
+function pipeTypeListLength(pipeTypeList: TPipeTypeList):integer;
+var
+    listLength:integer;
+    pipeTypeListRunner:PPipeTypeNode;
+begin
+    listLength := 0;
+    pipeTypeListRunner := pipeTypeList.firstNode;
+    while (pipeTypeListRunner <> nil) do
+    begin
+        inc(listLength);
+        pipeTypeListRunner := pipeTypeListRunner^.next;
+    end;
+    pipeTypeListLength := listLength;
+end;
 end.

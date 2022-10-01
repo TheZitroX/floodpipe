@@ -27,6 +27,7 @@ interface
     function positionInField(cellField:TCellField; position:TPosition):boolean;
     function positionEquals(position1, position2:TPosition):boolean;
     function hasPosition(positionList:TPositionList; position:TPosition):boolean;
+    function positionListLength(positionList:TPositionList):integer;
 
 implementation
     {
@@ -247,5 +248,26 @@ implementation
             positionListRunner := positionListRunner^.next;
         end;
         hasPosition := found;
+    end;
+
+    {
+        gets the length of a positionList
+
+        @param  IN:     the positionList
+                RETURN: length of the list
+    }
+    function positionListLength(positionList:TPositionList):integer;
+    var
+        listLength:integer;
+        positionListRunner:PPositionNode;
+    begin
+        listLength := 0;
+        positionListRunner := positionList.firstNode;
+        while (positionListRunner <> nil) do
+        begin
+            inc(listLength);
+            positionListRunner := positionListRunner^.next;
+        end;
+        positionListLength := listLength;
     end;
 end.
