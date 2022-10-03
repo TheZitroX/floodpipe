@@ -12,6 +12,7 @@ unit UPixelFunctions;
     // Bitmap file with all tiles in a 4 by 4 (à 58px) grid
     {$R resources/pipesEmptyTilemap.RES}
     {$R resources/pipesWaterTilemap.RES}
+    {$R resources/wallsTilemap.RES}
 
 interface
     uses
@@ -76,13 +77,13 @@ implementation
 
                 // get the right tilemap
                 case cell.cellType of
-                    TYPE_WALL:;
+                    TYPE_WALL: resourceStreamSource := 'walls';
                     TYPE_PIPE: resourceStreamSource := 'pipes';
                     else assert(true, 'ERROR from UPixelFunctions: no such TCellType');
                 end;
 
-                // if not a wall then add the content of a pipe
-                if not (cell.cellType = TCellType.TYPE_WALL) then
+                // if a pipe then add the content of a pipe
+                if (cell.cellType = TCellType.TYPE_PIPE) then
                     case cell.cellContent of
                         CONTENT_EMPTY: resourceStreamSource := resourceStreamSource + 'Empty';
                         CONTENT_WATER: resourceStreamSource := resourceStreamSource + 'Water';

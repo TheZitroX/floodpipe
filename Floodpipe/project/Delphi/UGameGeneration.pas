@@ -26,9 +26,12 @@ var
 begin
     tempCell.openings.firstNode := nil;
     pipeTypeList.firstNode := nil;
-
     tempCell.cellType := TYPE_PIPE;
-    if (positionListLength(possibleDirectionList) = 1) then
+
+    if (positionListLength(possibleDirectionList) = 0) then
+        setCellToItem(cell, TCellType.TYPE_WALL, TCellItem.PIPE,
+            TCellContent.CONTENT_EMPTY, TCellRotation.NONE)
+    else if (positionListLength(possibleDirectionList) = 1) then
     begin
         tempCell.cellItem := TCellItem.PIPE_LID;
         tempCell.cellRotation := TCellRotation.NONE;
@@ -82,64 +85,94 @@ begin
     delPipeTypeList(pipeTypeList);
 end;
 
-procedure generateGame(cellField: TCellField;
-  cellRowLength, cellColumnLength: integer);
+procedure getPositionsFromNeighboars(i, j:integer;
+    var cellField:TCellField);
 var
-    i, j, k: integer;
+    k:integer;
     possibleDirectionList, needToHaveDirectionList: TPositionList;
     position: TPosition;
     auswahl: TCell;
 begin
     possibleDirectionList.firstNode := nil;
     needToHaveDirectionList.firstNode := nil;
+    // every side
+    for k := 0 to 3 do
+    begin
+        case k of
+            // up
+            0:
+                position := getPosition(i, j - 1);
+            // right
+            1:
+                position := getPosition(i + 1, j);
+            // down
+            2:
+                position := getPosition(i, j + 1);
+            // left
+            3:
+                position := getPosition(i - 1, j);
+        end;
+        // add position to possible position list
+        if (positionInField(cellField, position) and
+        not positionEqualsType(cellField, position,
+        TCellType.TYPE_WALL)) then
+        begin
+            if isCellConnected(cellField[position.x, position.y],
+            getPosition(i, j)) then
+            begin
+                appendPosition(possibleDirectionList, position.x - i,
+                    position.y - j);
+                appendPosition(needToHaveDirectionList, position.x - i,
+                position.y - j);
+            end else if positionEqualsType(cellField, position, TCellType.TYPE_NONE) then
+                appendPosition(possibleDirectionList, position.x - i,
+                    position.y - j);
+        end;
+    end;
 
+    // if (possibleDirectionList.firstNode = nil) then showmessage('possible: empty');
+    // if (needToHaveDirectionList.firstNode = nil) then showmessage('needed: empty');
+    setRandomPossibleType(cellField[i, j], possibleDirectionList,
+    needToHaveDirectionList);
+
+    // clearing memory
+    delPositionList(possibleDirectionList);
+    delPositionList(needToHaveDirectionList);
+end;
+
+procedure generateGame(cellField: TCellField;
+  cellRowLength, cellColumnLength: integer);
+var
+    i, j, wallCount, maxWallCount:integer;
+begin
+    // todo empty field
+    // make random walls
+    wallCount := 0;
+    maxWallCount := 50;//(cellColumnLength * cellRowLength) div ?;
     for i := 0 to cellColumnLength - 1 do
         for j := 0 to cellRowLength - 1 do
         begin
-            // every side
-            for k := 0 to 3 do
-            begin
-                case k of
-                    // up
-                    0:
-                        position := getPosition(i, j - 1);
-                    // right
-                    1:
-                        position := getPosition(i + 1, j);
-                    // down
-                    2:
-                        position := getPosition(i, j + 1);
-                    // left
-                    3:
-                        position := getPosition(i - 1, j);
-                end;
-                // add position to possible position list
-                if (positionInField(cellField, position) and
-                  not positionEqualsType(cellField, position,
-                  TCellType.TYPE_WALL)) then
-                begin
-                    if isCellConnected(cellField[position.x, position.y],
-                      getPosition(i, j)) then
+            if (wallCount < maxWallCount) then
+                if (random(cellColumnLength * cellRowLength) < (maxWallCount / cellColumnLength * cellRowLength)) then
                     begin
-                        appendPosition(possibleDirectionList, position.x - i,
-                            position.y - j);
-                        appendPosition(needToHaveDirectionList, position.x - i,
-                          position.y - j);
-                    end else if positionEqualsType(cellField, position, TCellType.TYPE_NONE) then
-                        appendPosition(possibleDirectionList, position.x - i,
-                            position.y - j);
-                end;
-            end;
-
-            // if (possibleDirectionList.firstNode = nil) then showmessage('possible: empty');
-            // if (needToHaveDirectionList.firstNode = nil) then showmessage('needed: empty');
-            setRandomPossibleType(cellField[i, j], possibleDirectionList,
-              needToHaveDirectionList);
-
-            // clearing memory
-            delPositionList(possibleDirectionList);
-            delPositionList(needToHaveDirectionList);
+                        setCellToItem(cellField[i, j], TCellType.TYPE_WALL, TCellItem.PIPE,
+                            TCellContent.CONTENT_EMPTY, TCellRotation.NONE);
+                        inc(wallCount);
+                    end;
         end;
+
+    // make pipes
+    for i := 0 to cellColumnLength - 1 do
+        for j := 0 to cellRowLength - 1 do
+        begin
+            // make pipes when empty field
+            if (positionEqualsType(cellField, getPosition(i, j), TCellType.TYPE_NONE)) then
+            begin
+                getPositionsFromNeighboars(i, j, cellField);
+            end;
+        end;
+
+    // todo srumble rotations
 end;
 
 end.
