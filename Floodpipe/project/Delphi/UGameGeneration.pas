@@ -6,10 +6,11 @@ unit UGameGeneration;
 
 interface
 
-uses UTypedefine, UPositionFunctions, UCellFunctions, UPipeTypeFunctions, Vcl.Dialogs;
+uses UTypedefine, UPositionFunctions, UCellFunctions, UPipeTypeFunctions, UFluid, Vcl.Dialogs;
 
 procedure generateGame(cellField: TCellField;
-  cellRowLength, cellColumnLength: integer);
+  cellRowLength, cellColumnLength: integer;
+  var waterSourcePositionQueueList:TPositionList);
 
 implementation
 
@@ -141,24 +142,32 @@ begin
 end;
 
 procedure generateGame(cellField: TCellField;
-  cellRowLength, cellColumnLength: integer);
+  cellRowLength, cellColumnLength: integer;
+  var waterSourcePositionQueueList:TPositionList);
 var
     i, j, wallCount, maxWallCount:integer;
+    waterSourcePosition:TPosition;
 begin
     // todo empty field
+    waterSourcePosition := getPosition(
+        random(cellColumnLength - 1),
+        random(cellRowLength - 1)
+    );
     // make random walls
     wallCount := 0;
-    maxWallCount := 50;//(cellColumnLength * cellRowLength) div ?;
+    maxWallCount := 15;//(cellColumnLength * cellRowLength) div ?;
     for i := 0 to cellColumnLength - 1 do
         for j := 0 to cellRowLength - 1 do
         begin
-            if (wallCount < maxWallCount) then
-                if (random(cellColumnLength * cellRowLength) < (maxWallCount / cellColumnLength * cellRowLength)) then
-                    begin
-                        setCellToItem(cellField[i, j], TCellType.TYPE_WALL, TCellItem.PIPE,
-                            TCellContent.CONTENT_EMPTY, TCellRotation.NONE);
-                        inc(wallCount);
-                    end;
+            if (wallCount < maxWallCount) and
+                (random(cellColumnLength * cellRowLength) < 
+                    (maxWallCount / cellColumnLength * cellRowLength)) and
+                (not positionEquals(waterSourcePosition, getPosition(i, j))) then
+            begin
+                setCellToItem(cellField[i, j], TCellType.TYPE_WALL, TCellItem.PIPE,
+                    TCellContent.CONTENT_EMPTY, TCellRotation.NONE);
+                inc(wallCount);
+            end;
         end;
 
     // make pipes
@@ -172,6 +181,12 @@ begin
             end;
         end;
 
+    // place watersource
+    if setWaterSource(
+        cellField,
+        waterSourcePositionQueueList,
+        waterSourcePosition
+    ) then;
     // todo srumble rotations
 end;
 

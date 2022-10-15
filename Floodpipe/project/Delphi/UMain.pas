@@ -62,7 +62,7 @@ type
 var
     FMain: TFMain;
     cellAnimationTickRate: Integer;
-    positionQueueList: TPositionList;
+    waterSourcePositionQueueList: TPositionList;
     timerCount: Integer;
     fluidTimer: TTimer;
     isSimulating: Boolean;
@@ -92,7 +92,7 @@ begin
         // position.y
         // ]
         // );
-        if setWaterSource(cellField, positionQueueList,
+        if setWaterSource(cellField, waterSourcePositionQueueList,
           getPositionFromName(TImage(Sender).name)) then;
     end;
 end;
@@ -114,9 +114,9 @@ begin
 end;
 
 {
-  Works through the positionQueueList
+  Works through the waterSourcePositionQueueList
 
-  Global: positionQueueList die abzuarbeiten ist
+  Global: waterSourcePositionQueueList die abzuarbeiten ist
 }
 procedure TFMain.cellQueueHandler(Sender: TObject);
 begin
@@ -124,13 +124,13 @@ begin
     (Sender as TTimer).Enabled := false;
 
     // stop animation when finished
-    if isPositionListEmpty(positionQueueList) then
+    if isPositionListEmpty(waterSourcePositionQueueList) then
     begin
         cellQueueHandlerFinalize();
     end
     else
     begin
-        fluidMove(cellField, positionQueueList);
+        fluidMove(cellField, waterSourcePositionQueueList);
         // continiue animation
         (Sender as TTimer).Enabled := true;
     end;
@@ -139,7 +139,7 @@ end;
 procedure TFMain.formSetup();
 begin
     // inizialize
-    positionQueueList.firstNode := nil;
+    waterSourcePositionQueueList.firstNode := nil;
 
     // set default values
     cellRowLength := DEFAULT_CELL_ROW_COUNT;
@@ -176,7 +176,7 @@ begin
     // todo aufruf bei animation
     // flow start
     // fix testwise
-    // if setWaterSource(cellField, positionQueueList, getPosition(5, 5)) then;
+    // if setWaterSource(cellField, waterSourcePositionQueueList, getPosition(5, 5)) then;
     fluidTimer := TTimer.Create(FMain);
     with fluidTimer do
     begin
@@ -196,7 +196,12 @@ procedure TFMain.FormCreate(Sender: TObject);
 begin
     formSetup();
 
-    generateGame(cellField, cellRowLength, cellColumnLength);
+    generateGame(
+        cellField,
+        cellRowLength,
+        cellColumnLength,
+        waterSourcePositionQueueList
+    );
 end;
 
 procedure TFMain.FormResize(Sender: TObject);

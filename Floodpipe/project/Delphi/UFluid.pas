@@ -97,6 +97,7 @@ implementation
     ):boolean;
     begin
         if (positionInField(cellField, position)) then begin
+            // todo when cell is also a pipe
             setWaterSource := true;
             fillCellWithContent(cellField[position.x, position.y], TCellContent.CONTENT_WATER);
             appendPosition(positionQueueList, position.x, position.y);
