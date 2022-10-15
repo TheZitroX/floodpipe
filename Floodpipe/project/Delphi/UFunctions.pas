@@ -43,8 +43,10 @@ interface
         var b1:TButton;
         b1Procedure:TNotifyEvent;
         var b2:TButton;
+        b2Procedure:TNotifyEvent;
         var b3:TButton;
         var b4:TButton;
+        var b5:TButton;
         var newParent:TPanel
     );
 
@@ -226,8 +228,10 @@ implementation
         var b1:TButton;
         b1Procedure:TNotifyEvent;
         var b2:TButton;
+        b2Procedure:TNotifyEvent;
         var b3:TButton;
         var b4:TButton;
+        var b5:TButton;
         var newParent:TPanel
     );
     const
@@ -268,19 +272,26 @@ implementation
         createOptionButton(
             b2,
             newParent,
+            'settingsButton',
+            'Settings',
+            b2Procedure
+        );
+        createOptionButton(
+            b3,
+            newParent,
             'loadGameButton',
             'Load',
             nil
         );
         createOptionButton(
-            b3,
+            b4,
             newParent,
             'saveGameButton',
             'Save',
             nil 
         );
         createOptionButton(
-            b4,
+            b5,
             newParent,
             'quitGameButton',
             'Quit',

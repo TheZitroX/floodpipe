@@ -18,9 +18,10 @@ uses
     System.Classes, Vcl.Graphics,
     Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls,
 
+    USettings,
+
     UProperties, UFunctions, UTypedefine, UCellFunctions, UFluid,
-    UPositionFunctions,
-    UGameGeneration;
+    UPositionFunctions, UGameGeneration;
 
 type
     TFMain = class(TForm)
@@ -32,10 +33,13 @@ type
         procedure cellQueueHandler(Sender: TObject);
         procedure cellQueueHandlerFinalize();
         procedure onCellClick(Sender: TObject);
-        procedure onNewButtonClick(Sender: TObject);
         procedure animationStart();
         procedure finalizeAnimation();
         procedure formSetup();
+
+        // buttonMethods
+        procedure onNewButtonClick(Sender: TObject);
+        procedure onSettingsButtonClick(Sender: TObject);
 
     public
         // panel
@@ -47,6 +51,7 @@ type
 
         // buttons
         newGameButton: TButton;
+        settingsButton: TButton;
         loadGameButton: TButton;
         saveGameButton: TButton;
         exitGameButton: TButton;
@@ -74,6 +79,11 @@ implementation
 procedure TFMain.onNewButtonClick(Sender: TObject);
 begin
     animationStart();
+end;
+
+procedure TFMain.onSettingsButtonClick(Sender: TObject);
+begin
+    if FSettings.ShowModal = 0 then;
 end;
 
 procedure TFMain.onCellClick(Sender: TObject);
@@ -168,8 +178,13 @@ begin
     panelSetup(panelButtons, panelRightSideArea, 'panelButtons');
 
     // buttons with panelButtons as parent
-    createButtons(newGameButton, onNewButtonClick, loadGameButton,
-      saveGameButton, exitGameButton, panelButtons);
+    createButtons(
+        newGameButton, onNewButtonClick,
+        settingsButton, onSettingsButtonClick, 
+        loadGameButton,
+        saveGameButton,
+        exitGameButton,
+        panelButtons);
 
     updateLayout();
 
