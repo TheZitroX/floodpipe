@@ -2,7 +2,7 @@
 ## Pascal programming internship 2022
 Implementiert werden soll das Spiel FloodPipe, in dem der Spieler ein Spielfeld präsentiert bekommt, auf dem unterschiedliche Rohrstücke platziert sind. Der Spieler kann durch (mehrfaches) Anklicken einer Zelle das jeweilige Rohrstück drehen, um Verbindungen herzustellen. Ziel ist es, alle Rohre derart zu verbinden, dass jedes Rohrstück von der Quelle ausgehend geflutet wird und keine offenen Enden vorhanden sind.
 
-![shuffeled](https://user-images.githubusercontent.com/62332469/180308016-e7b529f5-f18c-430a-93f5-88da8abf2c85.jpg) ![solved](https://user-images.githubusercontent.com/62332469/180308043-be8cca45-0de2-423b-a478-a6c337bc33f3.jpg)
+![image](https://user-images.githubusercontent.com/62332469/195994274-a4022037-24f5-44b7-aaa7-8a57f769e6d4.png)
 
 ## Belegung des Spielfeldes
 >
