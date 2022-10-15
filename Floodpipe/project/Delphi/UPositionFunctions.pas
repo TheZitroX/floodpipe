@@ -20,11 +20,14 @@ interface
     procedure appendPositionNode(var positionList:TPositionList; positionNode:PPositionNode);
     procedure appendPosition(var positionList:TPositionList; positionX, positionY:integer);
     procedure delFirstPositionNode(var positionList:TPositionList);
+    procedure delPositionList(var positionList:TPositionList);
     procedure rotatePositions(var cell:TCell);
     procedure rotatePositionsByCellRotation(var cell:TCell);
     function addPositions(position1, position2:TPosition):TPosition;
     function positionInField(cellField:TCellField; position:TPosition):boolean;
     function positionEquals(position1, position2:TPosition):boolean;
+    function hasPosition(positionList:TPositionList; position:TPosition):boolean;
+    function positionListLength(positionList:TPositionList):integer;
 
 implementation
     {
@@ -65,7 +68,10 @@ implementation
         @param: IN/OUT: positionList with the beginning of the list
                 IN:     positionX (Y) with the positions
     }
-    procedure appendPosition(var positionList:TPositionList; positionX, positionY:integer);
+    procedure appendPosition(
+        var positionList:TPositionList;
+        positionX, positionY:integer
+    );
     var
         position:TPosition;
         positionNode:PPositionNode;
@@ -93,6 +99,18 @@ implementation
             positionList.firstNode := positionList.firstNode^.next;
             dispose(tempPositionNode);
         end;
+    end;
+
+    {
+        deletes every position in the list
+
+        @param  IN/OUT: the positionList to be cleared
+    }
+    procedure delPositionList(var positionList:TPositionList);
+    begin
+        while (not isPositionListEmpty(positionList)) do
+            delFirstPositionNode(positionList);
+        positionList.lastNode := nil;
     end;
 
     {
@@ -206,5 +224,50 @@ implementation
             (position1.x = position2.x) and
             (position1.y = position2.y)
         );
+    end;
+
+    {
+        tells if a position is in the positionList
+
+        @param: IN:     positionList with all positions
+                        position the position check against the positionList
+                RETURN: true when found and false when not found
+    }
+    function hasPosition(positionList:TPositionList; position:TPosition):boolean;
+    var
+        positionListRunner:PPositionNode;
+        found:boolean;
+    begin
+        positionListRunner := positionList.firstNode;
+        found := false;
+        while((positionListRunner <> nil) and not found) do begin
+            found := positionEquals(
+                positionListRunner.position,
+                position
+            );
+            positionListRunner := positionListRunner^.next;
+        end;
+        hasPosition := found;
+    end;
+
+    {
+        gets the length of a positionList
+
+        @param  IN:     the positionList
+                RETURN: length of the list
+    }
+    function positionListLength(positionList:TPositionList):integer;
+    var
+        listLength:integer;
+        positionListRunner:PPositionNode;
+    begin
+        listLength := 0;
+        positionListRunner := positionList.firstNode;
+        while (positionListRunner <> nil) do
+        begin
+            inc(listLength);
+            positionListRunner := positionListRunner^.next;
+        end;
+        positionListLength := listLength;
     end;
 end.

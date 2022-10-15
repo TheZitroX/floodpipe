@@ -41,6 +41,8 @@ interface
     function isCellEmpty(cell:TCell):boolean;
     function getCellFromPosition(cellField:TCellField; position:TPosition):TCell;
     function isCellConnected(cell:TCell; position:TPosition):boolean;
+    function positionEqualsType(cellField:TCellField; position:TPosition; cellType:TCellType):boolean;
+    procedure setOpeningsFromRotation(var cell:TCell);
 
 implementation
 
@@ -92,6 +94,7 @@ implementation
             cellRotation := newCellRotation;
         end;
         loadPictureFromBitmap(cell);
+        setOpeningsFromRotation(cell);
     end;
 
 
@@ -104,23 +107,29 @@ implementation
     begin
         with cell do begin
             case cellType of
+                TYPE_NONE:;
                 TYPE_WALL:;// do nothing
-                TYPE_PIPE:  case cellItem of
-                                PIPE: begin
-                                    appendPosition(openings, 1, 0);
-                                    appendPosition(openings, -1, 0);
-                                end;
-                                PIPE_LID: appendPosition(openings, 1, 0);
-                                PIPE_TSPLIT: begin;
-                                    appendPosition(openings, 1, 0);
-                                    appendPosition(openings, 0, 1);
-                                    appendPosition(openings, 0, -1);
-                                end;
-                                PIPE_CURVES: begin;
-                                    appendPosition(openings, -1, 0);
-                                    appendPosition(openings, 0, 1);
-                                end;
+                TYPE_PIPE: 
+                    begin
+                        if (not isPositionListEmpty(openings)) then
+                            delPositionList(openings);
+                        case cellItem of
+                            PIPE: begin
+                                appendPosition(openings, 1, 0);
+                                appendPosition(openings, -1, 0);
                             end;
+                            PIPE_LID: appendPosition(openings, 1, 0);
+                            PIPE_TSPLIT: begin;
+                                appendPosition(openings, 1, 0);
+                                appendPosition(openings, 0, 1);
+                                appendPosition(openings, 0, -1);
+                            end;
+                            PIPE_CURVES: begin;
+                                appendPosition(openings, -1, 0);
+                                appendPosition(openings, 0, 1);
+                            end;
+                        end;
+                    end;
                 else assert(true, 'ERROR cant set openings from this type');
             end;
             rotatePositionsByCellRotation(cell);
@@ -157,7 +166,7 @@ implementation
                 setCellToItem(
                     cellField[i, j],
                     // debug just random types for testing
-                    TCellType.TYPE_PIPE,
+                    TCellType.TYPE_NONE,
                     TCellItem(Random(Succ(Ord(High(TCellItem))))),
                     // TCellItem.PIPE,
                     // TCellContent(Random(Succ(Ord(High(TCellContent))))),
@@ -299,6 +308,7 @@ implementation
 
     {
         tells if a cell is connected to a position
+        returns false if celltype is not TYPE_PIPE
 
         @param  IN:     cell the target cell
                         position of expected connection
@@ -309,18 +319,31 @@ implementation
         isConnected:boolean;
     begin
         isConnected := false;
-        openingsRunner := cell.openings.firstNode;
-        while((openingsRunner <> nil) and not isConnected) do begin
-            isConnected := positionEquals(
-                position,
-                addPositions(
-                    openingsRunner^.position,
-                    getPositionFromName(cell.image.name)
-                )
-            );
-            openingsRunner := openingsRunner^.next;
+        if (cell.celltype = TCellType.TYPE_PIPE) then begin
+            openingsRunner := cell.openings.firstNode;
+            while((openingsRunner <> nil) and not isConnected) do begin
+                isConnected := positionEquals(
+                    position,
+                    addPositions(
+                        openingsRunner^.position,
+                        getPositionFromName(cell.image.name)
+                    )
+                );
+                openingsRunner := openingsRunner^.next;
+            end;
         end;
-
         isCellConnected := isConnected;
+    end;
+
+    {
+        returns true when cellType equals type of position in cellField
+
+        @param  IN:     cellField with cells
+                        position of target cell in field
+                        and the cellType
+    }
+    function positionEqualsType(cellField:TCellField; position:TPosition; cellType:TCellType):boolean;
+    begin
+        positionEqualsType := cellField[position.x, position.y].cellType = cellType;
     end;
 end.

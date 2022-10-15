@@ -19,6 +19,7 @@ interface
     type
         // cell types (pipe, wall);
         TCellType = (
+            TYPE_NONE,
             TYPE_WALL,
             TYPE_PIPE
         );
@@ -56,6 +57,20 @@ interface
         TPositionList = record
             firstNode:PPositionNode;
             lastNode:PPositionNode;
+        end;
+
+        
+        // pipetype node
+        PPipeTypeNode = ^TPipeTypeNode;
+        TPipeTypeNode = record
+            cellItem:TCellItem;
+            cellRotation:TCellRotation;
+            next:PPipeTypeNode;
+        end;
+        // pipetype list
+        TPipeTypeList = record
+            firstNode:PPipeTypeNode;
+            lastNode:PPipeTypeNode;
         end;
 
         // cell

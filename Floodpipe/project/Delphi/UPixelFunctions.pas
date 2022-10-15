@@ -12,6 +12,7 @@ unit UPixelFunctions;
     // Bitmap file with all tiles in a 4 by 4 (à 58px) grid
     {$R resources/pipesEmptyTilemap.RES}
     {$R resources/pipesWaterTilemap.RES}
+    {$R resources/wallsTilemap.RES}
 
 interface
     uses
@@ -70,44 +71,49 @@ implementation
         resourceStreamSource:string;
     begin
         tilemapBitmap := TBitmap.Create();
-        try
-            tilemapBitmap.PixelFormat := PIXEL_FORMAT;
+        if not (cell.cellType = TCellType.TYPE_NONE) then begin
+            try
+                tilemapBitmap.PixelFormat := PIXEL_FORMAT;
 
-            // get the right tilemap
-            case cell.cellType of
-                TYPE_WALL:;
-                TYPE_PIPE: resourceStreamSource := 'pipes';
-                else assert(true, 'ERROR from UPixelFunctions: no such TCellType');
-            end;
-
-            // if not a wall then add the content of a pipe
-            if not (cell.cellType = TCellType.TYPE_WALL) then
-                case cell.cellContent of
-                    CONTENT_EMPTY: resourceStreamSource := resourceStreamSource + 'Empty';
-                    CONTENT_WATER: resourceStreamSource := resourceStreamSource + 'Water';
-                    else assert(true, 'ERROR from UPixelFunctions: no such TCellContent');
+                // get the right tilemap
+                case cell.cellType of
+                    TYPE_WALL: resourceStreamSource := 'walls';
+                    TYPE_PIPE: resourceStreamSource := 'pipes';
+                    else assert(true, 'ERROR from UPixelFunctions: no such TCellType');
                 end;
 
-            resourceStreamSource := resourceStreamSource + 'Tilemap';
-            
-            // load the stream from resourceStreamSource
-            stream := TResourceStream.Create(HInstance, resourceStreamSource, RT_RCDATA);
+                // if a pipe then add the content of a pipe
+                if (cell.cellType = TCellType.TYPE_PIPE) then
+                    case cell.cellContent of
+                        CONTENT_EMPTY: resourceStreamSource := resourceStreamSource + 'Empty';
+                        CONTENT_WATER: resourceStreamSource := resourceStreamSource + 'Water';
+                        else assert(true, 'ERROR from UPixelFunctions: no such TCellContent');
+                    end;
 
-            try
-                // load bitmap from resource
-                tilemapBitmap.LoadFromStream(stream);
-                // use this when debuging the image resource
-                //// tilemapBitmap.LoadFromFile('tilemap.bmp');
-                cell.image.Picture.Bitmap := getTileFromTilemap(
-                    tilemapBitmap,
-                    cell.cellItem,
-                    cell.cellRotation
-                );
+                resourceStreamSource := resourceStreamSource + 'Tilemap';
+                
+                // load the stream from resourceStreamSource
+                stream := TResourceStream.Create(HInstance, resourceStreamSource, RT_RCDATA);
+
+                try
+                    // load bitmap from resource
+                    tilemapBitmap.LoadFromStream(stream);
+                    // use this when debuging the image resource
+                    //// tilemapBitmap.LoadFromFile('tilemap.bmp');
+                    cell.image.Picture.Bitmap := getTileFromTilemap(
+                        tilemapBitmap,
+                        cell.cellItem,
+                        cell.cellRotation
+                    );
+                finally
+                    stream.free;
+                end;
             finally
-                stream.free;
+                tilemapBitmap.free;
             end;
-        finally
-            tilemapBitmap.free;
+            cell.image.visible := true;
+        end else begin
+            cell.image.visible := false;
         end;
     end;
 
