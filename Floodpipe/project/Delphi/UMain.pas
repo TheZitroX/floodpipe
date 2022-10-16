@@ -35,6 +35,7 @@ type
         procedure onCellClick(Sender: TObject);
         procedure animationStart();
         procedure finalizeAnimation();
+        procedure enableSimulationMode(b:boolean);
         procedure formSetup();
 
         // buttonMethods
@@ -83,7 +84,14 @@ end;
 
 procedure TFMain.onSettingsButtonClick(Sender: TObject);
 begin
-    if FSettings.ShowModal = 0 then;
+    case FSettings.ShowModal of
+        mrOk:
+            // todo set UMain-variables to settings-variables
+            showmessage('HelloWorld!');
+        mrCancel:
+            // todo reset settings-variables
+    // else;
+    end;
 end;
 
 procedure TFMain.onCellClick(Sender: TObject);
@@ -178,13 +186,9 @@ begin
     panelSetup(panelButtons, panelRightSideArea, 'panelButtons');
 
     // buttons with panelButtons as parent
-    createButtons(
-        newGameButton, onNewButtonClick,
-        settingsButton, onSettingsButtonClick, 
-        loadGameButton,
-        saveGameButton,
-        exitGameButton,
-        panelButtons);
+    createButtons(newGameButton, onNewButtonClick, settingsButton,
+      onSettingsButtonClick, loadGameButton, saveGameButton, exitGameButton,
+      panelButtons);
 
     updateLayout();
 
@@ -211,12 +215,8 @@ procedure TFMain.FormCreate(Sender: TObject);
 begin
     formSetup();
 
-    generateGame(
-        cellField,
-        cellRowLength,
-        cellColumnLength,
-        waterSourcePositionQueueList
-    );
+    generateGame(cellField, cellRowLength, cellColumnLength,
+      waterSourcePositionQueueList);
 end;
 
 procedure TFMain.FormResize(Sender: TObject);
@@ -239,31 +239,39 @@ begin
     NewHeight := round(MAIN_FORM_ASPECT_RATIO * NewWidth);
 end;
 
-procedure TFMain.animationStart();
-    procedure deactivateUserInteraction();
-    begin
-        newGameButton.Enabled := false;
-        loadGameButton.Enabled := false;
-        saveGameButton.Enabled := false;
-    end;
+{
+    sets all buttons and inputfields enabled to b
 
+    @param  IN:     b: true for enabled false for the oposite :)
+}
+procedure TFMain.enableSimulationMode(b:boolean);
+begin
+    FSettings.nbColumns.Enabled := b;
+    FSettings.nbRows.Enabled := b;
+    FSettings.nbWallPercentage.Enabled := b;
+
+    newGameButton.Enabled := b;
+    loadGameButton.Enabled := b;
+    saveGameButton.Enabled := b;
+end;
+
+{
+    stating an animation and disable buttons
+}
+procedure TFMain.animationStart();
 begin
     isSimulating := true;
-    deactivateUserInteraction();
+    enableSimulationMode(false);
     fluidTimer.Enabled := true;
 end;
 
+{
+    finishing an animation and enable buttons
+}
 procedure TFMain.finalizeAnimation();
-    procedure activateUserInteraction();
-    begin
-        newGameButton.Enabled := true;
-        loadGameButton.Enabled := true;
-        saveGameButton.Enabled := true;
-    end;
-
 begin
     isSimulating := false;
-    activateUserInteraction();
+    enableSimulationMode(true);
 end;
 
 end.
