@@ -1,4 +1,4 @@
-{
+﻿{
   file:       UMain.pas
   author:     John Lienau
   title:      Main unit of project Floodpipe
@@ -35,8 +35,10 @@ type
         procedure onCellClick(Sender: TObject);
         procedure animationStart();
         procedure finalizeAnimation();
-        procedure enableSimulationMode(b:boolean);
+        procedure enableSimulationMode(b: Boolean);
         procedure formSetup();
+        procedure setFSettingsFromSettings();
+        function getSettingsFromFSettings(): Boolean;
 
         // buttonMethods
         procedure onNewButtonClick(Sender: TObject);
@@ -86,11 +88,16 @@ procedure TFMain.onSettingsButtonClick(Sender: TObject);
 begin
     case FSettings.ShowModal of
         mrOk:
-            // todo set UMain-variables to settings-variables
-            showmessage('HelloWorld!');
+            begin
+                // settings übernehmen welche die simulation beeinflussen würde
+                if (not isSimulating) then
+                begin
+                    if getSettingsFromFSettings() then
+                        showmessage('rebuild!'); // todo ask for window reload
+                end;
+            end;
         mrCancel:
-            // todo reset settings-variables
-    // else;
+            setFSettingsFromSettings();
     end;
 end;
 
@@ -110,6 +117,7 @@ begin
         // position.y
         // ]
         // );
+        // fixme change back to rotation when finished debuggin
         if setWaterSource(cellField, waterSourcePositionQueueList,
           getPositionFromName(TImage(Sender).name)) then;
     end;
@@ -129,6 +137,33 @@ procedure TFMain.cellQueueHandlerFinalize();
 begin
     finalizeAnimation();
     // todo set leak positions on field
+end;
+
+{
+  sets values from membervariables to FSettings
+}
+procedure TFMain.setFSettingsFromSettings();
+begin
+    FSettings.nbRows.Value := cellRowLength;
+    FSettings.nbColumns.Value := cellColumnLength;
+    FSettings.nbAnimationTime.Value := cellAnimationTickRate;
+end;
+
+{
+  gets values from FSettings and puts them in membervariables
+
+  @return     true when a new-build needs to be made
+}
+function TFMain.getSettingsFromFSettings(): Boolean;
+begin
+    getSettingsFromFSettings := (cellRowLength <> round(FSettings.nbRows.Value))
+      or (cellColumnLength <> round(FSettings.nbColumns.Value));
+
+    cellRowLength := round(FSettings.nbRows.Value);
+    cellColumnLength := round(FSettings.nbColumns.Value);
+
+    // no new-build needed when those settings change
+    cellAnimationTickRate := round(FSettings.nbAnimationTime.Value);
 end;
 
 {
@@ -240,11 +275,11 @@ begin
 end;
 
 {
-    sets all buttons and inputfields enabled to b
+  sets all buttons and inputfields enabled to b
 
-    @param  IN:     b: true for enabled false for the oposite :)
+  @param  IN:     b: true for enabled false for the oposite :)
 }
-procedure TFMain.enableSimulationMode(b:boolean);
+procedure TFMain.enableSimulationMode(b: Boolean);
 begin
     FSettings.nbColumns.Enabled := b;
     FSettings.nbRows.Enabled := b;
@@ -256,7 +291,7 @@ begin
 end;
 
 {
-    stating an animation and disable buttons
+  stating an animation and disable buttons
 }
 procedure TFMain.animationStart();
 begin
@@ -266,7 +301,7 @@ begin
 end;
 
 {
-    finishing an animation and enable buttons
+  finishing an animation and enable buttons
 }
 procedure TFMain.finalizeAnimation();
 begin
