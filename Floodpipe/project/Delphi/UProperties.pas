@@ -24,7 +24,10 @@ interface
         // cells
         DEFAULT_CELL_ROW_COUNT = 10;
         DEFAULT_CELL_COLUMN_COUNT = 10;
-        DEFAULT_CELL_TICK_RATE = 1000; // (in ms)
+        DEFAULT_CELL_TICK_RATE = 1; // (in ms)
+        
+        // walls
+        DEFAULT_WALL_PERCENTAGE = 10; // (in %)
 
         // ===PIXELFUNCTIONS===
         PIXEL_FORMAT = pf24bit;

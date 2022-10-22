@@ -65,6 +65,7 @@ type
         cellField: TCellField;
         cellRowLength: Integer;
         cellColumnLength: Integer;
+        wallPercentage: Integer;
     end;
 
 var
@@ -93,7 +94,14 @@ begin
                 if (not isSimulating) then
                 begin
                     if getSettingsFromFSettings() then
-                        showmessage('rebuild!'); // todo ask for window reload
+                    begin
+                        // todo ask for window reload
+                        removeCellGrid(cellGrid, panelGamefield, cellField);
+                        createCellGrid(cellGrid, panelGamefield, cellField, cellRowLength,
+                            cellColumnLength, onCellClick);
+                        generateGame(cellField, cellRowLength, cellColumnLength,
+                            wallPercentage, waterSourcePositionQueueList);
+                    end;
                 end;
             end;
         mrCancel:
@@ -105,21 +113,19 @@ procedure TFMain.onCellClick(Sender: TObject);
 var
     position: TPosition;
 begin
-    if isSimulating then
+    if not isSimulating then
     begin
-    end
-    else
-    begin
-        // position := getPositionFromName(TImage(Sender).name);
-        // rotateCellClockwise(
-        // cellField[
-        // position.x,
-        // position.y
-        // ]
-        // );
+        position := getPositionFromName(TImage(Sender).name);
+        rotateCellClockwise(
+            cellField[
+                position.x,
+                position.y
+            ]
+        );
+
         // fixme change back to rotation when finished debuggin
-        if setWaterSource(cellField, waterSourcePositionQueueList,
-          getPositionFromName(TImage(Sender).name)) then;
+        // if setWaterSource(cellField, waterSourcePositionQueueList,
+        //   getPositionFromName(TImage(Sender).name)) then;
     end;
 end;
 
@@ -156,11 +162,14 @@ end;
 }
 function TFMain.getSettingsFromFSettings(): Boolean;
 begin
-    getSettingsFromFSettings := (cellRowLength <> round(FSettings.nbRows.Value))
-      or (cellColumnLength <> round(FSettings.nbColumns.Value));
+    getSettingsFromFSettings := 
+        (cellRowLength <> round(FSettings.nbRows.Value)) or
+        (cellColumnLength <> round(FSettings.nbColumns.Value)) or
+        (wallPercentage <> round(FSettings.nbWallPercentage.Value));
 
     cellRowLength := round(FSettings.nbRows.Value);
     cellColumnLength := round(FSettings.nbColumns.Value);
+    wallPercentage := round(FSettings.nbWallPercentage.Value);
 
     // no new-build needed when those settings change
     cellAnimationTickRate := round(FSettings.nbAnimationTime.Value);
@@ -197,6 +206,7 @@ begin
     // set default values
     cellRowLength := DEFAULT_CELL_ROW_COUNT;
     cellColumnLength := DEFAULT_CELL_COLUMN_COUNT;
+    wallPercentage := DEFAULT_WALL_PERCENTAGE;
     cellAnimationTickRate := DEFAULT_CELL_TICK_RATE;
 
     // for randomniss
@@ -251,7 +261,7 @@ begin
     formSetup();
 
     generateGame(cellField, cellRowLength, cellColumnLength,
-      waterSourcePositionQueueList);
+        wallPercentage, waterSourcePositionQueueList);
 end;
 
 procedure TFMain.FormResize(Sender: TObject);
