@@ -75,12 +75,12 @@ interface
 
         // cell
         TCell = record
-            image:TImage;
+            image:TImage; // NEED TO BE DISPOSED
             cellType:TCellType;
             cellItem:TCellItem;
             cellContent:TCellContent;
             cellRotation:TCellRotation;
-            openings:TPositionList;
+            openings:TPositionList; // NEED TO BE DISPOSED
         end;
         TCellField = array of array of TCell;
 

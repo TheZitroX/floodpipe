@@ -1,4 +1,4 @@
-{
+﻿{
   file:       UMain.pas
   author:     John Lienau
   title:      Main unit of project Floodpipe
@@ -18,9 +18,10 @@ uses
     System.Classes, Vcl.Graphics,
     Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls,
 
+    USettings,
+
     UProperties, UFunctions, UTypedefine, UCellFunctions, UFluid,
-    UPositionFunctions,
-    UGameGeneration;
+    UPositionFunctions, UGameGeneration;
 
 type
     TFMain = class(TForm)
@@ -32,10 +33,16 @@ type
         procedure cellQueueHandler(Sender: TObject);
         procedure cellQueueHandlerFinalize();
         procedure onCellClick(Sender: TObject);
-        procedure onNewButtonClick(Sender: TObject);
         procedure animationStart();
         procedure finalizeAnimation();
+        procedure enableSimulationMode(b: Boolean);
         procedure formSetup();
+        procedure setFSettingsFromSettings();
+        function getSettingsFromFSettings(): Boolean;
+
+        // buttonMethods
+        procedure onNewButtonClick(Sender: TObject);
+        procedure onSettingsButtonClick(Sender: TObject);
 
     public
         // panel
@@ -47,6 +54,7 @@ type
 
         // buttons
         newGameButton: TButton;
+        settingsButton: TButton;
         loadGameButton: TButton;
         saveGameButton: TButton;
         exitGameButton: TButton;
@@ -57,6 +65,7 @@ type
         cellField: TCellField;
         cellRowLength: Integer;
         cellColumnLength: Integer;
+        wallPercentage: Integer;
     end;
 
 var
@@ -76,24 +85,47 @@ begin
     animationStart();
 end;
 
+procedure TFMain.onSettingsButtonClick(Sender: TObject);
+begin
+    case FSettings.ShowModal of
+        mrOk:
+            begin
+                // settings übernehmen welche die simulation beeinflussen würde
+                if (not isSimulating) then
+                begin
+                    if getSettingsFromFSettings() then
+                    begin
+                        // todo ask for window reload
+                        removeCellGrid(cellGrid, panelGamefield, cellField);
+                        createCellGrid(cellGrid, panelGamefield, cellField, cellRowLength,
+                            cellColumnLength, onCellClick);
+                        generateGame(cellField, cellRowLength, cellColumnLength,
+                            wallPercentage, waterSourcePositionQueueList);
+                    end;
+                end;
+            end;
+        mrCancel:
+            setFSettingsFromSettings();
+    end;
+end;
+
 procedure TFMain.onCellClick(Sender: TObject);
 var
     position: TPosition;
 begin
-    if isSimulating then
+    if not isSimulating then
     begin
-    end
-    else
-    begin
-        // position := getPositionFromName(TImage(Sender).name);
-        // rotateCellClockwise(
-        // cellField[
-        // position.x,
-        // position.y
-        // ]
-        // );
-        if setWaterSource(cellField, waterSourcePositionQueueList,
-          getPositionFromName(TImage(Sender).name)) then;
+        position := getPositionFromName(TImage(Sender).name);
+        rotateCellClockwise(
+            cellField[
+                position.x,
+                position.y
+            ]
+        );
+
+        // fixme change back to rotation when finished debuggin
+        // if setWaterSource(cellField, waterSourcePositionQueueList,
+        //   getPositionFromName(TImage(Sender).name)) then;
     end;
 end;
 
@@ -111,6 +143,37 @@ procedure TFMain.cellQueueHandlerFinalize();
 begin
     finalizeAnimation();
     // todo set leak positions on field
+end;
+
+{
+  sets values from membervariables to FSettings
+}
+procedure TFMain.setFSettingsFromSettings();
+begin
+    FSettings.nbRows.Value := cellRowLength;
+    FSettings.nbColumns.Value := cellColumnLength;
+    FSettings.nbAnimationTime.Value := cellAnimationTickRate;
+end;
+
+{
+  gets values from FSettings and puts them in membervariables
+
+  @return     true when a new-build needs to be made
+}
+function TFMain.getSettingsFromFSettings(): Boolean;
+begin
+    getSettingsFromFSettings := 
+        (cellRowLength <> round(FSettings.nbRows.Value)) or
+        (cellColumnLength <> round(FSettings.nbColumns.Value)) or
+        (wallPercentage <> round(FSettings.nbWallPercentage.Value));
+
+    cellRowLength := round(FSettings.nbRows.Value);
+    cellColumnLength := round(FSettings.nbColumns.Value);
+    wallPercentage := round(FSettings.nbWallPercentage.Value);
+
+    // no new-build needed when those settings change
+    cellAnimationTickRate := round(FSettings.nbAnimationTime.Value);
+    fluidtimer.interval := cellAnimationTickRate;
 end;
 
 {
@@ -144,6 +207,7 @@ begin
     // set default values
     cellRowLength := DEFAULT_CELL_ROW_COUNT;
     cellColumnLength := DEFAULT_CELL_COLUMN_COUNT;
+    wallPercentage := DEFAULT_WALL_PERCENTAGE;
     cellAnimationTickRate := DEFAULT_CELL_TICK_RATE;
 
     // for randomniss
@@ -168,8 +232,9 @@ begin
     panelSetup(panelButtons, panelRightSideArea, 'panelButtons');
 
     // buttons with panelButtons as parent
-    createButtons(newGameButton, onNewButtonClick, loadGameButton,
-      saveGameButton, exitGameButton, panelButtons);
+    createButtons(newGameButton, onNewButtonClick, settingsButton,
+      onSettingsButtonClick, loadGameButton, saveGameButton, exitGameButton,
+      panelButtons);
 
     updateLayout();
 
@@ -196,12 +261,8 @@ procedure TFMain.FormCreate(Sender: TObject);
 begin
     formSetup();
 
-    generateGame(
-        cellField,
-        cellRowLength,
-        cellColumnLength,
-        waterSourcePositionQueueList
-    );
+    generateGame(cellField, cellRowLength, cellColumnLength,
+        wallPercentage, waterSourcePositionQueueList);
 end;
 
 procedure TFMain.FormResize(Sender: TObject);
@@ -224,31 +285,39 @@ begin
     NewHeight := round(MAIN_FORM_ASPECT_RATIO * NewWidth);
 end;
 
-procedure TFMain.animationStart();
-    procedure deactivateUserInteraction();
-    begin
-        newGameButton.Enabled := false;
-        loadGameButton.Enabled := false;
-        saveGameButton.Enabled := false;
-    end;
+{
+  sets all buttons and inputfields enabled to b
 
+  @param  IN:     b: true for enabled false for the oposite :)
+}
+procedure TFMain.enableSimulationMode(b: Boolean);
+begin
+    FSettings.nbColumns.Enabled := b;
+    FSettings.nbRows.Enabled := b;
+    FSettings.nbWallPercentage.Enabled := b;
+
+    newGameButton.Enabled := b;
+    loadGameButton.Enabled := b;
+    saveGameButton.Enabled := b;
+end;
+
+{
+  stating an animation and disable buttons
+}
+procedure TFMain.animationStart();
 begin
     isSimulating := true;
-    deactivateUserInteraction();
+    enableSimulationMode(false);
     fluidTimer.Enabled := true;
 end;
 
+{
+  finishing an animation and enable buttons
+}
 procedure TFMain.finalizeAnimation();
-    procedure activateUserInteraction();
-    begin
-        newGameButton.Enabled := true;
-        loadGameButton.Enabled := true;
-        saveGameButton.Enabled := true;
-    end;
-
 begin
     isSimulating := false;
-    activateUserInteraction();
+    enableSimulationMode(true);
 end;
 
 end.

@@ -16,7 +16,7 @@ interface
     uses 
         vcl.Forms, sysutils, vcl.extctrls, vcl.controls, system.classes, Vcl.StdCtrls,
 
-        UTypedefine, UPixelfunctions, UProperties, UCellFunctions;
+        UTypedefine, UPixelfunctions, UProperties, UCellFunctions, UPositionFunctions;
 
     // public functions
     procedure panelSetup(
@@ -31,6 +31,11 @@ interface
         rowCount, columnCount:integer;
         onCellClick:TNotifyEvent
     );
+    procedure removeCellGrid(
+        var cellGrid:TGridPanel;
+        panelParent:TWinControl;
+        var cellField:TCellField
+    );
     procedure panelRedraw(
         mainWidth, mainHeight:integer;
         var panelGameArea:TPanel;
@@ -43,8 +48,10 @@ interface
         var b1:TButton;
         b1Procedure:TNotifyEvent;
         var b2:TButton;
+        b2Procedure:TNotifyEvent;
         var b3:TButton;
         var b4:TButton;
+        var b5:TButton;
         var newParent:TPanel
     );
 
@@ -157,6 +164,24 @@ implementation
         cellGrid.ColumnCollection.EndUpdate;
     end;
 
+    procedure removeCellGrid(
+        var cellGrid:TGridPanel;
+        panelParent:TWinControl;
+        var cellField:TCellField
+    );
+    var i, j:integer;
+    begin
+        // remove each cellfield
+        for i := 0 to length(cellField) - 1 do
+            for j := 0 to length(cellField[0]) - 1 do
+            begin
+                cellField[i, j].image.picture := nil;
+                cellField[i, j].image.Free;
+                delPositionList(cellField[i,j].openings);
+            end;
+        cellGrid.Free;
+    end;
+
     {
         Gives each panel its position and size,
         relativ to the width and height of the FMain size
@@ -175,59 +200,61 @@ implementation
         var panelGamefield:TPanel;
         var panelRightSideArea:TPanel;
         var panelRightSideInfo:TPanel;
-        var panelButtons:TPanel);
-
-        var
-            tempHeight:integer;
-        begin
-            // panelGameArea
-            setDimentions(
-                panelGameArea,
-                0, 0, // pos(0, 0)
-                (mainWidth * 80) div 100, // 80% of the Width
-                mainHeight
-            );
-            // panelGamefield
-            tempHeight := (mainHeight * 80) div 100; // 80% of Height
-            setDimentions(
-                panelGamefield,
-                panelGameArea.Height - tempHeight, // height of panelGamearea - height of panelGamefield
-                (panelGameArea.Width - tempHeight) div 2, // (width of panelGamearea - height of panelGamefield) / 2
-                tempHeight,
-                tempHeight
-            );
-            // panelRightSideArea
-            setDimentions(
-                panelRightSideArea,
-                0, // top of FMain
-                (mainWidth * 80) div 100, // 80% of the Width
-                (mainWidth * 20) div 100, // 20% of the Width
-                mainHeight
-            );
-            // panelRightSideInfo
-            setDimentions(
-                panelRightSideInfo,
-                0, // top-
-                0, // left corner
-                panelRightSideArea.Width,
-                (panelRightSideArea.Height * 33) div 100 // 33% height of panelRightSideArea
-            );
-            // panelRightSideInfo
-            setDimentions(
-                panelButtons,
-                (panelRightSideArea.Height * 33) div 100, // 33% height of panelRightSideArea
-                0,
-                panelRightSideArea.Width,
-                (panelRightSideArea.Height * 67) div 100 // 67% height of panelRightSideArea
-            );
-        end;
+        var panelButtons:TPanel
+    );
+    var
+        tempHeight:integer;
+    begin
+        // panelGameArea
+        setDimentions(
+            panelGameArea,
+            0, 0, // pos(0, 0)
+            (mainWidth * 80) div 100, // 80% of the Width
+            mainHeight
+        );
+        // panelGamefield
+        tempHeight := (mainHeight * 80) div 100; // 80% of Height
+        setDimentions(
+            panelGamefield,
+            panelGameArea.Height - tempHeight, // height of panelGamearea - height of panelGamefield
+            (panelGameArea.Width - tempHeight) div 2, // (width of panelGamearea - height of panelGamefield) / 2
+            tempHeight,
+            tempHeight
+        );
+        // panelRightSideArea
+        setDimentions(
+            panelRightSideArea,
+            0, // top of FMain
+            (mainWidth * 80) div 100, // 80% of the Width
+            (mainWidth * 20) div 100, // 20% of the Width
+            mainHeight
+        );
+        // panelRightSideInfo
+        setDimentions(
+            panelRightSideInfo,
+            0, // top-
+            0, // left corner
+            panelRightSideArea.Width,
+            (panelRightSideArea.Height * 33) div 100 // 33% height of panelRightSideArea
+        );
+        // panelRightSideInfo
+        setDimentions(
+            panelButtons,
+            (panelRightSideArea.Height * 33) div 100, // 33% height of panelRightSideArea
+            0,
+            panelRightSideArea.Width,
+            (panelRightSideArea.Height * 67) div 100 // 67% height of panelRightSideArea
+        );
+    end;
 
     procedure createButtons(
         var b1:TButton;
         b1Procedure:TNotifyEvent;
         var b2:TButton;
+        b2Procedure:TNotifyEvent;
         var b3:TButton;
         var b4:TButton;
+        var b5:TButton;
         var newParent:TPanel
     );
     const
@@ -268,19 +295,26 @@ implementation
         createOptionButton(
             b2,
             newParent,
+            'settingsButton',
+            'Settings',
+            b2Procedure
+        );
+        createOptionButton(
+            b3,
+            newParent,
             'loadGameButton',
             'Load',
             nil
         );
         createOptionButton(
-            b3,
+            b4,
             newParent,
             'saveGameButton',
             'Save',
             nil 
         );
         createOptionButton(
-            b4,
+            b5,
             newParent,
             'quitGameButton',
             'Quit',

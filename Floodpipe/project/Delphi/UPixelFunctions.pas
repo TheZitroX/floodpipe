@@ -44,17 +44,14 @@ implementation
         tileBitmap.Width := TILEMAP_TILE_SIDE_LENGTH;
         tileBitmap.Height := TILEMAP_TILE_SIDE_LENGTH;
 
-        // case cellItem of
-        //     else begin
-                posX := TILEMAP_TILE_SIDE_LENGTH * integer(cellRotation);
-                posY := TILEMAP_TILE_SIDE_LENGTH * integer(cellItem);
-            // end;
-        // end;
+        posX := TILEMAP_TILE_SIDE_LENGTH * integer(cellRotation);
+        posY := TILEMAP_TILE_SIDE_LENGTH * integer(cellItem);
         
         tileBitmap.Canvas.CopyRect(
             Rect(0, 0, TILEMAP_TILE_SIDE_LENGTH, TILEMAP_TILE_SIDE_LENGTH),
             tilemapBitmap.Canvas,
-            Rect(posX, posY, posX + TILEMAP_TILE_SIDE_LENGTH, posY + TILEMAP_TILE_SIDE_LENGTH));
+            Rect(posX, posY, posX + TILEMAP_TILE_SIDE_LENGTH, posY + TILEMAP_TILE_SIDE_LENGTH)
+        );
 
         getTileFromTilemap := tileBitmap;
     end;
@@ -71,7 +68,8 @@ implementation
         resourceStreamSource:string;
     begin
         tilemapBitmap := TBitmap.Create();
-        if not (cell.cellType = TCellType.TYPE_NONE) then begin
+        if not (cell.cellType = TCellType.TYPE_NONE) then
+        begin
             try
                 tilemapBitmap.PixelFormat := PIXEL_FORMAT;
 
@@ -112,7 +110,9 @@ implementation
                 tilemapBitmap.free;
             end;
             cell.image.visible := true;
-        end else begin
+        end
+        else
+        begin
             cell.image.visible := false;
         end;
     end;

@@ -9,7 +9,7 @@ interface
 uses UTypedefine, UPositionFunctions, UCellFunctions, UPipeTypeFunctions, UFluid, Vcl.Dialogs;
 
 procedure generateGame(cellField: TCellField;
-  cellRowLength, cellColumnLength: integer;
+  cellRowLength, cellColumnLength, wallPercentage: integer;
   var waterSourcePositionQueueList:TPositionList);
 
 implementation
@@ -141,27 +141,34 @@ begin
     delPositionList(needToHaveDirectionList);
 end;
 
+{
+    Generats the Gamefield with pipes, walls and a watersource
+
+    @param: IN      the cellField (empty)
+                    field rows and columns
+                    wallPercentage is how many walls will be generated
+            IN/OUT  waterSourcePositionQueueList with the attached new water sourche
+}
 procedure generateGame(cellField: TCellField;
-  cellRowLength, cellColumnLength: integer;
+  cellRowLength, cellColumnLength, wallPercentage: integer;
   var waterSourcePositionQueueList:TPositionList);
 var
     i, j, wallCount, maxWallCount:integer;
     waterSourcePosition:TPosition;
 begin
-    // todo empty field
     waterSourcePosition := getPosition(
         random(cellColumnLength - 1),
         random(cellRowLength - 1)
     );
     // make random walls
     wallCount := 0;
-    maxWallCount := 15;//(cellColumnLength * cellRowLength) div ?;
+    maxWallCount := round(((cellColumnLength * cellRowLength) / 100) * wallPercentage);
     for i := 0 to cellColumnLength - 1 do
         for j := 0 to cellRowLength - 1 do
         begin
             if (wallCount < maxWallCount) and
                 (random(cellColumnLength * cellRowLength) < 
-                    (maxWallCount / cellColumnLength * cellRowLength)) and
+                    (maxWallCount)) and
                 (not positionEquals(waterSourcePosition, getPosition(i, j))) then
             begin
                 setCellToItem(cellField[i, j], TCellType.TYPE_WALL, TCellItem.PIPE,
