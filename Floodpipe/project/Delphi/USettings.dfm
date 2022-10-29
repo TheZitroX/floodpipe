@@ -156,10 +156,6 @@ object FSettings: TFSettings
       end>
     ShowCaption = False
     TabOrder = 1
-    ExplicitLeft = 0
-    ExplicitTop = 0
-    ExplicitWidth = 216
-    ExplicitHeight = 190
     object cbOverflow: TCheckBox
       AlignWithMargins = True
       Left = 4
@@ -170,8 +166,6 @@ object FSettings: TFSettings
       Alignment = taLeftJustify
       Caption = 'Overflow'
       TabOrder = 0
-      ExplicitWidth = 208
-      ExplicitHeight = 32
     end
     object nbColumns: TNumberBox
       AlignWithMargins = True
@@ -182,12 +176,10 @@ object FSettings: TFSettings
       Align = alClient
       Alignment = taRightJustify
       MinValue = 2.000000000000000000
-      MaxValue = 50.000000000000000000
+      MaxValue = 15.000000000000000000
       TabOrder = 1
       Value = 10.000000000000000000
       UseMouseWheel = True
-      ExplicitTop = 39
-      ExplicitWidth = 107
       ExplicitHeight = 21
     end
     object nbAnimationTime: TNumberBox
@@ -202,8 +194,6 @@ object FSettings: TFSettings
       TabOrder = 2
       Value = 10.000000000000000000
       UseMouseWheel = True
-      ExplicitTop = 151
-      ExplicitWidth = 107
       ExplicitHeight = 21
     end
     object nbRows: TNumberBox
@@ -215,12 +205,10 @@ object FSettings: TFSettings
       Align = alClient
       Alignment = taRightJustify
       MinValue = 2.000000000000000000
-      MaxValue = 50.000000000000000000
+      MaxValue = 15.000000000000000000
       TabOrder = 3
       Value = 10.000000000000000000
       UseMouseWheel = True
-      ExplicitTop = 76
-      ExplicitWidth = 107
       ExplicitHeight = 21
     end
     object nbWallPercentage: TNumberBox
@@ -235,8 +223,6 @@ object FSettings: TFSettings
       TabOrder = 4
       Value = 10.000000000000000000
       UseMouseWheel = True
-      ExplicitTop = 114
-      ExplicitWidth = 107
       ExplicitHeight = 21
     end
     object textColumn: TStaticText
@@ -248,8 +234,6 @@ object FSettings: TFSettings
       Align = alClient
       Caption = 'Columns'
       TabOrder = 5
-      ExplicitTop = 42
-      ExplicitWidth = 101
     end
     object textRow: TStaticText
       AlignWithMargins = True
@@ -260,9 +244,6 @@ object FSettings: TFSettings
       Align = alClient
       Caption = 'Rows'
       TabOrder = 6
-      ExplicitTop = 79
-      ExplicitWidth = 101
-      ExplicitHeight = 32
     end
     object textWallPercentage: TStaticText
       AlignWithMargins = True
@@ -273,8 +254,6 @@ object FSettings: TFSettings
       Align = alClient
       Caption = 'Wall Percentage'
       TabOrder = 7
-      ExplicitTop = 117
-      ExplicitWidth = 101
     end
     object textAnimationTime: TStaticText
       AlignWithMargins = True
@@ -285,9 +264,6 @@ object FSettings: TFSettings
       Align = alClient
       Caption = 'Animation Time (ms)'
       TabOrder = 8
-      ExplicitTop = 154
-      ExplicitWidth = 101
-      ExplicitHeight = 32
     end
   end
 end

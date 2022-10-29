@@ -173,6 +173,7 @@ begin
 
     // no new-build needed when those settings change
     cellAnimationTickRate := round(FSettings.nbAnimationTime.Value);
+    fluidtimer.interval := cellAnimationTickRate;
 end;
 
 {
