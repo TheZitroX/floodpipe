@@ -92,7 +92,6 @@ var
     k:integer;
     possibleDirectionList, needToHaveDirectionList: TPositionList;
     position: TPosition;
-    auswahl: TCell;
 begin
     possibleDirectionList.firstNode := nil;
     needToHaveDirectionList.firstNode := nil;

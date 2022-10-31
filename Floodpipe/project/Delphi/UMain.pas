@@ -41,8 +41,10 @@ type
         function getSettingsFromFSettings(): Boolean;
 
         // buttonMethods
+        procedure onGamemodeButtonClick(Sender: TObject);
         procedure onNewButtonClick(Sender: TObject);
         procedure onSettingsButtonClick(Sender: TObject);
+        procedure onItemChooseClick(Sender: TObject);
 
     public
         // panel
@@ -53,6 +55,12 @@ type
         panelGamefield: TPanel;
 
         // buttons
+        pipeLidButton: TButton;
+        pipeButton: TButton;
+        pipeTSplitButton: TButton;
+        pipeCurveButton: TButton;
+        gamemodeButton: TButton;
+
         newGameButton: TButton;
         settingsButton: TButton;
         loadGameButton: TButton;
@@ -66,6 +74,9 @@ type
         cellRowLength: Integer;
         cellColumnLength: Integer;
         wallPercentage: Integer;
+
+    private
+        procedure setItemButtonVisibility(b:boolean);
     end;
 
 var
@@ -75,10 +86,82 @@ var
     timerCount: Integer;
     fluidTimer: TTimer;
     isSimulating: Boolean;
+    isEditorMode: boolean;
+    checkedItem: TItemButton;
+    oldButton: TButton;
 
 implementation
 
 {$R *.dfm}
+
+procedure TFMain.onItemChooseClick(Sender: TObject);
+begin
+    if (oldButton <> nil) then
+    begin
+        // remove font style of old button
+        oldButton.font.style := [];
+    end;
+
+    if (checkedItem = TItemButton((Sender as TButton).tag)) then
+        checkedItem := NONE_BUTTON
+    else checkedItem := TItemButton((Sender as TButton).tag);
+
+    case checkedItem of
+    PIPE_LID_BUTTON:
+    begin
+        (Sender as TButton).font.style := [fsBold];
+    end;
+    PIPE_BUTTON:
+    begin
+        (Sender as TButton).font.style := [fsBold];
+    end;
+    PIPE_TSPLIT_BUTTON:
+    begin
+        (Sender as TButton).font.style := [fsBold];
+    end;
+    PIPE_CURVE_BUTTON:
+    begin
+        (Sender as TButton).font.style := [fsBold];
+    end;
+    WALL_BUTTON:
+    begin
+        (Sender as TButton).font.style := [fsBold];
+    end;
+
+    else;
+    end;
+
+    oldButton := (Sender as TButton);
+end;
+
+procedure TFMain.setItemButtonVisibility(b:boolean);
+begin
+    pipeLidButton.visible := b;
+    pipeButton.visible := b;
+    pipeTSplitButton.visible := b;
+    pipeCurveButton.visible := b;
+end;
+
+procedure TFMain.onGamemodeButtonClick(Sender: TObject);
+begin
+    isEditorMode := not isEditorMode;
+
+    // changing to editormode
+    if (isEditorMode) then
+    begin
+        gamemodeButton.caption := 'Editor';
+        setItemButtonVisibility(true);
+    end
+    else // isEditorMode == false
+    begin
+        gamemodeButton.caption := 'Playing';
+        checkedItem := NONE_BUTTON;
+        // remove font style of old button
+        if (oldButton <> nil) then
+            oldButton.font.style := [];
+        setItemButtonVisibility(false);
+    end;
+end;
 
 procedure TFMain.onNewButtonClick(Sender: TObject);
 begin
@@ -89,21 +172,21 @@ procedure TFMain.onSettingsButtonClick(Sender: TObject);
 begin
     case FSettings.ShowModal of
         mrOk:
+        begin
+            // settings übernehmen welche die simulation beeinflussen würde
+            if (not isSimulating) then
             begin
-                // settings übernehmen welche die simulation beeinflussen würde
-                if (not isSimulating) then
+                if getSettingsFromFSettings() then
                 begin
-                    if getSettingsFromFSettings() then
-                    begin
-                        // todo ask for window reload
-                        removeCellGrid(cellGrid, panelGamefield, cellField);
-                        createCellGrid(cellGrid, panelGamefield, cellField, cellRowLength,
-                            cellColumnLength, onCellClick);
-                        generateGame(cellField, cellRowLength, cellColumnLength,
-                            wallPercentage, waterSourcePositionQueueList);
-                    end;
+                    // todo ask for window reload
+                    removeCellGrid(cellGrid, panelGamefield, cellField);
+                    createCellGrid(cellGrid, panelGamefield, cellField, cellRowLength,
+                        cellColumnLength, onCellClick);
+                    generateGame(cellField, cellRowLength, cellColumnLength,
+                        wallPercentage, waterSourcePositionQueueList);
                 end;
             end;
+        end;
         mrCancel:
             setFSettingsFromSettings();
     end;
@@ -116,16 +199,73 @@ begin
     if not isSimulating then
     begin
         position := getPositionFromName(TImage(Sender).name);
-        rotateCellClockwise(
-            cellField[
-                position.x,
-                position.y
-            ]
-        );
 
-        // fixme change back to rotation when finished debuggin
-        // if setWaterSource(cellField, waterSourcePositionQueueList,
-        //   getPositionFromName(TImage(Sender).name)) then;
+        case checkedItem of
+        NONE_BUTTON:
+        begin
+            rotateCellClockwise(
+                cellField[
+                    position.x,
+                    position.y
+                ]
+            );
+            // fixme change back to rotation when finished debuggin
+            // if setWaterSource(cellField, waterSourcePositionQueueList,
+            //   getPositionFromName(TImage(Sender).name)) then;
+        end;
+        PIPE_LID_BUTTON:
+        begin
+            setCellToItem(
+                cellField[position.x, position.y],
+                TYPE_PIPE,
+                PIPE_LID,
+                CONTENT_EMPTY,
+                NONE
+            );
+        end;
+        PIPE_BUTTON:
+        begin
+            setCellToItem(
+                cellField[position.x, position.y],
+                TYPE_PIPE,
+                PIPE,
+                CONTENT_EMPTY,
+                NONE
+            );
+        end;
+        PIPE_TSPLIT_BUTTON:
+        begin
+            setCellToItem(
+                cellField[position.x, position.y],
+                TYPE_PIPE,
+                PIPE_TSPLIT,
+                CONTENT_EMPTY,
+                NONE
+            );
+        end;
+        PIPE_CURVE_BUTTON:
+        begin
+            setCellToItem(
+                cellField[position.x, position.y],
+                TYPE_PIPE,
+                PIPE_CURVES,
+                CONTENT_EMPTY,
+                NONE
+            );
+        end;
+        WALL_BUTTON:
+        begin
+            setCellToItem(
+                cellField[position.x, position.y],
+                TYPE_WALL,
+                PIPE_LID,
+                CONTENT_EMPTY,
+                NONE
+            );
+        end;
+
+        else showmessage('no such item');
+        end;
     end;
 end;
 
@@ -203,6 +343,8 @@ procedure TFMain.formSetup();
 begin
     // inizialize
     waterSourcePositionQueueList.firstNode := nil;
+    checkedItem := NONE_BUTTON;
+    oldButton := nil;
 
     // set default values
     cellRowLength := DEFAULT_CELL_ROW_COUNT;
@@ -228,9 +370,12 @@ begin
     panelSetup(panelRightSideArea, FMain, 'panelSetup');
     // panel Right side info
     panelSetup(panelRightSideInfo, panelRightSideArea, 'panelRightSideInfo');
+    createInfoButtons(panelrightSideInfo,
+        pipeLidButton, pipeButton, pipeTSplitButton, pipeCurveButton, onItemChooseClick,
+        gamemodeButton, onGamemodeButtonClick
+    );
     // panel Right side info
     panelSetup(panelButtons, panelRightSideArea, 'panelButtons');
-
     // buttons with panelButtons as parent
     createButtons(newGameButton, onNewButtonClick, settingsButton,
       onSettingsButtonClick, loadGameButton, saveGameButton, exitGameButton,

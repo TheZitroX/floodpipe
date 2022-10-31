@@ -41,6 +41,16 @@ interface
             SECOND,
             THIRD
         );
+
+        TItemButton = (
+            NONE_BUTTON,
+            PIPE_LID_BUTTON,
+            PIPE_BUTTON,
+            PIPE_TSPLIT_BUTTON,
+            PIPE_CURVE_BUTTON,
+            WALL_BUTTON
+        );
+
         // position einer Celle
         TPosition = record
             x:integer;

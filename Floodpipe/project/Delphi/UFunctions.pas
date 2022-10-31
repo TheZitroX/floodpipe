@@ -44,6 +44,16 @@ interface
         var panelRightSideInfo:TPanel;
         var panelButtons:TPanel
     );
+    procedure createInfoButtons(
+        var newParent:TPanel;
+        var pipeLidButton:TButton;
+        var pipeButton:TButton;
+        var pipeTSplitButton:TButton;
+        var pipeCurveButton:TButton;
+        onItemChooseClick:TNotifyEvent;
+        var gamemodeButton:TButton;
+        onGamemodeButtonClick:TNotifyEvent
+    );
     procedure createButtons(
         var b1:TButton;
         b1Procedure:TNotifyEvent;
@@ -247,6 +257,96 @@ implementation
         );
     end;
 
+    {
+        @brief  Creates a Button with passed positions, names and onclick fucntioncall
+
+        @param  button as the Changed button
+                topPos and leftPos as integer
+                buttonName, buttonCaption as string
+                functionPointer as TNotifyEvent
+    }
+    procedure createOptionButton(
+        var button:TButton;
+        var newParent:TPanel;
+        buttonName, buttonCaption:string;
+        functionPointer:TNotifyEvent;
+        newAlign:TAlign
+    );
+    begin
+        button := TButton.Create(newParent);
+        with button do begin
+            Parent := newParent;
+            Name := buttonName;
+            Caption := buttonCaption;
+            OnClick := functionPointer;
+            Align := newAlign;
+        end;
+    end;
+
+    procedure createInfoButtons(
+        var newParent:TPanel;
+        var pipeLidButton:TButton;
+        var pipeButton:TButton;
+        var pipeTSplitButton:TButton;
+        var pipeCurveButton:TButton;
+        onItemChooseClick:TNotifyEvent;
+        var gamemodeButton:TButton;
+        onGamemodeButtonClick:TNotifyEvent
+    );
+    begin
+            // PIPE_LID,
+        createOptionButton(
+            pipeLidButton,
+            newParent,
+            'pipeLidButton',
+            'Lid',
+            onItemChooseClick,
+            alTop
+        );
+        pipeLidButton.tag := integer(PIPE_LID_BUTTON);
+        pipeLidButton.visible := false;
+        createOptionButton(
+            pipeButton,
+            newParent,
+            'pipeButton',
+            'Pipe',
+            onItemChooseClick,
+            alTop
+        );
+        pipeButton.tag := integer(PIPE_BUTTON);
+        pipeButton.visible := false;
+        createOptionButton(
+            pipeTSplitButton,
+            newParent,
+            'pipeTSplitButton',
+            'T-Split',
+            onItemChooseClick,
+            alTop
+        );
+        pipeTSplitButton.tag := integer(PIPE_TSPLIT_BUTTON);
+        pipeTSplitButton.visible := false;
+        createOptionButton(
+            pipeCurveButton,
+            newParent,
+            'pipeCurveButton',
+            'Curve',
+            onItemChooseClick,
+            alTop
+        );
+        pipeCurveButton.tag := integer(PIPE_CURVE_BUTTON);
+        pipeCurveButton.visible := false;
+
+
+        createOptionButton(
+            gamemodeButton,
+            newParent,
+            'gamemodeButton',
+            'Playing',
+            onGamemodeButtonClick,
+            alBottom
+        );
+    end;
+
     procedure createButtons(
         var b1:TButton;
         b1Procedure:TNotifyEvent;
@@ -257,68 +357,46 @@ implementation
         var b5:TButton;
         var newParent:TPanel
     );
-    const
-        OPTION_BUTTON_HEIGHT = 20;
-        OPTION_BUTTON_WIDTH = 20;
-        {
-            @brief  Creates a Button with passed positions, names and onclick fucntioncall
-
-            @param  button as the Changed button
-                    topPos and leftPos as integer
-                    buttonName, buttonCaption as string
-                    functionPointer as TNotifyEvent
-        }
-        procedure createOptionButton(
-            var button:TButton;
-            var newParent:TPanel;
-            buttonName, buttonCaption:string;
-            functionPointer:TNotifyEvent
-        );
-        begin
-            button := TButton.Create(newParent);
-            with button do begin
-                Parent := newParent;
-                Name := buttonName;
-                Caption := buttonCaption;
-                OnClick := functionPointer;
-                Align := alTop;
-            end;
-        end;
     begin
         createOptionButton(
             b1,
             newParent,
             'newGameButton',
             'New',
-            b1Procedure
+            b1Procedure,
+            TAlign(alTop)
         );
         createOptionButton(
             b2,
             newParent,
             'settingsButton',
             'Settings',
-            b2Procedure
+            b2Procedure,
+            TAlign(alTop)
         );
         createOptionButton(
             b3,
             newParent,
             'loadGameButton',
             'Load',
-            nil
+            nil,
+            TAlign(alTop)
         );
         createOptionButton(
             b4,
             newParent,
             'saveGameButton',
             'Save',
-            nil 
+            nil, 
+            TAlign(alTop)
         );
         createOptionButton(
             b5,
             newParent,
             'quitGameButton',
             'Quit',
-            nil
+            nil,
+            TAlign(alTop)
         );
     end;
 end.
