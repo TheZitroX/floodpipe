@@ -33,6 +33,11 @@ type
         procedure cellQueueHandler(Sender: TObject);
         procedure cellQueueHandlerFinalize();
         procedure onCellClick(Sender: TObject);
+        procedure onCellMouseDown(
+            Sender: TObject;
+            Button: TMouseButton;
+            Shift: TShiftState; X, Y: Integer
+        );
         procedure animationStart();
         procedure finalizeAnimation();
         procedure enableSimulationMode(b: Boolean);
@@ -107,28 +112,27 @@ begin
     else checkedItem := TItemButton((Sender as TButton).tag);
 
     case checkedItem of
-    PIPE_LID_BUTTON:
-    begin
-        (Sender as TButton).font.style := [fsBold];
-    end;
-    PIPE_BUTTON:
-    begin
-        (Sender as TButton).font.style := [fsBold];
-    end;
-    PIPE_TSPLIT_BUTTON:
-    begin
-        (Sender as TButton).font.style := [fsBold];
-    end;
-    PIPE_CURVE_BUTTON:
-    begin
-        (Sender as TButton).font.style := [fsBold];
-    end;
-    WALL_BUTTON:
-    begin
-        (Sender as TButton).font.style := [fsBold];
-    end;
-
-    else;
+        PIPE_LID_BUTTON:
+        begin
+            (Sender as TButton).font.style := [fsBold];
+        end;
+        PIPE_BUTTON:
+        begin
+            (Sender as TButton).font.style := [fsBold];
+        end;
+        PIPE_TSPLIT_BUTTON:
+        begin
+            (Sender as TButton).font.style := [fsBold];
+        end;
+        PIPE_CURVE_BUTTON:
+        begin
+            (Sender as TButton).font.style := [fsBold];
+        end;
+        WALL_BUTTON:
+        begin
+            (Sender as TButton).font.style := [fsBold];
+        end;
+        else; // maybe assertions
     end;
 
     oldButton := (Sender as TButton);
@@ -181,7 +185,7 @@ begin
                     // todo ask for window reload
                     removeCellGrid(cellGrid, panelGamefield, cellField);
                     createCellGrid(cellGrid, panelGamefield, cellField, cellRowLength,
-                        cellColumnLength, onCellClick);
+                        cellColumnLength, onCellMouseDown);
                     generateGame(cellField, cellRowLength, cellColumnLength,
                         wallPercentage, waterSourcePositionQueueList);
                 end;
@@ -192,9 +196,33 @@ begin
     end;
 end;
 
+procedure TFMain.onCellMouseDown(
+    Sender: TObject;
+    Button: TMouseButton;
+    Shift: TShiftState; X, Y: Integer
+);
+var position:TPosition;
+begin
+    if not isSimulating then
+    begin
+        if isEditorMode then
+        begin
+            position := getPositionFromName(TImage(Sender).name);
+            case Button of
+                mbLeft: onCellClick(Sender);
+                mbRight: rotateCellClockwise(
+                    cellField[position.x, position.y]
+                );
+                else; // nothing
+            end; 
+        end
+        // just a normal click action
+        else onCellClick(Sender);
+    end;
+end;
+
 procedure TFMain.onCellClick(Sender: TObject);
-var
-    position: TPosition;
+var position: TPosition;
 begin
     if not isSimulating then
     begin
@@ -365,7 +393,7 @@ begin
     panelSetup(panelGamefield, panelGameArea, 'panelGamefield');
     // gridpanel cellGrid
     createCellGrid(cellGrid, panelGamefield, cellField, cellRowLength,
-      cellColumnLength, onCellClick);
+      cellColumnLength, onCellMouseDown);
     // panel right side area
     panelSetup(panelRightSideArea, FMain, 'panelSetup');
     // panel Right side info

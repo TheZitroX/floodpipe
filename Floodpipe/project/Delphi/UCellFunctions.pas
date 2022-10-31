@@ -25,7 +25,7 @@ interface
         var cellField:TCellField;
         newParent:TWinControl;
         rowCount, columnCount:integer;
-        onCellClick:TNotifyEvent
+        onCellClick:TMouseEvent
     );
     procedure rotateCellClockwise(var cell:TCell);
     function getPositionFromName(name:string):TPosition;
@@ -148,7 +148,8 @@ implementation
         var cellField:TCellField;
         newParent:TWinControl;
         rowCount, columnCount:integer;
-        onCellClick:TNotifyEvent);
+        onCellClick:TMouseEvent
+    );
     var
         i, j:integer;
     begin
@@ -176,7 +177,7 @@ implementation
                 );
                 cellField[i, j].openings.firstNode := nil;
                 setOpeningsFromRotation(cellField[i, j]);
-                cellField[i][j].image.OnClick := onCellClick;
+                cellField[i][j].image.OnMouseDown := onCellClick;
             end;
     end;
 

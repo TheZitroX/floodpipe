@@ -29,7 +29,7 @@ interface
         panelParent:TWinControl;
         var cellField:TCellField;
         rowCount, columnCount:integer;
-        onCellClick:TNotifyEvent
+        onCellClick:TMouseEvent
     );
     procedure removeCellGrid(
         var cellGrid:TGridPanel;
@@ -129,7 +129,8 @@ implementation
         panelParent:TWinControl;
         var cellField:TCellField;
         rowCount, columnCount:integer;
-        onCellClick:TNotifyEvent);
+        onCellClick:TMouseEvent
+    );
     var
         i:integer;
     begin
