@@ -18,12 +18,33 @@ interface
 
         UTypedefine, UPixelfunctions, UProperties, UCellFunctions, UPositionFunctions;
 
-    // public functions
+    {
+        setup for the panel
+        parent and name to variables
+        and the caption to empty
+
+        @param  IN/OUT  panel the target
+
+                IN      panelParent the parent of target panel
+                        parentName the name of the target panel
+    }
     procedure panelSetup(
         var panel:TPanel;
         panelParent:TWinControl;
         panelName:string
     );
+
+    {
+        Creates a panelgrid with rowCount and columnCount dimentions,
+        sets the cells and spaces them evently out
+
+        @param  IN/OUT:     cellGrid
+                            cellField field of all cells
+
+                IN:         panelParent the parent of cellGrid
+                            rowCount and columnCount the dimentions of the field
+                            onCellClick the clickevent of the cells
+    }
     procedure createCellGrid(
         var cellGrid:TGridPanel;
         panelParent:TWinControl;
@@ -31,11 +52,31 @@ interface
         rowCount, columnCount:integer;
         onCellClick:TMouseEvent
     );
+
+    {
+        Clears all cells of the cellField and removed its allocation 
+
+        @param  IN/OUT  cellGrid the field -> nil
+                        cellField all cells -> nil
+    }
     procedure removeCellGrid(
         var cellGrid:TGridPanel;
-        panelParent:TWinControl;
         var cellField:TCellField
     );
+
+    {
+        Gives each panel its position and size,
+        relativ to the width and height of the FMain size
+
+        @param  IN      mainWidth: width of FMain
+                        mainHeight: newHeight of FMain
+
+                IN/OUT  panelGameArea: the Gamearea panel
+                        panelGamefield: the field for the cells
+                        panelRightsideArea: the panel on the right side
+                        panelRightSideInfo: the panel with info text
+                        panelButtons: the panel on the right side with buttons
+    }
     procedure panelRedraw(
         mainWidth, mainHeight:integer;
         var panelGameArea:TPanel;
@@ -44,6 +85,19 @@ interface
         var panelRightSideInfo:TPanel;
         var panelButtons:TPanel
     );
+
+    {
+        Creates all side buttons of the main form
+
+        @param  IN/OUT  newParent the new parant of them
+                        all buttons:    pipeLidButton,
+                                        pipeButton,
+                                        pipeTSplitButton,
+                                        pipeCurveButton,
+                                        gamemodeButton
+                IN      onItemChoseClick eventPointer when button clicked
+                        onGamemodeButtonClick when the gamemode Button has been clicked
+    }
     procedure createInfoButtons(
         var newParent:TPanel;
         var pipeLidButton:TButton;
@@ -54,6 +108,20 @@ interface
         var gamemodeButton:TButton;
         onGamemodeButtonClick:TNotifyEvent
     );
+    
+    {
+        Creates all side Buttons for saving and loading ect.
+
+        @param  IN/OUT  b1 is the NEW button
+                        b2 is the Settings button
+                        b3 is the Load button
+                        b4 is the Save button
+                        b5 is the quit button
+
+                // todo use button ids and a case in one function
+                IN      b1Procedure
+                        b2Procedure
+    }
     procedure createButtons(
         var b1:TButton;
         b1Procedure:TNotifyEvent;
@@ -89,15 +157,6 @@ implementation
             end;
         end;
 
-    {
-        setup for the panel
-        parent and name to variables
-        and the caption to empty
-
-        @param  panel the target
-                panelParent the parent of target panel
-                parentName the name of the target panel
-    }
     procedure panelSetup(
         var panel:TPanel;
         panelParent:TWinControl;
@@ -112,18 +171,6 @@ implementation
             end;
         end;
 
-
-    {
-        Creates a panelgrid with rowCount and columnCount dimentions,
-        sets the cells and spaces them evently out
-
-        IN/OUT:     cellGrid
-                    cellField field of all cells
-
-        IN:         panelParent the parent of cellGrid
-                    rowCount and columnCount the dimentions of the field
-                    onCellClick the clickevent of the cells
-    }
     procedure createCellGrid(
         var cellGrid:TGridPanel;
         panelParent:TWinControl;
@@ -177,7 +224,6 @@ implementation
 
     procedure removeCellGrid(
         var cellGrid:TGridPanel;
-        panelParent:TWinControl;
         var cellField:TCellField
     );
     var i, j:integer;
@@ -188,23 +234,13 @@ implementation
             begin
                 cellField[i, j].image.picture := nil;
                 cellField[i, j].image.Free;
+                cellField[i, j].image := nil;
                 delPositionList(cellField[i,j].openings);
             end;
         cellGrid.Free;
+        cellGrid := nil;
     end;
 
-    {
-        Gives each panel its position and size,
-        relativ to the width and height of the FMain size
-
-        @param  mainWidth: width of FMain
-                mainHeight: newHeight of FMain
-                panelGameArea: the Gamearea panel
-                panelGamefield: the field for the cells
-                panelRightsideArea: the panel on the right side
-                panelRightSideInfo: the panel with info text
-                panelButtons: the panel on the right side with buttons
-    }
     procedure panelRedraw(
         mainWidth, mainHeight:integer;
         var panelGameArea:TPanel;
@@ -261,10 +297,12 @@ implementation
     {
         @brief  Creates a Button with passed positions, names and onclick fucntioncall
 
-        @param  button as the Changed button
-                topPos and leftPos as integer
-                buttonName, buttonCaption as string
-                functionPointer as TNotifyEvent
+        @param  IN/OUT  button as the Changed button
+                        newParent
+                
+                IN      topPos and leftPos as integer
+                        buttonName, buttonCaption as string
+                        functionPointer as TNotifyEvent
     }
     procedure createOptionButton(
         var button:TButton;
@@ -295,7 +333,6 @@ implementation
         onGamemodeButtonClick:TNotifyEvent
     );
     begin
-            // PIPE_LID,
         createOptionButton(
             pipeLidButton,
             newParent,

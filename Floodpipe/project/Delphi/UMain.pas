@@ -183,7 +183,7 @@ begin
                 if getSettingsFromFSettings() then
                 begin
                     // todo ask for window reload
-                    removeCellGrid(cellGrid, panelGamefield, cellField);
+                    removeCellGrid(cellGrid, cellField);
                     createCellGrid(cellGrid, panelGamefield, cellField, cellRowLength,
                         cellColumnLength, onCellMouseDown);
                     generateGame(cellField, cellRowLength, cellColumnLength,
@@ -213,11 +213,17 @@ begin
                 mbRight: rotateCellClockwise(
                     cellField[position.x, position.y]
                 );
-                else; // nothing
+                mbMiddle: setCellFieldToItem(
+                    cellField,
+                    TYPE_WALL,
+                    PIPE,
+                    CONTENT_EMPTY,
+                    NONE
+                );
             end; 
         end
-        // just a normal click action
-        else onCellClick(Sender);
+        else // not editor mode
+            onCellClick(Sender);
     end;
 end;
 
@@ -383,10 +389,7 @@ begin
     // for randomniss
     randomize;
 
-    // FMain setup
-    FMain.Constraints.MinWidth := MAIN_FORM_MIN_WIDTH;
-    FMain.Constraints.MinHeight := MAIN_FORM_MIN_HEIGHT;
-    // create panel-layout
+    // ===CREATE PANEL-LAYOUT===
     // panel game area
     panelSetup(panelGameArea, FMain, 'panelGameArea');
     // panel gamefield

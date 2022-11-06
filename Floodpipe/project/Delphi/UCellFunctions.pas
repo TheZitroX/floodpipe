@@ -16,20 +16,69 @@ interface
 
         UTypedefine, UPixelfunctions, UProperties, UPositionFunctions;
 
+    {
+        Creates a cell with name and parant
+        @param  IN/OUT  cell as target
+
+                IN      newParent the parant of target
+                        newName the name of target
+    }
     procedure cellSetup(
         var cell:TCell;
         newParent:TWinControl;
         newName:string
     );
+
+    {
+        creates a field (rows * columns) of TCellField
+
+        @param  IN/OUT  cellField the field of TPanel
+
+                IN      newParent the parent of cellField
+                        rowCount the row-count
+                        columnCount the column-count
+                        onCellClick as mouseEvent
+    }
     procedure createCells(
         var cellField:TCellField;
         newParent:TWinControl;
         rowCount, columnCount:integer;
         onCellClick:TMouseEvent
     );
+
+    {
+        @brief  increments the rotational state of a cell
+                and updates the bitmap of it
+        
+        @param  IN/OUT  TCell the rotated cell
+    }
     procedure rotateCellClockwise(var cell:TCell);
+
+    {
+        @brief  gets the position of a cell name
+
+        @param  IN      string the cell name
+                OUT     TPosition with the x and y values of the name
+    }
     function getPositionFromName(name:string):TPosition;
+
+    {
+        gets all openings of a pipe and makes a string from it
+
+        @param  IN      the target cell
+                OUT     a string with all openings of the pipe
+    }
     function cellOpeningsToString(cell:TCell):string;
+
+    {
+        sets a cell to the passed types
+
+        @param  IN/OUT  the target cell
+                IN      celltype,
+                        cellitem,
+                        cellContent,
+                        cellRotation
+    }
     procedure setCellToItem(
         var cell:TCell;
         newCellType:TCellType;
@@ -37,21 +86,77 @@ interface
         newCellContent:TCellContent;
         newCellRotation:TCellRotation
     );
+
+    {
+        sets all cells in cellField to the passed types
+
+        @param  IN/OUT  cellField with 2d cell array
+                IN      celltype,
+                        cellitem,
+                        cellContent,
+                        cellRotation
+    }
+    procedure setCellFieldToItem(
+        var cellField:TCellField;
+        newCellType:TCellType;
+        newCellItem:TCellItem;
+        newCellContent:TCellContent;
+        newCellRotation:TCellRotation
+    );
+
+    {
+        fills a cell with content
+
+        @param  IN/OUT  target cell
+                IN      content type
+    }
     procedure fillCellWithContent(var cell:TCell; content:TCellContent);
+
+    {
+        returns true when a cell is empty
+
+        @param  IN      the target cell
+                RETURN  true when cell is empty
+    }
     function isCellEmpty(cell:TCell):boolean;
+
+    {
+        gets a cell from position
+
+        @param  IN      cellField with all cells
+                        position (has to be in field!)
+
+                RETURN  the cell on the position in field
+    }
     function getCellFromPosition(cellField:TCellField; position:TPosition):TCell;
+
+    {
+        tells if a cell is connected to a position
+        returns false if celltype is not TYPE_PIPE
+
+        @param  IN      cell the target cell
+                        position of expected connection
+    }
     function isCellConnected(cell:TCell; position:TPosition):boolean;
+
+    {
+        returns true when cellType equals type of position in cellField
+
+        @param  IN      cellField with cells
+                        position of target cell in field
+                        and the cellType
+    }
     function positionEqualsType(cellField:TCellField; position:TPosition; cellType:TCellType):boolean;
+
+    {
+        sets the openings from type and rotation of a cell
+
+        @param  IN/OUT  target cell
+    }
     procedure setOpeningsFromRotation(var cell:TCell);
 
 implementation
 
-    {
-        Creates a cell with name and parant
-        @param  cell as target
-                newParent the parant of target
-                newName the name of target
-    }
     procedure cellSetup(
         var cell:TCell;
         newParent:TWinControl;
@@ -71,13 +176,6 @@ implementation
         end;
     end;
 
-    {
-        sets a cell to the passed types
-
-        @param  IN/OUT: the target cell
-                IN:     celltype, cellitem,
-                        cellContent and cellRotation
-    }
     procedure setCellToItem(
         var cell:TCell;
         newCellType:TCellType;
@@ -97,12 +195,28 @@ implementation
         setOpeningsFromRotation(cell);
     end;
 
+    procedure setCellFieldToItem(
+        var cellField:TCellField;
+        newCellType:TCellType;
+        newCellItem:TCellItem;
+        newCellContent:TCellContent;
+        newCellRotation:TCellRotation
+    );
+    var i,j:integer;
+    begin
+        for i := 0 to length(cellField) - 1 do
+            for j := 0 to length(cellField[0]) - 1 do
+            begin
+                setCellToItem(
+                    cellField[i, j],
+                    newCellType,
+                    newCellItem,
+                    newCellContent,
+                    newCellRotation
+                );
+            end;
+    end;
 
-    {
-        sets the openings from type and rotation of a cell
-
-        @param  IN/OUT: target cell
-    }
     procedure setOpeningsFromRotation(var cell:TCell);
     begin
         with cell do begin
@@ -136,14 +250,6 @@ implementation
         end;
     end;
 
-    {
-        creates a field (rows * columns) of TCellField
-
-        @param  cellField the field of TPanel
-                newParent the parent of cellField
-                rowCount the row-count
-                columnCount the column-count
-    }
     procedure createCells(
         var cellField:TCellField;
         newParent:TWinControl;
@@ -181,12 +287,6 @@ implementation
             end;
     end;
 
-    {
-        @brief  increments the rotational state of a cell
-                and updates the bitmap of it
-        
-        @param  IN/OUT: TCell the rotated cell
-    }
     procedure rotateCellClockwise(var cell:TCell);
     begin
         if (cell.cellRotation = high(TCellRotation)) then
@@ -196,12 +296,6 @@ implementation
         rotatePositions(cell);
     end;
 
-    {
-        @brief  gets the position of a cell name
-
-        @param  IN:     string the cell name
-                OUT:    TPosition with the x and y values of the name
-    }
     function getPositionFromName(name:string):TPosition;
         {
             @brief  to get the x-integer-value of the Cell-name
@@ -243,12 +337,6 @@ implementation
         getPositionFromName := position;
     end;
 
-    {
-        gets all openings of a pipe and makes a string from it
-
-        @param  IN:     the target cell
-                OUT:    a string with all openings of the pipe
-    }
     function cellOpeningsToString(cell:TCell):string;
     var
         stringBuilder:TStringBuilder;
@@ -269,36 +357,17 @@ implementation
         cellOpeningsToString := stringBuilder.toString();
     end;
 
-    {
-        fills a cell with content
-
-        @param  IN/OUT: target cell
-                IN:     content type
-    }
     procedure fillCellWithContent(var cell:TCell; content:TCellContent);
     begin
         cell.cellContent := content;
         loadPictureFromBitmap(cell);
     end;
 
-    {
-        returns true when a cell is empty
-
-        @param  IN:     the target cell
-                RETURN: true when cell is empty
-    }
     function isCellEmpty(cell:TCell):boolean;
     begin
         isCellEmpty := cell.cellContent = TCellContent.CONTENT_EMPTY;
     end;
 
-    {
-        gets a cell from position
-
-        @param  IN:     cellField with all cells
-                        position (has to be in field!)
-                RETURN: the cell on the position in field
-    }
     function getCellFromPosition(cellField:TCellField; position:TPosition):TCell;
     begin
         getCellFromPosition := cellField[
@@ -307,13 +376,6 @@ implementation
         ];
     end;
 
-    {
-        tells if a cell is connected to a position
-        returns false if celltype is not TYPE_PIPE
-
-        @param  IN:     cell the target cell
-                        position of expected connection
-    }
     function isCellConnected(cell:TCell; position:TPosition):boolean;
     var
         openingsRunner:PPositionNode;
@@ -336,13 +398,6 @@ implementation
         isCellConnected := isConnected;
     end;
 
-    {
-        returns true when cellType equals type of position in cellField
-
-        @param  IN:     cellField with cells
-                        position of target cell in field
-                        and the cellType
-    }
     function positionEqualsType(cellField:TCellField; position:TPosition; cellType:TCellType):boolean;
     begin
         positionEqualsType := cellField[position.x, position.y].cellType = cellType;
