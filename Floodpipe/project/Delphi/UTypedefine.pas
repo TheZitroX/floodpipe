@@ -49,10 +49,10 @@ interface
             PIPE_BUTTON,
             PIPE_TSPLIT_BUTTON,
             PIPE_CURVE_BUTTON,
-            WALL_BUTTON,
-            GAMEMODE_BUTTON
+            WALL_BUTTON
         );
         TSideButton = (
+            GAMEMODE_BUTTON,
             NEW_BUTTON,
             SETTINGS_BUTTON,
             LOAD_BUTTON,

@@ -175,6 +175,8 @@ implementation
     procedure TFMain.onSideButtonClick(Sender: TObject);
     begin
         case TSideButton((Sender as TButton).tag) of
+            GAMEMODE_BUTTON:
+                onGamemodeButtonClick(Sender);
             NEW_BUTTON:
                onNewButtonClick(Sender);
             SETTINGS_BUTTON: 
