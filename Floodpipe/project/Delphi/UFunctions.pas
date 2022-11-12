@@ -124,13 +124,12 @@ interface
     }
     procedure createButtons(
         var b1:TButton;
-        b1Procedure:TNotifyEvent;
         var b2:TButton;
-        b2Procedure:TNotifyEvent;
         var b3:TButton;
         var b4:TButton;
-        var b5:TButton;
-        var newParent:TPanel
+        var btnExit:TButton;
+        var newParent:TPanel;
+        onClickFunction:TNotifyEvent
     );
 
 implementation
@@ -260,7 +259,7 @@ implementation
             mainHeight
         );
         // panelGamefield
-        tempHeight := (mainHeight * 80) div 100; // 80% of Height
+        tempHeight := mainHeight; // 100% of Height
         setDimentions(
             panelGamefield,
             panelGameArea.Height - tempHeight, // height of panelGamearea - height of panelGamefield
@@ -309,7 +308,8 @@ implementation
         var newParent:TPanel;
         buttonName, buttonCaption:string;
         functionPointer:TNotifyEvent;
-        newAlign:TAlign
+        newAlign:TAlign;
+        id:integer
     );
     begin
         button := TButton.Create(newParent);
@@ -319,6 +319,7 @@ implementation
             Caption := buttonCaption;
             OnClick := functionPointer;
             Align := newAlign;
+            Tag := id;
         end;
     end;
 
@@ -339,39 +340,42 @@ implementation
             'pipeLidButton',
             'Lid',
             onItemChooseClick,
-            alTop
+            alTop,
+            integer(PIPE_LID_BUTTON)
         );
-        pipeLidButton.tag := integer(PIPE_LID_BUTTON);
         pipeLidButton.visible := false;
+
         createOptionButton(
             pipeButton,
             newParent,
             'pipeButton',
             'Pipe',
             onItemChooseClick,
-            alTop
+            alTop,
+            integer(PIPE_BUTTON)
         );
-        pipeButton.tag := integer(PIPE_BUTTON);
         pipeButton.visible := false;
+
         createOptionButton(
             pipeTSplitButton,
             newParent,
             'pipeTSplitButton',
             'T-Split',
             onItemChooseClick,
-            alTop
+            alTop,
+            integer(PIPE_TSPLIT_BUTTON)
         );
-        pipeTSplitButton.tag := integer(PIPE_TSPLIT_BUTTON);
         pipeTSplitButton.visible := false;
+
         createOptionButton(
             pipeCurveButton,
             newParent,
             'pipeCurveButton',
             'Curve',
             onItemChooseClick,
-            alTop
+            alTop,
+            integer(PIPE_CURVE_BUTTON)
         );
-        pipeCurveButton.tag := integer(PIPE_CURVE_BUTTON);
         pipeCurveButton.visible := false;
 
 
@@ -381,19 +385,19 @@ implementation
             'gamemodeButton',
             'Playing',
             onGamemodeButtonClick,
-            alBottom
+            alBottom,
+            integer(GAMEMODE_BUTTON)
         );
     end;
 
     procedure createButtons(
         var b1:TButton;
-        b1Procedure:TNotifyEvent;
         var b2:TButton;
-        b2Procedure:TNotifyEvent;
         var b3:TButton;
         var b4:TButton;
-        var b5:TButton;
-        var newParent:TPanel
+        var btnExit:TButton;
+        var newParent:TPanel;
+        onClickFunction:TNotifyEvent
     );
     begin
         createOptionButton(
@@ -401,16 +405,18 @@ implementation
             newParent,
             'newGameButton',
             'New',
-            b1Procedure,
-            TAlign(alTop)
+            onClickFunction,
+            TAlign(alTop),
+            integer(NEW_BUTTON)
         );
         createOptionButton(
             b2,
             newParent,
             'settingsButton',
             'Settings',
-            b2Procedure,
-            TAlign(alTop)
+            onClickFunction,
+            TAlign(alTop),
+            integer(SETTINGS_BUTTON)
         );
         createOptionButton(
             b3,
@@ -418,7 +424,8 @@ implementation
             'loadGameButton',
             'Load',
             nil,
-            TAlign(alTop)
+            TAlign(alTop),
+            integer(LOAD_BUTTON)
         );
         createOptionButton(
             b4,
@@ -426,15 +433,17 @@ implementation
             'saveGameButton',
             'Save',
             nil, 
-            TAlign(alTop)
+            TAlign(alTop),
+            integer(SAVE_BUTTON)
         );
         createOptionButton(
-            b5,
+            btnExit,
             newParent,
             'quitGameButton',
             'Quit',
-            nil,
-            TAlign(alTop)
+            onClickFunction,
+            TAlign(alTop),
+            integer(EXIT_BUTTON)
         );
     end;
 end.

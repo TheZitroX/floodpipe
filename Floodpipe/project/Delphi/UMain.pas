@@ -25,30 +25,103 @@ uses
 
 type
     TFMain = class(TForm)
-        procedure FormCanResize(Sender: TObject;
-          var NewWidth, NewHeight: Integer; var Resize: Boolean);
+
+        {
+            On Resize the aspect ratio will be maintained
+            // fixme Horizontal sizing is not possible
+
+            @param  IN      Sender: not used
+
+                    IN/OUT  NewWidth: used to get the Width
+                            NewHeight: changed the height of the form
+                            Resize: not used
+        }
+        procedure FormCanResize(
+            Sender: TObject;
+            var NewWidth, NewHeight: Integer;
+            var Resize: Boolean
+        );
+
+        {
+            Setup before the FMain shows
+            Panels, buttons and the game is setup here
+
+            @param  IN      Sender: not used
+        }
         procedure FormCreate(Sender: TObject);
         procedure FormResize(Sender: TObject);
+
+        {
+            Calles the panelRedraw procedure to update all positions and sizes
+        }
         procedure updateLayout();
+
+        {
+            Timer works through the waterSourcePositionQueueList
+
+            @param  IN      Sender: the TTimer
+
+                    Global  waterSourcePositionQueueList die abzuarbeiten ist
+        }
         procedure cellQueueHandler(Sender: TObject);
+
         procedure cellQueueHandlerFinalize();
+
+        {
+            stating an animation and disable buttons
+        }
+        procedure animationStart();
+
+        {
+            finishing an animation and enable buttons
+        }
+        procedure finalizeAnimation();
+
+        {
+            sets all buttons and inputfields enabled to b
+
+            @param  IN      b: true for enabled false for the oposite :)
+        }
+        procedure enableSimulationMode(b: Boolean);
+
+        procedure formSetup();
+
+        {
+            sets values from membervariables to FSettings
+        }
+        procedure setFSettingsFromSettings();
+
+        {
+            gets values from FSettings and puts them in membervariables
+
+            @return true when a new-build needs to be made
+        }
+        function getSettingsFromFSettings(): Boolean;
+
+        // ======buttonMethods======
         procedure onCellClick(Sender: TObject);
         procedure onCellMouseDown(
             Sender: TObject;
             Button: TMouseButton;
             Shift: TShiftState; X, Y: Integer
         );
-        procedure animationStart();
-        procedure finalizeAnimation();
-        procedure enableSimulationMode(b: Boolean);
-        procedure formSetup();
-        procedure setFSettingsFromSettings();
-        function getSettingsFromFSettings(): Boolean;
-
-        // buttonMethods
         procedure onGamemodeButtonClick(Sender: TObject);
         procedure onNewButtonClick(Sender: TObject);
+
+        {
+            opens a settings menu
+            when specific changes has been made a game restart will be made
+
+            @param  IN      Sender: the button 
+        }
         procedure onSettingsButtonClick(Sender: TObject);
+        
+        {
+            handles all side button onclick events
+
+            @param  IN      Sender: the button
+        }
+        procedure onSideButtonClick(Sender: TObject);
         procedure onItemChooseClick(Sender: TObject);
 
     public
@@ -97,403 +170,368 @@ var
 
 implementation
 
-{$R *.dfm}
+    {$R *.dfm}
 
-procedure TFMain.onItemChooseClick(Sender: TObject);
-begin
-    if (oldButton <> nil) then
+    procedure TFMain.onSideButtonClick(Sender: TObject);
     begin
-        // remove font style of old button
-        oldButton.font.style := [];
+        case TSideButton((Sender as TButton).tag) of
+            NEW_BUTTON:
+               onNewButtonClick(Sender);
+            SETTINGS_BUTTON: 
+                onSettingsButtonClick(Sender);
+            EXIT_BUTTON:
+                // todo abfrage nach speichern oder ob geschlossen werden soll
+                Application.Terminate;
+            else; // nothing
+        end;
     end;
 
-    if (checkedItem = TItemButton((Sender as TButton).tag)) then
-        checkedItem := NONE_BUTTON
-    else checkedItem := TItemButton((Sender as TButton).tag);
-
-    case checkedItem of
-        PIPE_LID_BUTTON:
-        begin
-            (Sender as TButton).font.style := [fsBold];
-        end;
-        PIPE_BUTTON:
-        begin
-            (Sender as TButton).font.style := [fsBold];
-        end;
-        PIPE_TSPLIT_BUTTON:
-        begin
-            (Sender as TButton).font.style := [fsBold];
-        end;
-        PIPE_CURVE_BUTTON:
-        begin
-            (Sender as TButton).font.style := [fsBold];
-        end;
-        WALL_BUTTON:
-        begin
-            (Sender as TButton).font.style := [fsBold];
-        end;
-        else; // maybe assertions
-    end;
-
-    oldButton := (Sender as TButton);
-end;
-
-procedure TFMain.setItemButtonVisibility(b:boolean);
-begin
-    pipeLidButton.visible := b;
-    pipeButton.visible := b;
-    pipeTSplitButton.visible := b;
-    pipeCurveButton.visible := b;
-end;
-
-procedure TFMain.onGamemodeButtonClick(Sender: TObject);
-begin
-    isEditorMode := not isEditorMode;
-
-    // changing to editormode
-    if (isEditorMode) then
+    procedure TFMain.onItemChooseClick(Sender: TObject);
     begin
-        gamemodeButton.caption := 'Editor';
-        setItemButtonVisibility(true);
-    end
-    else // isEditorMode == false
-    begin
-        gamemodeButton.caption := 'Playing';
-        checkedItem := NONE_BUTTON;
-        // remove font style of old button
         if (oldButton <> nil) then
-            oldButton.font.style := [];
-        setItemButtonVisibility(false);
-    end;
-end;
-
-procedure TFMain.onNewButtonClick(Sender: TObject);
-begin
-    animationStart();
-end;
-
-procedure TFMain.onSettingsButtonClick(Sender: TObject);
-begin
-    case FSettings.ShowModal of
-        mrOk:
         begin
-            // settings übernehmen welche die simulation beeinflussen würde
-            if (not isSimulating) then
+            // remove font style of old button
+            oldButton.font.style := [];
+        end;
+
+        if (checkedItem = TItemButton((Sender as TButton).tag)) then
+            checkedItem := NONE_BUTTON
+        else checkedItem := TItemButton((Sender as TButton).tag);
+
+        case checkedItem of
+            PIPE_LID_BUTTON,
+            PIPE_BUTTON,
+            PIPE_TSPLIT_BUTTON,
+            PIPE_CURVE_BUTTON,
+            WALL_BUTTON:
+                (Sender as TButton).font.style := [fsBold];
+
+            else; // maybe assertions
+        end;
+
+        oldButton := (Sender as TButton);
+    end;
+
+    procedure TFMain.setItemButtonVisibility(b:boolean);
+    begin
+        pipeLidButton.visible := b;
+        pipeButton.visible := b;
+        pipeTSplitButton.visible := b;
+        pipeCurveButton.visible := b;
+    end;
+
+    procedure TFMain.onGamemodeButtonClick(Sender: TObject);
+    begin
+        isEditorMode := not isEditorMode;
+
+        // changing to editormode
+        if (isEditorMode) then
+        begin
+            gamemodeButton.caption := 'Editor';
+            setItemButtonVisibility(true);
+        end
+        else // isEditorMode == false
+        begin
+            gamemodeButton.caption := 'Playing';
+            checkedItem := NONE_BUTTON;
+            // remove font style of old button
+            if (oldButton <> nil) then
+                oldButton.font.style := [];
+            setItemButtonVisibility(false);
+        end;
+    end;
+
+    procedure TFMain.onNewButtonClick(Sender: TObject);
+    begin
+        animationStart();
+    end;
+
+    procedure TFMain.onSettingsButtonClick(Sender: TObject);
+    begin
+        case FSettings.ShowModal of
+            mrOk:
             begin
-                if getSettingsFromFSettings() then
+                // settings übernehmen welche die simulation beeinflussen würde
+                if (not isSimulating) then
                 begin
-                    // todo ask for window reload
-                    removeCellGrid(cellGrid, cellField);
-                    createCellGrid(cellGrid, panelGamefield, cellField, cellRowLength,
-                        cellColumnLength, onCellMouseDown);
-                    generateGame(cellField, cellRowLength, cellColumnLength,
-                        wallPercentage, waterSourcePositionQueueList);
+                    if getSettingsFromFSettings() then
+                    begin
+                        // todo ask for window reload
+                        removeCellGrid(cellGrid, cellField);
+                        createCellGrid(cellGrid, panelGamefield, cellField, cellRowLength,
+                            cellColumnLength, onCellMouseDown);
+                        generateGame(cellField, cellRowLength, cellColumnLength,
+                            wallPercentage, waterSourcePositionQueueList);
+                    end;
                 end;
             end;
+            mrCancel:
+                setFSettingsFromSettings();
         end;
-        mrCancel:
-            setFSettingsFromSettings();
     end;
-end;
 
-procedure TFMain.onCellMouseDown(
-    Sender: TObject;
-    Button: TMouseButton;
-    Shift: TShiftState; X, Y: Integer
-);
-var position:TPosition;
-begin
-    if not isSimulating then
+    procedure TFMain.onCellMouseDown(
+        Sender: TObject;
+        Button: TMouseButton;
+        Shift: TShiftState; X, Y: Integer
+    );
+    var position:TPosition;
     begin
-        if isEditorMode then
+        if not isSimulating then
+        begin
+            if isEditorMode then
+            begin
+                position := getPositionFromName(TImage(Sender).name);
+                case Button of
+                    mbLeft: onCellClick(Sender);
+                    mbRight: rotateCellClockwise(
+                        cellField[position.x, position.y]
+                    );
+                    mbMiddle: setCellFieldToItem(
+                        cellField,
+                        TYPE_WALL,
+                        PIPE,
+                        CONTENT_EMPTY,
+                        NONE
+                    );
+                end; 
+            end
+            else // not editor mode
+                onCellClick(Sender);
+        end;
+    end;
+
+    procedure TFMain.onCellClick(Sender: TObject);
+    var position: TPosition;
+    begin
+        if not isSimulating then
         begin
             position := getPositionFromName(TImage(Sender).name);
-            case Button of
-                mbLeft: onCellClick(Sender);
-                mbRight: rotateCellClockwise(
-                    cellField[position.x, position.y]
+
+            case checkedItem of
+            NONE_BUTTON:
+            begin
+                rotateCellClockwise(
+                    cellField[
+                        position.x,
+                        position.y
+                    ]
                 );
-                mbMiddle: setCellFieldToItem(
-                    cellField,
-                    TYPE_WALL,
+                // fixme change back to rotation when finished debuggin
+                // if setWaterSource(cellField, waterSourcePositionQueueList,
+                //   getPositionFromName(TImage(Sender).name)) then;
+            end;
+            PIPE_LID_BUTTON:
+            begin
+                setCellToItem(
+                    cellField[position.x, position.y],
+                    TYPE_PIPE,
+                    PIPE_LID,
+                    CONTENT_EMPTY,
+                    NONE
+                );
+            end;
+            PIPE_BUTTON:
+            begin
+                setCellToItem(
+                    cellField[position.x, position.y],
+                    TYPE_PIPE,
                     PIPE,
                     CONTENT_EMPTY,
                     NONE
                 );
-            end; 
+            end;
+            PIPE_TSPLIT_BUTTON:
+            begin
+                setCellToItem(
+                    cellField[position.x, position.y],
+                    TYPE_PIPE,
+                    PIPE_TSPLIT,
+                    CONTENT_EMPTY,
+                    NONE
+                );
+            end;
+            PIPE_CURVE_BUTTON:
+            begin
+                setCellToItem(
+                    cellField[position.x, position.y],
+                    TYPE_PIPE,
+                    PIPE_CURVES,
+                    CONTENT_EMPTY,
+                    NONE
+                );
+            end;
+            WALL_BUTTON:
+            begin
+                setCellToItem(
+                    cellField[position.x, position.y],
+                    TYPE_WALL,
+                    PIPE_LID,
+                    CONTENT_EMPTY,
+                    NONE
+                );
+            end;
+
+            else showmessage('no such item');
+            end;
+        end;
+    end;
+
+    procedure TFMain.updateLayout();
+    begin
+        // update positions
+        panelRedraw(FMain.ClientWidth, FMain.ClientHeight, panelGameArea,
+        panelGamefield, panelRightSideArea, panelRightSideInfo, panelButtons);
+    end;
+
+    procedure TFMain.cellQueueHandlerFinalize();
+    begin
+        finalizeAnimation();
+        // todo set leak positions on field
+    end;
+
+    procedure TFMain.setFSettingsFromSettings();
+    begin
+        FSettings.nbRows.Value := cellRowLength;
+        FSettings.nbColumns.Value := cellColumnLength;
+        FSettings.nbAnimationTime.Value := cellAnimationTickRate;
+    end;
+
+    function TFMain.getSettingsFromFSettings(): Boolean;
+    begin
+        getSettingsFromFSettings := 
+            (cellRowLength <> round(FSettings.nbRows.Value)) or
+            (cellColumnLength <> round(FSettings.nbColumns.Value)) or
+            (wallPercentage <> round(FSettings.nbWallPercentage.Value));
+
+        cellRowLength := round(FSettings.nbRows.Value);
+        cellColumnLength := round(FSettings.nbColumns.Value);
+        wallPercentage := round(FSettings.nbWallPercentage.Value);
+
+        // no new-build needed when those settings change
+        cellAnimationTickRate := round(FSettings.nbAnimationTime.Value);
+        fluidtimer.interval := cellAnimationTickRate;
+    end;
+
+    procedure TFMain.cellQueueHandler(Sender: TObject);
+    begin
+        // disable to get no overflow when waiting for fluidMove(...)
+        (Sender as TTimer).Enabled := false;
+
+        // stop animation when finished
+        if isPositionListEmpty(waterSourcePositionQueueList) then
+        begin
+            cellQueueHandlerFinalize();
         end
-        else // not editor mode
-            onCellClick(Sender);
-    end;
-end;
-
-procedure TFMain.onCellClick(Sender: TObject);
-var position: TPosition;
-begin
-    if not isSimulating then
-    begin
-        position := getPositionFromName(TImage(Sender).name);
-
-        case checkedItem of
-        NONE_BUTTON:
+        else
         begin
-            rotateCellClockwise(
-                cellField[
-                    position.x,
-                    position.y
-                ]
-            );
-            // fixme change back to rotation when finished debuggin
-            // if setWaterSource(cellField, waterSourcePositionQueueList,
-            //   getPositionFromName(TImage(Sender).name)) then;
-        end;
-        PIPE_LID_BUTTON:
-        begin
-            setCellToItem(
-                cellField[position.x, position.y],
-                TYPE_PIPE,
-                PIPE_LID,
-                CONTENT_EMPTY,
-                NONE
-            );
-        end;
-        PIPE_BUTTON:
-        begin
-            setCellToItem(
-                cellField[position.x, position.y],
-                TYPE_PIPE,
-                PIPE,
-                CONTENT_EMPTY,
-                NONE
-            );
-        end;
-        PIPE_TSPLIT_BUTTON:
-        begin
-            setCellToItem(
-                cellField[position.x, position.y],
-                TYPE_PIPE,
-                PIPE_TSPLIT,
-                CONTENT_EMPTY,
-                NONE
-            );
-        end;
-        PIPE_CURVE_BUTTON:
-        begin
-            setCellToItem(
-                cellField[position.x, position.y],
-                TYPE_PIPE,
-                PIPE_CURVES,
-                CONTENT_EMPTY,
-                NONE
-            );
-        end;
-        WALL_BUTTON:
-        begin
-            setCellToItem(
-                cellField[position.x, position.y],
-                TYPE_WALL,
-                PIPE_LID,
-                CONTENT_EMPTY,
-                NONE
-            );
-        end;
-
-        else showmessage('no such item');
+            fluidMove(cellField, waterSourcePositionQueueList);
+            // continiue animation
+            (Sender as TTimer).Enabled := true;
         end;
     end;
-end;
 
-{
-  Calles the panelRedraw procedure to update all positions and sizes
-}
-procedure TFMain.updateLayout();
-begin
-    // update positions
-    panelRedraw(FMain.ClientWidth, FMain.ClientHeight, panelGameArea,
-      panelGamefield, panelRightSideArea, panelRightSideInfo, panelButtons);
-end;
-
-procedure TFMain.cellQueueHandlerFinalize();
-begin
-    finalizeAnimation();
-    // todo set leak positions on field
-end;
-
-{
-  sets values from membervariables to FSettings
-}
-procedure TFMain.setFSettingsFromSettings();
-begin
-    FSettings.nbRows.Value := cellRowLength;
-    FSettings.nbColumns.Value := cellColumnLength;
-    FSettings.nbAnimationTime.Value := cellAnimationTickRate;
-end;
-
-{
-  gets values from FSettings and puts them in membervariables
-
-  @return     true when a new-build needs to be made
-}
-function TFMain.getSettingsFromFSettings(): Boolean;
-begin
-    getSettingsFromFSettings := 
-        (cellRowLength <> round(FSettings.nbRows.Value)) or
-        (cellColumnLength <> round(FSettings.nbColumns.Value)) or
-        (wallPercentage <> round(FSettings.nbWallPercentage.Value));
-
-    cellRowLength := round(FSettings.nbRows.Value);
-    cellColumnLength := round(FSettings.nbColumns.Value);
-    wallPercentage := round(FSettings.nbWallPercentage.Value);
-
-    // no new-build needed when those settings change
-    cellAnimationTickRate := round(FSettings.nbAnimationTime.Value);
-    fluidtimer.interval := cellAnimationTickRate;
-end;
-
-{
-  Works through the waterSourcePositionQueueList
-
-  Global: waterSourcePositionQueueList die abzuarbeiten ist
-}
-procedure TFMain.cellQueueHandler(Sender: TObject);
-begin
-    // disable to get no overflow when waiting for fluidMove(...)
-    (Sender as TTimer).Enabled := false;
-
-    // stop animation when finished
-    if isPositionListEmpty(waterSourcePositionQueueList) then
+    procedure TFMain.formSetup();
     begin
-        cellQueueHandlerFinalize();
-    end
-    else
-    begin
-        fluidMove(cellField, waterSourcePositionQueueList);
-        // continiue animation
-        (Sender as TTimer).Enabled := true;
+        // inizialize
+        waterSourcePositionQueueList.firstNode := nil;
+        checkedItem := NONE_BUTTON;
+        oldButton := nil;
+
+        // set default values
+        cellRowLength := DEFAULT_CELL_ROW_COUNT;
+        cellColumnLength := DEFAULT_CELL_COLUMN_COUNT;
+        wallPercentage := DEFAULT_WALL_PERCENTAGE;
+        cellAnimationTickRate := DEFAULT_CELL_TICK_RATE;
+
+        // for randomniss
+        randomize;
+
+        // ===CREATE PANEL-LAYOUT===
+        // panel game area
+        panelSetup(panelGameArea, FMain, 'panelGameArea');
+        // panel gamefield
+        panelSetup(panelGamefield, panelGameArea, 'panelGamefield');
+        // gridpanel cellGrid
+        createCellGrid(cellGrid, panelGamefield, cellField, cellRowLength,
+        cellColumnLength, onCellMouseDown);
+        // panel right side area
+        panelSetup(panelRightSideArea, FMain, 'panelSetup');
+        // panel Right side info
+        panelSetup(panelRightSideInfo, panelRightSideArea, 'panelRightSideInfo');
+        createInfoButtons(panelrightSideInfo,
+            pipeLidButton, pipeButton, pipeTSplitButton, pipeCurveButton, onItemChooseClick,
+            gamemodeButton, onSideButtonClick 
+        );
+        // panel Right side info
+        panelSetup(panelButtons, panelRightSideArea, 'panelButtons');
+        // buttons with panelButtons as parent
+        createButtons(
+            newGameButton,
+            settingsButton,
+            loadGameButton,
+            saveGameButton,
+            exitGameButton,
+            panelButtons,
+            onSideButtonClick
+        );
+
+        updateLayout();
+
+        // todo aufruf bei animation
+        // flow start
+        // fix testwise
+        // if setWaterSource(cellField, waterSourcePositionQueueList, getPosition(5, 5)) then;
+        fluidTimer := TTimer.Create(FMain);
+        with fluidTimer do
+        begin
+            Interval := cellAnimationTickRate;
+            OnTimer := FMain.cellQueueHandler;
+            Enabled := false;
+        end;
     end;
-end;
 
-procedure TFMain.formSetup();
-begin
-    // inizialize
-    waterSourcePositionQueueList.firstNode := nil;
-    checkedItem := NONE_BUTTON;
-    oldButton := nil;
-
-    // set default values
-    cellRowLength := DEFAULT_CELL_ROW_COUNT;
-    cellColumnLength := DEFAULT_CELL_COLUMN_COUNT;
-    wallPercentage := DEFAULT_WALL_PERCENTAGE;
-    cellAnimationTickRate := DEFAULT_CELL_TICK_RATE;
-
-    // for randomniss
-    randomize;
-
-    // ===CREATE PANEL-LAYOUT===
-    // panel game area
-    panelSetup(panelGameArea, FMain, 'panelGameArea');
-    // panel gamefield
-    panelSetup(panelGamefield, panelGameArea, 'panelGamefield');
-    // gridpanel cellGrid
-    createCellGrid(cellGrid, panelGamefield, cellField, cellRowLength,
-      cellColumnLength, onCellMouseDown);
-    // panel right side area
-    panelSetup(panelRightSideArea, FMain, 'panelSetup');
-    // panel Right side info
-    panelSetup(panelRightSideInfo, panelRightSideArea, 'panelRightSideInfo');
-    createInfoButtons(panelrightSideInfo,
-        pipeLidButton, pipeButton, pipeTSplitButton, pipeCurveButton, onItemChooseClick,
-        gamemodeButton, onGamemodeButtonClick
-    );
-    // panel Right side info
-    panelSetup(panelButtons, panelRightSideArea, 'panelButtons');
-    // buttons with panelButtons as parent
-    createButtons(newGameButton, onNewButtonClick, settingsButton,
-      onSettingsButtonClick, loadGameButton, saveGameButton, exitGameButton,
-      panelButtons);
-
-    updateLayout();
-
-    // todo aufruf bei animation
-    // flow start
-    // fix testwise
-    // if setWaterSource(cellField, waterSourcePositionQueueList, getPosition(5, 5)) then;
-    fluidTimer := TTimer.Create(FMain);
-    with fluidTimer do
+    procedure TFMain.FormCreate(Sender: TObject);
     begin
-        Interval := cellAnimationTickRate;
-        OnTimer := FMain.cellQueueHandler;
-        Enabled := false;
+        formSetup();
+
+        generateGame(cellField, cellRowLength, cellColumnLength,
+            wallPercentage, waterSourcePositionQueueList);
     end;
-end;
 
-{
-  Setup before the FMain shows
-  Panels, buttons and the game is setup here
+    procedure TFMain.FormResize(Sender: TObject);
+    begin
+        updateLayout();
+    end;
 
-  @param  Sender: not used
-}
-procedure TFMain.FormCreate(Sender: TObject);
-begin
-    formSetup();
+    procedure TFMain.FormCanResize(Sender: TObject;
+    var NewWidth, NewHeight: Integer; var Resize: Boolean);
+    begin
+        NewHeight := round(MAIN_FORM_ASPECT_RATIO * NewWidth);
+    end;
 
-    generateGame(cellField, cellRowLength, cellColumnLength,
-        wallPercentage, waterSourcePositionQueueList);
-end;
+    procedure TFMain.enableSimulationMode(b: Boolean);
+    begin
+        FSettings.nbColumns.Enabled := b;
+        FSettings.nbRows.Enabled := b;
+        FSettings.nbWallPercentage.Enabled := b;
 
-procedure TFMain.FormResize(Sender: TObject);
-begin
-    updateLayout();
-end;
+        newGameButton.Enabled := b;
+        loadGameButton.Enabled := b;
+        saveGameButton.Enabled := b;
+    end;
 
-{
-  On Resize the aspect ratio will be maintained
-  // fixme Horizontal sizing is not possible
+    procedure TFMain.animationStart();
+    begin
+        isSimulating := true;
+        enableSimulationMode(false);
+        fluidTimer.Enabled := true;
+    end;
 
-  @param  Sender: not used
-  var NewWidth: used to get the Width
-  var NewHeight: changed the height of the form
-  var Resize: not used
-}
-procedure TFMain.FormCanResize(Sender: TObject;
-  var NewWidth, NewHeight: Integer; var Resize: Boolean);
-begin
-    NewHeight := round(MAIN_FORM_ASPECT_RATIO * NewWidth);
-end;
-
-{
-  sets all buttons and inputfields enabled to b
-
-  @param  IN:     b: true for enabled false for the oposite :)
-}
-procedure TFMain.enableSimulationMode(b: Boolean);
-begin
-    FSettings.nbColumns.Enabled := b;
-    FSettings.nbRows.Enabled := b;
-    FSettings.nbWallPercentage.Enabled := b;
-
-    newGameButton.Enabled := b;
-    loadGameButton.Enabled := b;
-    saveGameButton.Enabled := b;
-end;
-
-{
-  stating an animation and disable buttons
-}
-procedure TFMain.animationStart();
-begin
-    isSimulating := true;
-    enableSimulationMode(false);
-    fluidTimer.Enabled := true;
-end;
-
-{
-  finishing an animation and enable buttons
-}
-procedure TFMain.finalizeAnimation();
-begin
-    isSimulating := false;
-    enableSimulationMode(true);
-end;
+    procedure TFMain.finalizeAnimation();
+    begin
+        isSimulating := false;
+        enableSimulationMode(true);
+    end;
 
 end.

@@ -42,13 +42,22 @@ interface
             THIRD
         );
 
+    
         TItemButton = (
             NONE_BUTTON,
             PIPE_LID_BUTTON,
             PIPE_BUTTON,
             PIPE_TSPLIT_BUTTON,
             PIPE_CURVE_BUTTON,
-            WALL_BUTTON
+            WALL_BUTTON,
+            GAMEMODE_BUTTON
+        );
+        TSideButton = (
+            NEW_BUTTON,
+            SETTINGS_BUTTON,
+            LOAD_BUTTON,
+            SAVE_BUTTON,
+            EXIT_BUTTON
         );
 
         // position einer Celle
