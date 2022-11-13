@@ -39,6 +39,7 @@ interface
         sets the cells and spaces them evently out
 
         @param  IN/OUT:     cellGrid
+                            waterSourcePositionQueueList with water sources
                             cellField field of all cells
 
                 IN:         panelParent the parent of cellGrid
@@ -47,6 +48,7 @@ interface
     }
     procedure createCellGrid(
         var cellGrid:TGridPanel;
+        var waterSourcePositionQueueList:TPositionList;
         panelParent:TWinControl;
         var cellField:TCellField;
         rowCount, columnCount:integer;
@@ -172,6 +174,7 @@ implementation
 
     procedure createCellGrid(
         var cellGrid:TGridPanel;
+        var waterSourcePositionQueueList:TPositionList;
         panelParent:TWinControl;
         var cellField:TCellField;
         rowCount, columnCount:integer;
@@ -211,6 +214,7 @@ implementation
         // creation of cells
         createCells(
             cellField,
+            waterSourcePositionQueueList,
             cellGrid,
             rowCount,
             columnCount,

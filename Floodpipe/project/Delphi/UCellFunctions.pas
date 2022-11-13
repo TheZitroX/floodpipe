@@ -19,7 +19,6 @@ interface
     {
         Creates a cell with name and parant
         @param  IN/OUT  cell as target
-
                 IN      newParent the parant of target
                         newName the name of target
     }
@@ -33,7 +32,7 @@ interface
         creates a field (rows * columns) of TCellField
 
         @param  IN/OUT  cellField the field of TPanel
-
+                        waterSourcePositionQueueList with all water positions
                 IN      newParent the parent of cellField
                         rowCount the row-count
                         columnCount the column-count
@@ -41,6 +40,7 @@ interface
     }
     procedure createCells(
         var cellField:TCellField;
+        var waterSourcePositionQueueList:TPositionList; 
         newParent:TWinControl;
         rowCount, columnCount:integer;
         onCellClick:TMouseEvent
@@ -74,6 +74,7 @@ interface
         sets a cell to the passed types
 
         @param  IN/OUT  the target cell
+                        waterSourcePositionQueueList with water positions
                 IN      celltype,
                         cellitem,
                         cellContent,
@@ -81,6 +82,7 @@ interface
     }
     procedure setCellToItem(
         var cell:TCell;
+        var waterSourcePositionQueueList:TPositionList;
         newCellType:TCellType;
         newCellItem:TCellItem;
         newCellContent:TCellContent;
@@ -89,8 +91,10 @@ interface
 
     {
         sets all cells in cellField to the passed types
+        sets or clears the waterSources
 
         @param  IN/OUT  cellField with 2d cell array
+                        waterSourcePositionQueueList with water positions
                 IN      celltype,
                         cellitem,
                         cellContent,
@@ -98,6 +102,7 @@ interface
     }
     procedure setCellFieldToItem(
         var cellField:TCellField;
+        var waterSourcePositionQueueList:TPositionList;
         newCellType:TCellType;
         newCellItem:TCellItem;
         newCellContent:TCellContent;
@@ -178,12 +183,22 @@ implementation
 
     procedure setCellToItem(
         var cell:TCell;
+        var waterSourcePositionQueueList:TPositionList;
         newCellType:TCellType;
         newCellItem:TCellItem;
         newCellContent:TCellContent;
         newCellRotation:TCellRotation
     );
     begin
+        // remove watersource when new content isnt water
+        if (cell.cellContent = CONTENT_WATER) and
+            hasPosition(waterSourcePositionQueueList, getPositionFromName(cell.image.Name)) and
+            (newCellContent <> CONTENT_WATER) then
+            removePositions(waterSourcePositionQueueList, getPositionFromName(cell.image.Name))
+        else if ((cell.cellContent = CONTENT_EMPTY) and
+            (newCellContent = CONTENT_WATER)) then
+            appendPosition(waterSourcePositionQueueList, getPositionFromName(cell.image.Name));
+
         with cell do
         begin
             cellType := newCellType;
@@ -197,6 +212,7 @@ implementation
 
     procedure setCellFieldToItem(
         var cellField:TCellField;
+        var waterSourcePositionQueueList:TPositionList;
         newCellType:TCellType;
         newCellItem:TCellItem;
         newCellContent:TCellContent;
@@ -209,6 +225,7 @@ implementation
             begin
                 setCellToItem(
                     cellField[i, j],
+                    waterSourcePositionQueueList,
                     newCellType,
                     newCellItem,
                     newCellContent,
@@ -252,6 +269,7 @@ implementation
 
     procedure createCells(
         var cellField:TCellField;
+        var waterSourcePositionQueueList:TPositionList; 
         newParent:TWinControl;
         rowCount, columnCount:integer;
         onCellClick:TMouseEvent
@@ -263,7 +281,8 @@ implementation
         setLength(cellField, columnCount, rowCount);
         // create cells
         for j := 0 to rowCount - 1 do
-            for i := 0 to columnCount - 1 do begin
+            for i := 0 to columnCount - 1 do
+            begin
                 cellSetup(
                     cellField[i, j],
                     newParent,
@@ -272,6 +291,7 @@ implementation
                 cellField[i][j].image.Align := alClient;
                 setCellToItem(
                     cellField[i, j],
+                    waterSourcePositionQueueList,
                     // debug just random types for testing
                     TCellType.TYPE_NONE,
                     TCellItem(Random(Succ(Ord(High(TCellItem))))),

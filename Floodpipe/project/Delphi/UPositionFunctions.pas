@@ -1,4 +1,4 @@
-{
+﻿{
     file:       UPositionFunctions.pas
     author:     John Lienau
     date:       02.09.2022
@@ -18,7 +18,30 @@ interface
     procedure rotatePosition(var position:TPosition);
     function isPositionListEmpty(positionList:TPositionList):boolean;
     procedure appendPositionNode(var positionList:TPositionList; positionNode:PPositionNode);
-    procedure appendPosition(var positionList:TPositionList; positionX, positionY:integer);
+
+    {
+        @brief: appends a new positionNode to the positionList
+                creates the positionlist when empty
+
+        @param: IN/OUT: positionList with the beginning of the list
+                IN:     positionX (Y) with the positions
+    }
+    procedure appendPosition(
+        var positionList:TPositionList;
+        positionX, positionY:integer
+    ); overload;
+
+    {
+        appends a position to positionList
+
+        @param  IN/OUT  the positionList
+                IN      the position
+    }
+    procedure appendPosition(
+        var positionList:TPositionList;
+        position:TPosition
+    ); overload;
+
     procedure delFirstPositionNode(var positionList:TPositionList);
     procedure delPositionList(var positionList:TPositionList);
     procedure rotatePositions(var cell:TCell);
@@ -27,6 +50,18 @@ interface
     function positionInField(cellField:TCellField; position:TPosition):boolean;
     function positionEquals(position1, position2:TPosition):boolean;
     function hasPosition(positionList:TPositionList; position:TPosition):boolean;
+
+    {
+        removes all position in positionList
+
+        @param  IN/OUT  positionList with all positions
+                IN      position where all occurrences are deleted
+    }
+    procedure removePositions(
+        var positionList:TPositionList;
+        position:TPosition
+    );
+
     function positionListLength(positionList:TPositionList):integer;
 
 implementation
@@ -61,13 +96,6 @@ implementation
         end;
     end;
 
-    {
-        @brief: appends a new positionNode to the positionList
-                creates the positionlist when empty
-
-        @param: IN/OUT: positionList with the beginning of the list
-                IN:     positionX (Y) with the positions
-    }
     procedure appendPosition(
         var positionList:TPositionList;
         positionX, positionY:integer
@@ -78,6 +106,18 @@ implementation
     begin
         position.x := positionX;
         position.y := positionY;
+        new(positionNode);
+        positionNode^.position := position;
+        positionNode^.next := nil;
+        appendPositionNode(positionList, positionNode);
+    end;
+
+    procedure appendPosition(
+        var positionList:TPositionList;
+        position:TPosition
+    );
+    var positionNode:PPositionNode;
+    begin
         new(positionNode);
         positionNode^.position := position;
         positionNode^.next := nil;
@@ -269,5 +309,32 @@ implementation
             positionListRunner := positionListRunner^.next;
         end;
         positionListLength := listLength;
+    end;
+
+    procedure removePositions(
+        var positionList:TPositionList;
+        position:TPosition
+    );
+    var beforePosition, positionListRunner:PPositionNode;
+    begin
+        positionListRunner := positionList.firstNode;
+        beforePosition := nil;
+
+        while positionListRunner <> nil do
+        begin
+            if positionEquals(positionListRunner^.position, position) then
+                if positionListRunner = positionList.firstNode then
+                begin
+                    delFirstPositionNode(positionList);
+                    beforePosition := positionList.firstNode;
+                    positionListRunner := positionList.firstNode;
+                end
+                else
+                begin
+                    beforePosition^.next := positionListRunner^.next;
+                    dispose(positionListRunner);
+                    positionListRunner := beforePosition^.next;
+                end;
+        end;
     end;
 end.

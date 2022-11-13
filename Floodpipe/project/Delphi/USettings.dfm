@@ -190,7 +190,10 @@ object FSettings: TFSettings
       Height = 30
       Align = alClient
       Alignment = taRightJustify
+      LargeStep = 1000.000000000000000000
+      MinValue = 1.000000000000000000
       MaxValue = 1000.000000000000000000
+      SmallStep = 100.000000000000000000
       TabOrder = 2
       Value = 10.000000000000000000
       UseMouseWheel = True

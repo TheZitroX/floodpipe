@@ -260,10 +260,20 @@ implementation
                     begin
                         // todo ask for window reload
                         removeCellGrid(cellGrid, cellField);
-                        createCellGrid(cellGrid, panelGamefield, cellField, cellRowLength,
-                            cellColumnLength, onCellMouseDown);
-                        generateGame(cellField, cellRowLength, cellColumnLength,
-                            wallPercentage, waterSourcePositionQueueList);
+                        createCellGrid(
+                            cellGrid,
+                            waterSourcePositionQueueList,
+                            panelGamefield,
+                            cellField, cellRowLength,
+                            cellColumnLength,
+                            onCellMouseDown
+                        );
+                        generateGame(
+                            cellField,
+                            cellRowLength, cellColumnLength,
+                            wallPercentage,
+                            waterSourcePositionQueueList
+                        );
                     end;
                 end;
             end;
@@ -291,6 +301,7 @@ implementation
                     );
                     mbMiddle: setCellFieldToItem(
                         cellField,
+                        waterSourcePositionQueueList,
                         TYPE_WALL,
                         PIPE,
                         CONTENT_EMPTY,
@@ -327,6 +338,7 @@ implementation
             begin
                 setCellToItem(
                     cellField[position.x, position.y],
+                    waterSourcePositionQueueList,
                     TYPE_PIPE,
                     PIPE_LID,
                     CONTENT_EMPTY,
@@ -337,6 +349,7 @@ implementation
             begin
                 setCellToItem(
                     cellField[position.x, position.y],
+                    waterSourcePositionQueueList,
                     TYPE_PIPE,
                     PIPE,
                     CONTENT_EMPTY,
@@ -347,6 +360,7 @@ implementation
             begin
                 setCellToItem(
                     cellField[position.x, position.y],
+                    waterSourcePositionQueueList,
                     TYPE_PIPE,
                     PIPE_TSPLIT,
                     CONTENT_EMPTY,
@@ -357,6 +371,7 @@ implementation
             begin
                 setCellToItem(
                     cellField[position.x, position.y],
+                    waterSourcePositionQueueList,
                     TYPE_PIPE,
                     PIPE_CURVES,
                     CONTENT_EMPTY,
@@ -367,6 +382,7 @@ implementation
             begin
                 setCellToItem(
                     cellField[position.x, position.y],
+                    waterSourcePositionQueueList,
                     TYPE_WALL,
                     PIPE_LID,
                     CONTENT_EMPTY,
@@ -455,8 +471,15 @@ implementation
         // panel gamefield
         panelSetup(panelGamefield, panelGameArea, 'panelGamefield');
         // gridpanel cellGrid
-        createCellGrid(cellGrid, panelGamefield, cellField, cellRowLength,
-        cellColumnLength, onCellMouseDown);
+        createCellGrid(
+            cellGrid,
+            waterSourcePositionQueueList,
+            panelGamefield,
+            cellField,
+            cellRowLength,
+            cellColumnLength,
+            onCellMouseDown
+        );
         // panel right side area
         panelSetup(panelRightSideArea, FMain, 'panelSetup');
         // panel Right side info
@@ -506,8 +529,11 @@ implementation
         updateLayout();
     end;
 
-    procedure TFMain.FormCanResize(Sender: TObject;
-    var NewWidth, NewHeight: Integer; var Resize: Boolean);
+    procedure TFMain.FormCanResize(
+        Sender: TObject;
+        var NewWidth, NewHeight: Integer;
+        var Resize: Boolean
+    );
     begin
         NewHeight := round(MAIN_FORM_ASPECT_RATIO * NewWidth);
     end;
