@@ -12,7 +12,7 @@ unit UPositionFunctions;
 
 interface
 
-    uses UTypedefine;
+    uses UTypedefine, sysutils;
 
     function getPosition(posX, posY:integer):TPosition;
     procedure rotatePosition(var position:TPosition);
@@ -50,6 +50,24 @@ interface
     function positionInField(cellField:TCellField; position:TPosition):boolean;
     function positionEquals(position1, position2:TPosition):boolean;
     function hasPosition(positionList:TPositionList; position:TPosition):boolean;
+
+    {
+        Makes a positionList to a string
+
+        @param  IN      positionList: the positionList
+
+                RETURN  positionList to a string
+    }
+    function positionListToString(positionList:TPositionList):string;
+
+    {
+        makes a position to a string
+
+        @param  IN      position the postion
+
+                RETURN  position to string
+    }
+    function positionToString(position:TPosition):string;
 
     {
         removes all position in positionList
@@ -337,4 +355,27 @@ implementation
                 end;
         end;
     end;
+
+    function positionToString(position:TPosition):string;
+    begin
+        positionToString := inttostr(position.x) + ' ' + inttostr(position.y);
+    end;
+
+    function positionListToString(positionList:TPositionList):string;
+    var positionListRunner:PPositionNode;
+        stringBuilder:TStringBuilder;
+    begin
+        stringBuilder := TStringBuilder.Create();
+
+        positionListRunner := positionList.firstNode;
+        while(positionListRunner <> nil) do
+        begin
+            stringBuilder := stringBuilder.append(positionToString(positionListRunner^.position));
+            stringBuilder := stringBuilder.append(' ');
+            positionListRunner := positionListRunner^.next;
+        end;
+
+        positionListToString := stringBuilder.toString();
+    end;
+
 end.

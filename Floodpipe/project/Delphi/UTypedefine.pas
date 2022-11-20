@@ -103,5 +103,11 @@ interface
         end;
         TCellField = array of array of TCell;
 
+        TGameStruct = record
+            cellField: TCellField;
+            cellRowLength, cellColumnLength, wallPercentage: integer;
+            waterSourcePositionQueueList:TPositionList
+        end;
+
 implementation
 end.

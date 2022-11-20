@@ -21,7 +21,7 @@ uses
     USettings,
 
     UProperties, UFunctions, UTypedefine, UCellFunctions, UFluid,
-    UPositionFunctions, UGameGeneration;
+    UPositionFunctions, UGameGeneration, UFileHandler;
 
 type
     TFMain = class(TForm)
@@ -49,6 +49,9 @@ type
             @param  IN      Sender: not used
         }
         procedure FormCreate(Sender: TObject);
+
+        procedure formSetup();
+
         procedure FormResize(Sender: TObject);
 
         {
@@ -57,11 +60,11 @@ type
         procedure updateLayout();
 
         {
-            Timer works through the waterSourcePositionQueueList
+            Timer works through the m_recGameStruct.waterSourcePositionQueueList
 
             @param  IN      Sender: the TTimer
 
-                    Global  waterSourcePositionQueueList die abzuarbeiten ist
+                    Global  m_recGameStruct.waterSourcePositionQueueList die abzuarbeiten ist
         }
         procedure cellQueueHandler(Sender: TObject);
 
@@ -83,8 +86,6 @@ type
             @param  IN      b: true for enabled false for the oposite :)
         }
         procedure enableSimulationMode(b: Boolean);
-
-        procedure formSetup();
 
         {
             sets values from membervariables to FSettings
@@ -148,10 +149,10 @@ type
         // ---gamefield---
         cellGrid: TGridPanel;
         // gamefield cells
-        cellField: TCellField;
-        cellRowLength: Integer;
-        cellColumnLength: Integer;
-        wallPercentage: Integer;
+        // m_recGameStruct.cellField: Tm_recGameStruct.cellField;
+        // m_recGameStruct.cellRowLength: Integer;
+        // m_recGameStruct.cellColumnLength: Integer;
+        // m_recGameStruct.wallPercentage: Integer;
 
     private
         procedure setItemButtonVisibility(b:boolean);
@@ -160,13 +161,13 @@ type
 var
     FMain: TFMain;
     cellAnimationTickRate: Integer;
-    waterSourcePositionQueueList: TPositionList;
     timerCount: Integer;
     fluidTimer: TTimer;
     isSimulating: Boolean;
     isEditorMode: boolean;
     checkedItem: TItemButton;
     oldButton: TButton;
+    m_recGameStruct: TGameStruct;
 
 implementation
 
@@ -177,13 +178,25 @@ implementation
         case TSideButton((Sender as TButton).tag) of
             GAMEMODE_BUTTON:
                 onGamemodeButtonClick(Sender);
+
             NEW_BUTTON:
                onNewButtonClick(Sender);
+
             SETTINGS_BUTTON: 
                 onSettingsButtonClick(Sender);
+
+            SAVE_BUTTON:
+                case saveGameToFile('Test', m_recGameStruct) of
+                    FILE_ERROR_FILE_DOESNT_EXIST: showmessage('file doesnt exist');
+                    FILE_ERROR_COULD_NOT_WRITE_TO_FILE: showmessage('could not write to file');
+
+                    else;
+                end;
+
             EXIT_BUTTON:
                 // todo abfrage nach speichern oder ob geschlossen werden soll
                 Application.Terminate;
+
             else; // nothing
         end;
     end;
@@ -259,20 +272,20 @@ implementation
                     if getSettingsFromFSettings() then
                     begin
                         // todo ask for window reload
-                        removeCellGrid(cellGrid, cellField);
+                        removeCellGrid(cellGrid, m_recGameStruct.cellField);
                         createCellGrid(
                             cellGrid,
-                            waterSourcePositionQueueList,
+                            m_recGameStruct.waterSourcePositionQueueList,
                             panelGamefield,
-                            cellField, cellRowLength,
-                            cellColumnLength,
+                            m_recGameStruct.cellField, m_recGameStruct.cellRowLength,
+                            m_recGameStruct.cellColumnLength,
                             onCellMouseDown
                         );
                         generateGame(
-                            cellField,
-                            cellRowLength, cellColumnLength,
-                            wallPercentage,
-                            waterSourcePositionQueueList
+                            m_recGameStruct.cellField,
+                            m_recGameStruct.cellRowLength, m_recGameStruct.cellColumnLength,
+                            m_recGameStruct.wallPercentage,
+                            m_recGameStruct.waterSourcePositionQueueList
                         );
                     end;
                 end;
@@ -297,11 +310,11 @@ implementation
                 case Button of
                     mbLeft: onCellClick(Sender);
                     mbRight: rotateCellClockwise(
-                        cellField[position.x, position.y]
+                        m_recGameStruct.cellField[position.x, position.y]
                     );
-                    mbMiddle: setCellFieldToItem(
-                        cellField,
-                        waterSourcePositionQueueList,
+                    mbMiddle: setcellFieldToItem(
+                        m_recGameStruct.cellField,
+                        m_recGameStruct.waterSourcePositionQueueList,
                         TYPE_WALL,
                         PIPE,
                         CONTENT_EMPTY,
@@ -325,20 +338,20 @@ implementation
             NONE_BUTTON:
             begin
                 rotateCellClockwise(
-                    cellField[
+                    m_recGameStruct.cellField[
                         position.x,
                         position.y
                     ]
                 );
                 // fixme change back to rotation when finished debuggin
-                // if setWaterSource(cellField, waterSourcePositionQueueList,
+                // if setWaterSource(m_recGameStruct.cellField, m_recGameStruct.waterSourcePositionQueueList,
                 //   getPositionFromName(TImage(Sender).name)) then;
             end;
             PIPE_LID_BUTTON:
             begin
                 setCellToItem(
-                    cellField[position.x, position.y],
-                    waterSourcePositionQueueList,
+                    m_recGameStruct.cellField[position.x, position.y],
+                    m_recGameStruct.waterSourcePositionQueueList,
                     TYPE_PIPE,
                     PIPE_LID,
                     CONTENT_EMPTY,
@@ -348,8 +361,8 @@ implementation
             PIPE_BUTTON:
             begin
                 setCellToItem(
-                    cellField[position.x, position.y],
-                    waterSourcePositionQueueList,
+                    m_recGameStruct.cellField[position.x, position.y],
+                    m_recGameStruct.waterSourcePositionQueueList,
                     TYPE_PIPE,
                     PIPE,
                     CONTENT_EMPTY,
@@ -359,8 +372,8 @@ implementation
             PIPE_TSPLIT_BUTTON:
             begin
                 setCellToItem(
-                    cellField[position.x, position.y],
-                    waterSourcePositionQueueList,
+                    m_recGameStruct.cellField[position.x, position.y],
+                    m_recGameStruct.waterSourcePositionQueueList,
                     TYPE_PIPE,
                     PIPE_TSPLIT,
                     CONTENT_EMPTY,
@@ -370,8 +383,8 @@ implementation
             PIPE_CURVE_BUTTON:
             begin
                 setCellToItem(
-                    cellField[position.x, position.y],
-                    waterSourcePositionQueueList,
+                    m_recGameStruct.cellField[position.x, position.y],
+                    m_recGameStruct.waterSourcePositionQueueList,
                     TYPE_PIPE,
                     PIPE_CURVES,
                     CONTENT_EMPTY,
@@ -381,8 +394,8 @@ implementation
             WALL_BUTTON:
             begin
                 setCellToItem(
-                    cellField[position.x, position.y],
-                    waterSourcePositionQueueList,
+                    m_recGameStruct.cellField[position.x, position.y],
+                    m_recGameStruct.waterSourcePositionQueueList,
                     TYPE_WALL,
                     PIPE_LID,
                     CONTENT_EMPTY,
@@ -398,8 +411,14 @@ implementation
     procedure TFMain.updateLayout();
     begin
         // update positions
-        panelRedraw(FMain.ClientWidth, FMain.ClientHeight, panelGameArea,
-        panelGamefield, panelRightSideArea, panelRightSideInfo, panelButtons);
+        panelRedraw(
+            FMain.ClientWidth, FMain.ClientHeight,
+            panelGameArea,
+            panelGamefield,
+            panelRightSideArea,
+            panelRightSideInfo,
+            panelButtons
+        );
     end;
 
     procedure TFMain.cellQueueHandlerFinalize();
@@ -410,21 +429,21 @@ implementation
 
     procedure TFMain.setFSettingsFromSettings();
     begin
-        FSettings.nbRows.Value := cellRowLength;
-        FSettings.nbColumns.Value := cellColumnLength;
+        FSettings.nbRows.Value := m_recGameStruct.cellRowLength;
+        FSettings.nbColumns.Value := m_recGameStruct.cellColumnLength;
         FSettings.nbAnimationTime.Value := cellAnimationTickRate;
     end;
 
     function TFMain.getSettingsFromFSettings(): Boolean;
     begin
         getSettingsFromFSettings := 
-            (cellRowLength <> round(FSettings.nbRows.Value)) or
-            (cellColumnLength <> round(FSettings.nbColumns.Value)) or
-            (wallPercentage <> round(FSettings.nbWallPercentage.Value));
+            (m_recGameStruct.cellRowLength <> round(FSettings.nbRows.Value)) or
+            (m_recGameStruct.cellColumnLength <> round(FSettings.nbColumns.Value)) or
+            (m_recGameStruct.wallPercentage <> round(FSettings.nbwallPercentage.Value));
 
-        cellRowLength := round(FSettings.nbRows.Value);
-        cellColumnLength := round(FSettings.nbColumns.Value);
-        wallPercentage := round(FSettings.nbWallPercentage.Value);
+        m_recGameStruct.cellRowLength := round(FSettings.nbRows.Value);
+        m_recGameStruct.cellColumnLength := round(FSettings.nbColumns.Value);
+        m_recGameStruct.wallPercentage := round(FSettings.nbwallPercentage.Value);
 
         // no new-build needed when those settings change
         cellAnimationTickRate := round(FSettings.nbAnimationTime.Value);
@@ -437,13 +456,13 @@ implementation
         (Sender as TTimer).Enabled := false;
 
         // stop animation when finished
-        if isPositionListEmpty(waterSourcePositionQueueList) then
+        if isPositionListEmpty(m_recGameStruct.waterSourcePositionQueueList) then
         begin
             cellQueueHandlerFinalize();
         end
         else
         begin
-            fluidMove(cellField, waterSourcePositionQueueList);
+            fluidMove(m_recGameStruct.cellField, m_recGameStruct.waterSourcePositionQueueList);
             // continiue animation
             (Sender as TTimer).Enabled := true;
         end;
@@ -452,14 +471,14 @@ implementation
     procedure TFMain.formSetup();
     begin
         // inizialize
-        waterSourcePositionQueueList.firstNode := nil;
+        m_recGameStruct.waterSourcePositionQueueList.firstNode := nil;
         checkedItem := NONE_BUTTON;
         oldButton := nil;
 
         // set default values
-        cellRowLength := DEFAULT_CELL_ROW_COUNT;
-        cellColumnLength := DEFAULT_CELL_COLUMN_COUNT;
-        wallPercentage := DEFAULT_WALL_PERCENTAGE;
+        m_recGameStruct.cellRowLength := DEFAULT_CELL_ROW_COUNT;
+        m_recGameStruct.cellColumnLength := DEFAULT_CELL_COLUMN_COUNT;
+        m_recGameStruct.wallPercentage := DEFAULT_WALL_PERCENTAGE;
         cellAnimationTickRate := DEFAULT_CELL_TICK_RATE;
 
         // for randomniss
@@ -473,20 +492,23 @@ implementation
         // gridpanel cellGrid
         createCellGrid(
             cellGrid,
-            waterSourcePositionQueueList,
+            m_recGameStruct.waterSourcePositionQueueList,
             panelGamefield,
-            cellField,
-            cellRowLength,
-            cellColumnLength,
+            m_recGameStruct.cellField,
+            m_recGameStruct.cellRowLength,
+            m_recGameStruct.cellColumnLength,
             onCellMouseDown
         );
         // panel right side area
         panelSetup(panelRightSideArea, FMain, 'panelSetup');
         // panel Right side info
         panelSetup(panelRightSideInfo, panelRightSideArea, 'panelRightSideInfo');
-        createInfoButtons(panelrightSideInfo,
-            pipeLidButton, pipeButton, pipeTSplitButton, pipeCurveButton, onItemChooseClick,
-            gamemodeButton, onSideButtonClick 
+        createInfoButtons(
+            panelrightSideInfo,
+            pipeLidButton, pipeButton, pipeTSplitButton, pipeCurveButton,
+            onItemChooseClick,
+            gamemodeButton,
+            onSideButtonClick
         );
         // panel Right side info
         panelSetup(panelButtons, panelRightSideArea, 'panelButtons');
@@ -503,10 +525,7 @@ implementation
 
         updateLayout();
 
-        // todo aufruf bei animation
-        // flow start
-        // fix testwise
-        // if setWaterSource(cellField, waterSourcePositionQueueList, getPosition(5, 5)) then;
+        // creating fluid animation thread (timer)
         fluidTimer := TTimer.Create(FMain);
         with fluidTimer do
         begin
@@ -514,14 +533,18 @@ implementation
             OnTimer := FMain.cellQueueHandler;
             Enabled := false;
         end;
+
+        generateGame(
+            m_recGameStruct.cellField,
+            m_recGameStruct.cellRowLength, m_recGameStruct.cellColumnLength,
+            m_recGameStruct.wallPercentage, m_recGameStruct.waterSourcePositionQueueList
+        );
+
     end;
 
     procedure TFMain.FormCreate(Sender: TObject);
     begin
         formSetup();
-
-        generateGame(cellField, cellRowLength, cellColumnLength,
-            wallPercentage, waterSourcePositionQueueList);
     end;
 
     procedure TFMain.FormResize(Sender: TObject);
@@ -542,7 +565,7 @@ implementation
     begin
         FSettings.nbColumns.Enabled := b;
         FSettings.nbRows.Enabled := b;
-        FSettings.nbWallPercentage.Enabled := b;
+        FSettings.nbwallPercentage.Enabled := b;
 
         newGameButton.Enabled := b;
         loadGameButton.Enabled := b;

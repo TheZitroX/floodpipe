@@ -427,7 +427,7 @@ implementation
             newParent,
             'loadGameButton',
             'Load',
-            nil,
+            onClickFunction,
             TAlign(alTop),
             integer(LOAD_BUTTON)
         );
@@ -436,7 +436,7 @@ implementation
             newParent,
             'saveGameButton',
             'Save',
-            nil, 
+            onClickFunction, 
             TAlign(alTop),
             integer(SAVE_BUTTON)
         );
