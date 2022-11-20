@@ -148,11 +148,7 @@ type
 
         // ---gamefield---
         cellGrid: TGridPanel;
-        // gamefield cells
-        // m_recGameStruct.cellField: Tm_recGameStruct.cellField;
-        // m_recGameStruct.cellRowLength: Integer;
-        // m_recGameStruct.cellColumnLength: Integer;
-        // m_recGameStruct.wallPercentage: Integer;
+        m_recGameStruct: TGameStruct;
 
     private
         procedure setItemButtonVisibility(b:boolean);
@@ -167,13 +163,13 @@ var
     isEditorMode: boolean;
     checkedItem: TItemButton;
     oldButton: TButton;
-    m_recGameStruct: TGameStruct;
 
 implementation
 
     {$R *.dfm}
 
     procedure TFMain.onSideButtonClick(Sender: TObject);
+    var fileError:TFileError;
     begin
         case TSideButton((Sender as TButton).tag) of
             GAMEMODE_BUTTON:
@@ -184,6 +180,32 @@ implementation
 
             SETTINGS_BUTTON: 
                 onSettingsButtonClick(Sender);
+
+            LOAD_BUTTON:
+            begin
+                // todo abfrage ob geladen werden soll
+
+                fileError := loadGameFromFile('Test', m_recGameStruct);
+                case fileError of
+                    FILE_ERROR_COUNT_NOT_READ_FROM_FILE: ShowMessage('coulnd read from file');
+
+                    else;
+                end;
+                if (fileError = FILE_ERROR_NONE) then
+                begin
+                    removeCellGrid(cellGrid, m_recGameStruct.cellField);
+                    createCellGrid(
+                        cellGrid,
+                        m_recGameStruct.waterSourcePositionQueueList,
+                        panelGamefield,
+                        m_recGameStruct.cellField, m_recGameStruct.cellRowLength,
+                        m_recGameStruct.cellColumnLength,
+                        onCellMouseDown,
+                        false
+                    );
+                    generateGameFromGameStruct(m_recGameStruct);
+                end;
+            end;
 
             SAVE_BUTTON:
                 case saveGameToFile('Test', m_recGameStruct) of
@@ -279,7 +301,8 @@ implementation
                             panelGamefield,
                             m_recGameStruct.cellField, m_recGameStruct.cellRowLength,
                             m_recGameStruct.cellColumnLength,
-                            onCellMouseDown
+                            onCellMouseDown,
+                            true
                         );
                         generateGame(
                             m_recGameStruct.cellField,
@@ -343,9 +366,6 @@ implementation
                         position.y
                     ]
                 );
-                // fixme change back to rotation when finished debuggin
-                // if setWaterSource(m_recGameStruct.cellField, m_recGameStruct.waterSourcePositionQueueList,
-                //   getPositionFromName(TImage(Sender).name)) then;
             end;
             PIPE_LID_BUTTON:
             begin
@@ -355,7 +375,8 @@ implementation
                     TYPE_PIPE,
                     PIPE_LID,
                     CONTENT_EMPTY,
-                    NONE
+                    NONE,
+                    true
                 );
             end;
             PIPE_BUTTON:
@@ -366,7 +387,8 @@ implementation
                     TYPE_PIPE,
                     PIPE,
                     CONTENT_EMPTY,
-                    NONE
+                    NONE,
+                    true
                 );
             end;
             PIPE_TSPLIT_BUTTON:
@@ -377,7 +399,8 @@ implementation
                     TYPE_PIPE,
                     PIPE_TSPLIT,
                     CONTENT_EMPTY,
-                    NONE
+                    NONE,
+                    true
                 );
             end;
             PIPE_CURVE_BUTTON:
@@ -388,7 +411,8 @@ implementation
                     TYPE_PIPE,
                     PIPE_CURVES,
                     CONTENT_EMPTY,
-                    NONE
+                    NONE,
+                    true
                 );
             end;
             WALL_BUTTON:
@@ -399,7 +423,8 @@ implementation
                     TYPE_WALL,
                     PIPE_LID,
                     CONTENT_EMPTY,
-                    NONE
+                    NONE,
+                    true
                 );
             end;
 
@@ -497,7 +522,8 @@ implementation
             m_recGameStruct.cellField,
             m_recGameStruct.cellRowLength,
             m_recGameStruct.cellColumnLength,
-            onCellMouseDown
+            onCellMouseDown,
+            true
         );
         // panel right side area
         panelSetup(panelRightSideArea, FMain, 'panelSetup');

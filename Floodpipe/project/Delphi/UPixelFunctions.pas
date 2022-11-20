@@ -76,17 +76,19 @@ implementation
                 // get the right tilemap
                 case cell.cellType of
                     TYPE_WALL: resourceStreamSource := 'walls';
-                    TYPE_PIPE: resourceStreamSource := 'pipes';
-                    else assert(true, 'ERROR from UPixelFunctions: no such TCellType');
-                end;
 
-                // if a pipe then add the content of a pipe
-                if (cell.cellType = TCellType.TYPE_PIPE) then
-                    case cell.cellContent of
-                        CONTENT_EMPTY: resourceStreamSource := resourceStreamSource + 'Empty';
-                        CONTENT_WATER: resourceStreamSource := resourceStreamSource + 'Water';
-                        else assert(true, 'ERROR from UPixelFunctions: no such TCellContent');
+                    TYPE_PIPE:
+                    begin
+                        resourceStreamSource := 'pipes';
+                        case cell.cellContent of
+                            CONTENT_EMPTY: resourceStreamSource := resourceStreamSource + 'Empty';
+                            CONTENT_WATER: resourceStreamSource := resourceStreamSource + 'Water';
+                            else assert(false, 'ERROR from UPixelFunctions: no such TCellContent');
+                        end;
                     end;
+
+                    else assert(false, 'ERROR from UPixelFunctions: no such TCellType');
+                end;
 
                 resourceStreamSource := resourceStreamSource + 'Tilemap';
                 

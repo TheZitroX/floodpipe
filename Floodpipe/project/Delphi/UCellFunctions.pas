@@ -37,13 +37,15 @@ interface
                         rowCount the row-count
                         columnCount the column-count
                         onCellClick as mouseEvent
+                        overrideTypes when true all types of cellField will be overriden
     }
     procedure createCells(
         var cellField:TCellField;
         var waterSourcePositionQueueList:TPositionList; 
         newParent:TWinControl;
         rowCount, columnCount:integer;
-        onCellClick:TMouseEvent
+        onCellClick:TMouseEvent;
+        overrideTypes:boolean
     );
 
     {
@@ -79,6 +81,7 @@ interface
                         cellitem,
                         cellContent,
                         cellRotation
+                        overrideTypes when true all types will be overridden to newTypes
     }
     procedure setCellToItem(
         var cell:TCell;
@@ -86,7 +89,8 @@ interface
         newCellType:TCellType;
         newCellItem:TCellItem;
         newCellContent:TCellContent;
-        newCellRotation:TCellRotation
+        newCellRotation:TCellRotation;
+        overrideTypes:boolean
     );
 
     {
@@ -187,25 +191,30 @@ implementation
         newCellType:TCellType;
         newCellItem:TCellItem;
         newCellContent:TCellContent;
-        newCellRotation:TCellRotation
+        newCellRotation:TCellRotation;
+        overrideTypes:boolean
     );
     begin
-        // remove watersource when new content isnt water
-        if (cell.cellContent = CONTENT_WATER) and
-            hasPosition(waterSourcePositionQueueList, getPositionFromName(cell.image.Name)) and
-            (newCellContent <> CONTENT_WATER) then
-            removePositions(waterSourcePositionQueueList, getPositionFromName(cell.image.Name))
-        else if ((cell.cellContent = CONTENT_EMPTY) and
-            (newCellContent = CONTENT_WATER)) then
-            appendPosition(waterSourcePositionQueueList, getPositionFromName(cell.image.Name));
-
-        with cell do
+        if (overrideTypes) then
         begin
-            cellType := newCellType;
-            cellItem := newCellItem;
-            cellContent := newCellContent;
-            cellRotation := newCellRotation;
+            // remove watersource when new content isnt water
+            if (cell.cellContent = CONTENT_WATER) and
+                hasPosition(waterSourcePositionQueueList, getPositionFromName(cell.image.Name)) and
+                (newCellContent <> CONTENT_WATER) then
+                removePositions(waterSourcePositionQueueList, getPositionFromName(cell.image.Name))
+            else if ((cell.cellContent = CONTENT_EMPTY) and
+                (newCellContent = CONTENT_WATER)) then
+                appendPosition(waterSourcePositionQueueList, getPositionFromName(cell.image.Name));
+
+                with cell do
+                begin
+                    cellType := newCellType;
+                    cellItem := newCellItem;
+                    cellContent := newCellContent;
+                    cellRotation := newCellRotation;
+                end;
         end;
+
         loadPictureFromBitmap(cell);
         setOpeningsFromRotation(cell);
     end;
@@ -229,7 +238,8 @@ implementation
                     newCellType,
                     newCellItem,
                     newCellContent,
-                    newCellRotation
+                    newCellRotation,
+                    true
                 );
             end;
     end;
@@ -272,7 +282,8 @@ implementation
         var waterSourcePositionQueueList:TPositionList; 
         newParent:TWinControl;
         rowCount, columnCount:integer;
-        onCellClick:TMouseEvent
+        onCellClick:TMouseEvent;
+        overrideTypes:boolean
     );
     var
         i, j:integer;
@@ -298,8 +309,9 @@ implementation
                     // TCellItem.PIPE,
                     // TCellContent(Random(Succ(Ord(High(TCellContent))))),
                     TCellContent.CONTENT_EMPTY,
-                    TCellRotation(Random(Succ(Ord(High(TCellRotation)))))
-                    // TCellRotation.NONE
+                    TCellRotation(Random(Succ(Ord(High(TCellRotation))))),
+                    // TCellRotation.NONE,
+                    overrideTypes
                 );
                 cellField[i, j].openings.firstNode := nil;
                 setOpeningsFromRotation(cellField[i, j]);

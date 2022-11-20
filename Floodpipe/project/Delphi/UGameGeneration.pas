@@ -6,22 +6,30 @@ unit UGameGeneration;
 
 interface
 
-uses UTypedefine, UPositionFunctions, UCellFunctions, UPipeTypeFunctions, UFluid, Vcl.Dialogs;
+    uses UTypedefine, UPositionFunctions, UCellFunctions, UPipeTypeFunctions, UFluid, Vcl.Dialogs;
 
-{
-    Generates a game with given size and settings
+    {
+        Generates a game with given size and settings
 
-    @param  IN/OUT  cellField with all cells
-                    waterSourcePositionQueueList with all watersources
-            
-            IN      cellRow- and Columnlength of the field
-                    wallPercentage between 0 and 100
-}
-procedure generateGame(
-    cellField: TCellField;
-    cellRowLength, cellColumnLength, wallPercentage: integer;
-    var waterSourcePositionQueueList:TPositionList
-);
+        @param  IN/OUT  cellField with all cells
+                        waterSourcePositionQueueList with all watersources
+                
+                IN      cellRow- and Columnlength of the field
+                        wallPercentage between 0 and 100
+    }
+    procedure generateGame(
+        cellField: TCellField;
+        cellRowLength, cellColumnLength, wallPercentage: integer;
+        var waterSourcePositionQueueList:TPositionList
+    );
+
+    {
+        Generates a game with the given settings in gameStruct
+
+        @param  IN/OUT  gameStruct: all settings
+                        overrides the cellfield in gameStruct
+    }
+    procedure generateGameFromGameStruct(gameStruct:TGameStruct);
 
 implementation
 
@@ -50,7 +58,8 @@ implementation
                 TCellType.TYPE_WALL,
                 TCellItem.PIPE,
                 TCellContent.CONTENT_EMPTY,
-                TCellRotation.NONE
+                TCellRotation.NONE,
+                true
             )
         else if (positionListLength(possibleDirectionList) = 1) then
         begin
@@ -62,7 +71,8 @@ implementation
                 TCellType.TYPE_PIPE,
                 tempCell.cellItem,
                 TCellContent.CONTENT_EMPTY,
-                tempCell.cellRotation
+                tempCell.cellRotation,
+                true
             );
             while (not hasPosition(cell.openings, possibleDirectionList.firstNode.position)) do
             begin
@@ -111,7 +121,8 @@ implementation
                 TCellType.TYPE_PIPE,
                 tempCell.cellItem,
                 TCellContent.CONTENT_EMPTY,
-                tempCell.cellRotation
+                tempCell.cellRotation,
+                true
             );
         end;
 
@@ -206,7 +217,8 @@ implementation
                         TCellType.TYPE_WALL,
                         TCellItem.PIPE,
                         TCellContent.CONTENT_EMPTY,
-                        TCellRotation.NONE
+                        TCellRotation.NONE,
+                        true
                     );
                     inc(wallCount);
                 end;
@@ -234,4 +246,23 @@ implementation
         // todo srumble rotations
     end;
 
+
+    procedure generateGameFromGameStruct(gameStruct:TGameStruct);
+    var i, j:integer;
+    begin
+        for i := 0 to gameStruct.cellRowLength - 1 do
+            for j := 0 to gameStruct.cellColumnLength - 1 do
+            begin
+                setCellToItem(
+                    gameStruct.cellField[j, i],
+                    gameStruct.waterSourcePositionQueueList,
+                    gameStruct.cellField[j, i].cellType,
+                    gameStruct.cellField[j, i].cellItem,
+                    gameStruct.cellField[j, i].cellContent,
+                    gameStruct.cellField[j, i].cellrotation,
+                    true
+                );
+                setOpeningsFromRotation(gameStruct.cellField[j, i]);
+            end;
+    end;
 end.

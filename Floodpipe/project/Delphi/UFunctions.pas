@@ -45,6 +45,7 @@ interface
                 IN:         panelParent the parent of cellGrid
                             rowCount and columnCount the dimentions of the field
                             onCellClick the clickevent of the cells
+                            overrideTypes when true, all types will be overriden to TYPE_NONE
     }
     procedure createCellGrid(
         var cellGrid:TGridPanel;
@@ -52,7 +53,8 @@ interface
         panelParent:TWinControl;
         var cellField:TCellField;
         rowCount, columnCount:integer;
-        onCellClick:TMouseEvent
+        onCellClick:TMouseEvent;
+        overrideTypes:boolean
     );
 
     {
@@ -178,7 +180,8 @@ implementation
         panelParent:TWinControl;
         var cellField:TCellField;
         rowCount, columnCount:integer;
-        onCellClick:TMouseEvent
+        onCellClick:TMouseEvent;
+        overrideTypes:boolean
     );
     var
         i:integer;
@@ -218,7 +221,8 @@ implementation
             cellGrid,
             rowCount,
             columnCount,
-            onCellClick
+            onCellClick,
+            overrideTypes
         );
 
         cellGrid.RowCollection.EndUpdate;
