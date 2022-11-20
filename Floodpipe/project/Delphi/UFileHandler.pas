@@ -61,10 +61,24 @@ implementation
             // wallPercentage
             writeln(gameFile, gameStruct.wallPercentage);
 
-            // todo gamefield
-            // writeln(gameFile, integer(gameStruct.cellField[0][0].cellType));
+            // gamefield cells
+            for i := 0 to gameStruct.cellRowLength - 1 do
+            begin
+                for j := 0 to gameStruct.cellColumnLength - 1 do
+                begin
+                    write(gameFile, integer(gameStruct.cellField[j, i].cellType));
+                    write(gameFile, ' ');
+                    write(gameFile, integer(gameStruct.cellField[j, i].cellItem));
+                    write(gameFile, ' ');
+                    write(gameFile, integer(gameStruct.cellField[j, i].cellContent));
+                    write(gameFile, ' ');
+                    write(gameFile, integer(gameStruct.cellField[j, i].cellRotation));
+                    write(gameFile, ' ');
+                end;
+                writeln(gameFile);
+            end;
 
-            // todo waterSourcePositionQueueList
+            // waterSourcePositionQueueList
             writeln(gameFile, positionListToString(gameStruct.waterSourcePositionQueueList));
 
 
