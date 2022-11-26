@@ -170,6 +170,7 @@ implementation
 
     procedure TFMain.onSideButtonClick(Sender: TObject);
     var fileError:TFileError;
+        oldCellField:TCellField;
     begin
         case TSideButton((Sender as TButton).tag) of
             GAMEMODE_BUTTON:
@@ -185,25 +186,30 @@ implementation
             begin
                 // todo abfrage ob geladen werden soll
 
-                fileError := loadGameFromFile('Test', m_recGameStruct);
+                // save for deleting later when newCellField is generated
+                oldCellField := m_recGameStruct.cellField;
+
+                fileError := loadGameFromFile(
+                    'Test',
+                    m_recGameStruct,
+                    panelGamefield,
+                    onCellMouseDown,
+                    cellGrid
+                );
                 case fileError of
                     FILE_ERROR_COUNT_NOT_READ_FROM_FILE: ShowMessage('coulnd read from file');
 
                     else;
                 end;
+                // load variables when no error accoured
                 if (fileError = FILE_ERROR_NONE) then
                 begin
-                    removeCellGrid(cellGrid, m_recGameStruct.cellField);
-                    createCellGrid(
-                        cellGrid,
-                        m_recGameStruct.waterSourcePositionQueueList,
-                        panelGamefield,
-                        m_recGameStruct.cellField, m_recGameStruct.cellRowLength,
-                        m_recGameStruct.cellColumnLength,
-                        onCellMouseDown,
-                        false
-                    );
+                    removeCellGrid(cellGrid, oldCellField);
                     generateGameFromGameStruct(m_recGameStruct);
+                end
+                else
+                begin
+                    // fixme restore old gamefield when file is currupted
                 end;
             end;
 

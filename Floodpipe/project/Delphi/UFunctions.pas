@@ -237,13 +237,19 @@ implementation
     begin
         // remove each cellfield
         for i := 0 to length(cellField) - 1 do
+        begin
             for j := 0 to length(cellField[0]) - 1 do
             begin
+                // clear mamory
                 cellField[i, j].image.picture := nil;
                 cellField[i, j].image.Free;
                 cellField[i, j].image := nil;
                 delPositionList(cellField[i,j].openings);
             end;
+            setlength(cellField[i], 0);
+        end;
+        setlength(cellField, 0);
+        cellField := nil;
         cellGrid.Free;
         cellGrid := nil;
     end;

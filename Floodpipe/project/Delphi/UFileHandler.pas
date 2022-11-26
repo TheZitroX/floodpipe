@@ -14,7 +14,9 @@ unit UFileHandler;
 interface
 
     uses
-        UTypedefine, SysUtils, vcl.dialogs, UPositionFunctions;
+        SysUtils, vcl.dialogs, UPositionFunctions, UFunctions, vcl.controls,  vcl.extctrls, UGameGeneration,
+        
+        UTypedefine;
 
     type
 
@@ -46,12 +48,18 @@ interface
         @param  IN      filename: the path, either from exe or
                         absolut path to the file
                         gameStruct: the game to save
+                        panelGAmefield: the parent panel of the cells
+                        onCellMouseDown:The function pointer to the mouse event
+                        cellGrid is the positioning of the cells
                 
                 RETURN  a TFileError type
     }
     function loadGameFromFile(
         filename:string;
-        var gameStruct:TGameStruct
+        var gameStruct:TGameStruct;
+        panelGamefield:TPanel;
+        onCellMouseDown:TMouseEvent;
+        cellGrid:TGridPanel
     ):TFileError;
 
 implementation
@@ -123,16 +131,32 @@ implementation
     );
         procedure cutCellTypeFromString(var cell:TCell; var line:string);
         begin
-            cell.cellType := TCellType(strtoint(copy(line, 1, pos(' ', line) - 1)));
+            cell.cellType := TCellType(strtoint(copy(
+                line,
+                1,
+                pos(' ', line) - 1
+            )));
             delete(line, 1, pos(' ', line));
 
-            cell.cellItem := TCellItem(strtoint(copy(line, 1, pos(' ', line) - 1)));
+            cell.cellItem := TCellItem(strtoint(copy(
+                line,
+                1,
+                pos(' ', line) - 1
+            )));
             delete(line, 1, pos(' ', line));
 
-            cell.cellContent := TCellContent(strtoint(copy(line, 1, pos(' ', line) - 1)));
+            cell.cellContent := TCellContent(strtoint(copy(
+                line,
+                1,
+                pos(' ', line) - 1
+            )));
             delete(line, 1, pos(' ', line));
 
-            cell.cellRotation := TCellRotation(strtoint(copy(line, 1, pos(' ', line) - 1)));
+            cell.cellRotation := TCellRotation(strtoint(copy(
+                line,
+                1,
+                pos(' ', line) - 1
+            )));
             delete(line, 1, pos(' ', line));
         end;
 
@@ -144,9 +168,29 @@ implementation
         end;
     end;
 
+    procedure stringRowToWaterSourceList(
+        var positionList:TPositionList;
+        var line:string
+    );
+    begin
+        while (line <> '') do
+        begin
+            appendPosition(
+                positionList,
+                integer(strtoint(copy(line, 1, pos(' ', line) - 1))),
+                integer(strtoint(copy(line, 1, pos(' ', line) - 1)))
+            );
+            delete(line, 1, pos(' ', line));
+            delete(line, 1, pos(' ', line));
+        end;
+    end;
+
     function loadGameFromFile(
         filename:string;
-        var gameStruct:TGameStruct
+        var gameStruct:TGameStruct;
+        panelGamefield:TPanel;
+        onCellMouseDown:TMouseEvent;
+        cellGrid:TGridPanel
     ):TFileError;
     var gameFile:TextFile;
         fileError:TFileError;
@@ -166,6 +210,18 @@ implementation
             readln(gameFile, line);
             gameStruct.cellColumnLength := strtoint(line);
 
+            // create gamefield
+            createCellGrid(
+                cellGrid,
+                gameStruct.waterSourcePositionQueueList,
+                panelGamefield,
+                gameStruct.cellField,
+                gameStruct.cellRowLength,
+                gameStruct.cellColumnLength,
+                onCellMouseDown,
+                true
+            );
+
             // wallPercentage
             readln(gameFile, line);
             gameStruct.wallPercentage := strtoint(line);
@@ -175,6 +231,12 @@ implementation
                 readln(gameFile, line);
                 stringRowToCellField(line, gameStruct.cellField, i);
             end;
+
+            delPositionList(gameStruct.waterSourcePositionQueueList);
+            // get waterSources
+            readln(gameFile, line);
+            stringRowToWaterSourceList(gameStruct.waterSourcePositionQueueList, line);
+
 
             CloseFile(gameFile);
         except
