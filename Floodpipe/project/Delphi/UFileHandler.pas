@@ -13,20 +13,16 @@
 unit UFileHandler;
 interface
 
-    uses
-        SysUtils, vcl.dialogs, UPositionFunctions, UFunctions, vcl.controls,  vcl.extctrls, UGameGeneration,
-        
-        UTypedefine;
+    uses SysUtils, vcl.dialogs, UPositionFunctions, UFunctions, vcl.controls,  vcl.extctrls, UGameGeneration, UTypedefine;
 
-    type
-
-        // return codes of the Filehandler functions 
-        TFileError = (
-            FILE_ERROR_NONE,
-            FILE_ERROR_FILE_DOESNT_EXIST,
-            FILE_ERROR_COULD_NOT_WRITE_TO_FILE,
-            FILE_ERROR_COUNT_NOT_READ_FROM_FILE
-        );
+    
+    // return codes of the Filehandler functions 
+    type TFileError = (
+        FILE_ERROR_NONE,
+        FILE_ERROR_FILE_DOESNT_EXIST,
+        FILE_ERROR_COULD_NOT_WRITE_TO_FILE,
+        FILE_ERROR_COUNT_NOT_READ_FROM_FILE
+    );
 
     {
         creates, or writes, on filename 
@@ -203,7 +199,6 @@ implementation
         try
             reset(gameFile);
             
-            // todo reading in
             // gameField rows and columns
             readln(gameFile, line);
             gameStruct.cellRowLength := strtoint(line);
