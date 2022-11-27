@@ -23,10 +23,10 @@ interface
         parent and name to variables
         and the caption to empty
 
-        @param  IN/OUT  panel the target
+        @param  IN/OUT  panel: the target
 
-                IN      panelParent the parent of target panel
-                        parentName the name of the target panel
+                IN      panelParent: the parent of target panel
+                        parentName: the name of the target panel
     }
     procedure panelSetup(
         var panel:TPanel;
@@ -39,13 +39,13 @@ interface
         sets the cells and spaces them evently out
 
         @param  IN/OUT:     cellGrid
-                            waterSourcePositionQueueList with water sources
-                            cellField field of all cells
+                            waterSourcePositionQueueList: with water sources
+                            cellField: field of all cells
 
-                IN:         panelParent the parent of cellGrid
-                            rowCount and columnCount the dimentions of the field
-                            onCellClick the clickevent of the cells
-                            overrideTypes when true, all types will be overriden to TYPE_NONE
+                IN:         panelParent: the parent of cellGrid
+                            rowCount: and columnCount: the dimentions of the field
+                            onCellClick: the clickevent of the cells
+                            overrideTypes: when true, all types will be overriden to TYPE_NONE
     }
     procedure createCellGrid(
         var cellGrid:TGridPanel;
@@ -98,9 +98,11 @@ interface
                                         pipeButton,
                                         pipeTSplitButton,
                                         pipeCurveButton,
+                                        wallButton
                                         gamemodeButton
-                IN      onItemChoseClick eventPointer when button clicked
-                        onGamemodeButtonClick when the gamemode Button has been clicked
+
+                IN      onItemChoseClick: eventPointer when button clicked
+                        onGamemodeButtonClick: when the gamemode Button has been clicked
     }
     procedure createInfoButtons(
         var newParent:TPanel;
@@ -108,6 +110,7 @@ interface
         var pipeButton:TButton;
         var pipeTSplitButton:TButton;
         var pipeCurveButton:TButton;
+        var wallButton:TButton;
         onItemChooseClick:TNotifyEvent;
         var gamemodeButton:TButton;
         onGamemodeButtonClick:TNotifyEvent
@@ -116,21 +119,23 @@ interface
     {
         Creates all side Buttons for saving and loading ect.
 
-        @param  IN/OUT  b1 is the NEW button
-                        b2 is the Settings button
-                        b3 is the Load button
-                        b4 is the Save button
-                        b5 is the quit button
+        @param  IN/OUT  btnAnimate: for starting animation
+                        btnSettings: is the Settings button
+                        btnNewGame: for generating a new gamefield
+                        btnLoad: is the Load button for loading game from file
+                        btnSave: is the Save button
+                        btnExit: is the quit button
 
                 // todo use button ids and a case in one function
-                IN      b1Procedure
-                        b2Procedure
+                IN      btnAnimateProcedure
+                        btnSettingsProcedure
     }
     procedure createButtons(
-        var b1:TButton;
-        var b2:TButton;
-        var b3:TButton;
-        var b4:TButton;
+        var btnAnimate:TButton;
+        var btnSettings:TButton;
+        var btnNewGame:TButton;
+        var btnLoad:TButton;
+        var btnSave:TButton;
         var btnExit:TButton;
         var newParent:TPanel;
         onClickFunction:TNotifyEvent
@@ -141,11 +146,11 @@ implementation
     {
         Sets the position anad side length of a panel
 
-        @param  panel the changed panel
-                newTop the top position
-                newLeft the left position
-                newWidth the width
-                newHeight the height
+        @param  IN      panel: the changed panel
+                        newTop: the top position
+                        newLeft: the left position
+                        newWidth: the width
+                        newHeight: the height
     }
     procedure setDimentions(
         var panel:TPanel;
@@ -295,15 +300,15 @@ implementation
             0, // top-
             0, // left corner
             panelRightSideArea.Width,
-            (panelRightSideArea.Height * 33) div 100 // 33% height of panelRightSideArea
+            (panelRightSideArea.Height * 50) div 100 // 50% height of panelRightSideArea
         );
         // panelRightSideInfo
         setDimentions(
             panelButtons,
-            (panelRightSideArea.Height * 33) div 100, // 33% height of panelRightSideArea
+            (panelRightSideArea.Height * 50) div 100, // 50% height of panelRightSideArea
             0,
             panelRightSideArea.Width,
-            (panelRightSideArea.Height * 67) div 100 // 67% height of panelRightSideArea
+            (panelRightSideArea.Height * 50) div 100 // 50% height of panelRightSideArea
         );
     end;
 
@@ -343,6 +348,7 @@ implementation
         var pipeButton:TButton;
         var pipeTSplitButton:TButton;
         var pipeCurveButton:TButton;
+        var wallButton:TButton;
         onItemChooseClick:TNotifyEvent;
         var gamemodeButton:TButton;
         onGamemodeButtonClick:TNotifyEvent
@@ -392,6 +398,17 @@ implementation
         );
         pipeCurveButton.visible := false;
 
+        createOptionButton(
+            wallButton,
+            newParent,
+            'wallButton',
+            'Wall',
+            onItemChooseClick,
+            alTop,
+            integer(WALL_BUTTON)
+        );
+        wallButton.visible := false;
+
 
         createOptionButton(
             gamemodeButton,
@@ -405,49 +422,59 @@ implementation
     end;
 
     procedure createButtons(
-        var b1:TButton;
-        var b2:TButton;
-        var b3:TButton;
-        var b4:TButton;
+        var btnAnimate:TButton;
+        var btnSettings:TButton;
+        var btnNewGame:TButton;
+        var btnLoad:TButton;
+        var btnSave:TButton;
         var btnExit:TButton;
         var newParent:TPanel;
         onClickFunction:TNotifyEvent
     );
     begin
         createOptionButton(
-            b1,
+            btnAnimate,
             newParent,
-            'newGameButton',
-            'New',
+            'animateButton',
+            'Animate',
             onClickFunction,
-            TAlign(alTop),
-            integer(NEW_BUTTON)
+            TAlign(alBottom),
+            integer(ANIMATE_BUTTON)
         );
         createOptionButton(
-            b2,
+            btnNewGame,
+            newParent,
+            'newGameButton',
+            'Generate New Field',
+            onClickFunction,
+            TAlign(alBottom),
+            integer(GENERATE_NEW_FIELD_BUTTON)
+        );
+        createOptionButton(
+            btnSettings,
             newParent,
             'settingsButton',
             'Settings',
             onClickFunction,
-            TAlign(alTop),
+            TAlign(alBottom),
             integer(SETTINGS_BUTTON)
         );
         createOptionButton(
-            b3,
+            btnLoad,
             newParent,
             'loadGameButton',
             'Load',
             onClickFunction,
-            TAlign(alTop),
+            TAlign(alBottom),
             integer(LOAD_BUTTON)
         );
         createOptionButton(
-            b4,
+            btnSave,
             newParent,
             'saveGameButton',
             'Save',
             onClickFunction, 
-            TAlign(alTop),
+            TAlign(alBottom),
             integer(SAVE_BUTTON)
         );
         createOptionButton(
@@ -456,7 +483,7 @@ implementation
             'quitGameButton',
             'Quit',
             onClickFunction,
-            TAlign(alTop),
+            TAlign(alBottom),
             integer(EXIT_BUTTON)
         );
     end;

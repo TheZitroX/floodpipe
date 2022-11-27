@@ -101,11 +101,13 @@ type
 
         // ======buttonMethods======
         procedure onCellClick(Sender: TObject);
+
         procedure onCellMouseDown(
             Sender: TObject;
             Button: TMouseButton;
             Shift: TShiftState; X, Y: Integer
         );
+
         procedure onGamemodeButtonClick(Sender: TObject);
         procedure onNewButtonClick(Sender: TObject);
 
@@ -123,46 +125,61 @@ type
             @param  IN      Sender: the button
         }
         procedure onSideButtonClick(Sender: TObject);
+
+        {
+            sets the choseen item to the clicked button
+
+            @param  IN      Sender: the clicked button
+        }
         procedure onItemChooseClick(Sender: TObject);
 
     public
         // panel
-        panelGameArea: TPanel;
-        panelRightSideArea: TPanel;
-        panelRightSideInfo: TPanel;
-        panelButtons: TPanel;
-        panelGamefield: TPanel;
+        m_panelGameArea: TPanel;
+        m_panelRightSideArea: TPanel;
+        m_panelRightSideInfo: TPanel;
+        m_panelButtons: TPanel;
+        m_panelGamefield: TPanel;
 
-        // buttons
-        pipeLidButton: TButton;
-        pipeButton: TButton;
-        pipeTSplitButton: TButton;
-        pipeCurveButton: TButton;
-        gamemodeButton: TButton;
+        // editor buttons
+        m_btnPipeLidButton: TButton;
+        m_btnPipeButton: TButton;
+        m_btnPipeTSplitButton: TButton;
+        m_btnPipeCurveButton: TButton;
+        m_btnWallButton: TButton;
 
-        newGameButton: TButton;
-        settingsButton: TButton;
-        loadGameButton: TButton;
-        saveGameButton: TButton;
-        exitGameButton: TButton;
+        m_btnGamemodeButton: TButton;
+
+        // side panel buttons
+        m_btnAnimate: TButton;
+        m_btnNewGameButton: TButton;
+        m_btnSettingsButton: TButton;
+        m_btnLoadGameButton: TButton;
+        m_btnSaveGameButton: TButton;
+        m_btnExitGameButton: TButton;
 
         // ---gamefield---
-        cellGrid: TGridPanel;
-        m_recGameStruct: TGameStruct;
+        m_gridpanelCellGrid: TGridPanel;
 
     private
+        {
+            sets the visibility to the passed boolean of all Itembuttons
+
+            @param  IN      b: passed boolean
+        }
         procedure setItemButtonVisibility(b:boolean);
     end;
 
 var
     FMain: TFMain;
-    cellAnimationTickRate: Integer;
-    timerCount: Integer;
-    fluidTimer: TTimer;
-    isSimulating: Boolean;
-    isEditorMode: boolean;
-    checkedItem: TItemButton;
-    oldButton: TButton;
+    m_iCellAnimationTickRate: Integer;
+    m_iTimerCount: Integer;
+    m_fluidTimer: TTimer;
+    m_bIsSimulating: Boolean;
+    m_bIsEditorMode: boolean;
+    m_eCheckedItem: TItemButton;
+    m_btnOldButon: TButton;
+    m_recGameStruct: TGameStruct;
 
 implementation
 
@@ -176,8 +193,13 @@ implementation
             GAMEMODE_BUTTON:
                 onGamemodeButtonClick(Sender);
 
-            NEW_BUTTON:
+            ANIMATE_BUTTON:
                onNewButtonClick(Sender);
+
+            GENERATE_NEW_FIELD_BUTTON:
+            begin
+                // todo implementation
+            end;
 
             SETTINGS_BUTTON: 
                 onSettingsButtonClick(Sender);
@@ -192,9 +214,9 @@ implementation
                 fileError := loadGameFromFile(
                     'Test',
                     m_recGameStruct,
-                    panelGamefield,
+                    m_panelGamefield,
                     onCellMouseDown,
-                    cellGrid
+                    m_gridpanelCellGrid
                 );
                 case fileError of
                     FILE_ERROR_COUNT_NOT_READ_FROM_FILE: ShowMessage('coulnd read from file');
@@ -204,7 +226,7 @@ implementation
                 // load variables when no error accoured
                 if (fileError = FILE_ERROR_NONE) then
                 begin
-                    removeCellGrid(cellGrid, oldCellField);
+                    removeCellGrid(m_gridpanelCellGrid, oldCellField);
                     generateGameFromGameStruct(m_recGameStruct);
                 end
                 else
@@ -231,17 +253,17 @@ implementation
 
     procedure TFMain.onItemChooseClick(Sender: TObject);
     begin
-        if (oldButton <> nil) then
+        if (m_btnOldButon <> nil) then
         begin
             // remove font style of old button
-            oldButton.font.style := [];
+            m_btnOldButon.font.style := [];
         end;
 
-        if (checkedItem = TItemButton((Sender as TButton).tag)) then
-            checkedItem := NONE_BUTTON
-        else checkedItem := TItemButton((Sender as TButton).tag);
+        if (m_eCheckedItem = TItemButton((Sender as TButton).tag)) then
+            m_eCheckedItem := NONE_BUTTON
+        else m_eCheckedItem := TItemButton((Sender as TButton).tag);
 
-        case checkedItem of
+        case m_eCheckedItem of
             PIPE_LID_BUTTON,
             PIPE_BUTTON,
             PIPE_TSPLIT_BUTTON,
@@ -249,37 +271,38 @@ implementation
             WALL_BUTTON:
                 (Sender as TButton).font.style := [fsBold];
 
-            else; // maybe assertions
+            else; // nothing
         end;
 
-        oldButton := (Sender as TButton);
+        m_btnOldButon := (Sender as TButton);
     end;
 
     procedure TFMain.setItemButtonVisibility(b:boolean);
     begin
-        pipeLidButton.visible := b;
-        pipeButton.visible := b;
-        pipeTSplitButton.visible := b;
-        pipeCurveButton.visible := b;
+        m_btnPipeLidButton.visible := b;
+        m_btnPipeButton.visible := b;
+        m_btnPipeTSplitButton.visible := b;
+        m_btnPipeCurveButton.visible := b;
+        m_btnWallButton.visible := b;
     end;
 
     procedure TFMain.onGamemodeButtonClick(Sender: TObject);
     begin
-        isEditorMode := not isEditorMode;
+        m_bIsEditorMode := not m_bIsEditorMode;
 
         // changing to editormode
-        if (isEditorMode) then
+        if (m_bIsEditorMode) then
         begin
-            gamemodeButton.caption := 'Editor';
+            m_btnGamemodeButton.caption := 'Editor';
             setItemButtonVisibility(true);
         end
-        else // isEditorMode == false
+        else // m_bIsEditorMode == false
         begin
-            gamemodeButton.caption := 'Playing';
-            checkedItem := NONE_BUTTON;
+            m_btnGamemodeButton.caption := 'Playing';
+            m_eCheckedItem := NONE_BUTTON;
             // remove font style of old button
-            if (oldButton <> nil) then
-                oldButton.font.style := [];
+            if (m_btnOldButon <> nil) then
+                m_btnOldButon.font.style := [];
             setItemButtonVisibility(false);
         end;
     end;
@@ -295,16 +318,16 @@ implementation
             mrOk:
             begin
                 // settings übernehmen welche die simulation beeinflussen würde
-                if (not isSimulating) then
+                if (not m_bIsSimulating) then
                 begin
                     if getSettingsFromFSettings() then
                     begin
                         // todo ask for window reload
-                        removeCellGrid(cellGrid, m_recGameStruct.cellField);
+                        removeCellGrid(m_gridpanelCellGrid, m_recGameStruct.cellField);
                         createCellGrid(
-                            cellGrid,
+                            m_gridpanelCellGrid,
                             m_recGameStruct.waterSourcePositionQueueList,
-                            panelGamefield,
+                            m_panelGamefield,
                             m_recGameStruct.cellField, m_recGameStruct.cellRowLength,
                             m_recGameStruct.cellColumnLength,
                             onCellMouseDown,
@@ -332,11 +355,11 @@ implementation
     var position:TPosition;
         i:integer;
     begin
-        if not isSimulating then
+        if not m_bIsSimulating then
         begin
             position := getPositionFromName(TImage(Sender).name);
 
-            if isEditorMode then
+            if m_bIsEditorMode then
             begin
                 case Button of
                     mbLeft: onCellClick(Sender);
@@ -379,11 +402,11 @@ implementation
     procedure TFMain.onCellClick(Sender: TObject);
     var position: TPosition;
     begin
-        if not isSimulating then
+        if not m_bIsSimulating then
         begin
             position := getPositionFromName(TImage(Sender).name);
 
-            case checkedItem of
+            case m_eCheckedItem of
             NONE_BUTTON:
             begin
                 rotateCellClockwise(
@@ -464,11 +487,11 @@ implementation
         // update positions
         panelRedraw(
             FMain.ClientWidth, FMain.ClientHeight,
-            panelGameArea,
-            panelGamefield,
-            panelRightSideArea,
-            panelRightSideInfo,
-            panelButtons
+            m_panelGameArea,
+            m_panelGamefield,
+            m_panelRightSideArea,
+            m_panelRightSideInfo,
+            m_panelButtons
         );
     end;
 
@@ -482,7 +505,7 @@ implementation
     begin
         FSettings.nbRows.Value := m_recGameStruct.cellRowLength;
         FSettings.nbColumns.Value := m_recGameStruct.cellColumnLength;
-        FSettings.nbAnimationTime.Value := cellAnimationTickRate;
+        FSettings.nbAnimationTime.Value := m_iCellAnimationTickRate;
     end;
 
     function TFMain.getSettingsFromFSettings(): Boolean;
@@ -497,8 +520,8 @@ implementation
         m_recGameStruct.wallPercentage := round(FSettings.nbwallPercentage.Value);
 
         // no new-build needed when those settings change
-        cellAnimationTickRate := round(FSettings.nbAnimationTime.Value);
-        fluidtimer.interval := cellAnimationTickRate;
+        m_iCellAnimationTickRate := round(FSettings.nbAnimationTime.Value);
+        m_fluidTimer.interval := m_iCellAnimationTickRate;
     end;
 
     procedure TFMain.cellQueueHandler(Sender: TObject);
@@ -523,28 +546,28 @@ implementation
     begin
         // inizialize
         m_recGameStruct.waterSourcePositionQueueList.firstNode := nil;
-        checkedItem := NONE_BUTTON;
-        oldButton := nil;
+        m_eCheckedItem := NONE_BUTTON;
+        m_btnOldButon := nil;
 
         // set default values
         m_recGameStruct.cellRowLength := DEFAULT_CELL_ROW_COUNT;
         m_recGameStruct.cellColumnLength := DEFAULT_CELL_COLUMN_COUNT;
         m_recGameStruct.wallPercentage := DEFAULT_WALL_PERCENTAGE;
-        cellAnimationTickRate := DEFAULT_CELL_TICK_RATE;
+        m_iCellAnimationTickRate := DEFAULT_CELL_TICK_RATE;
 
         // for randomniss
         randomize;
 
         // ===CREATE PANEL-LAYOUT===
         // panel game area
-        panelSetup(panelGameArea, FMain, 'panelGameArea');
+        panelSetup(m_panelGameArea, FMain, 'm_panelGameArea');
         // panel gamefield
-        panelSetup(panelGamefield, panelGameArea, 'panelGamefield');
-        // gridpanel cellGrid
+        panelSetup(m_panelGamefield, m_panelGameArea, 'm_panelGamefield');
+        // gridpanel m_gridpanelCellGrid
         createCellGrid(
-            cellGrid,
+            m_gridpanelCellGrid,
             m_recGameStruct.waterSourcePositionQueueList,
-            panelGamefield,
+            m_panelGamefield,
             m_recGameStruct.cellField,
             m_recGameStruct.cellRowLength,
             m_recGameStruct.cellColumnLength,
@@ -552,36 +575,37 @@ implementation
             true
         );
         // panel right side area
-        panelSetup(panelRightSideArea, FMain, 'panelSetup');
+        panelSetup(m_panelRightSideArea, FMain, 'panelSetup');
         // panel Right side info
-        panelSetup(panelRightSideInfo, panelRightSideArea, 'panelRightSideInfo');
+        panelSetup(m_panelRightSideInfo, m_panelRightSideArea, 'm_panelRightSideInfo');
         createInfoButtons(
-            panelrightSideInfo,
-            pipeLidButton, pipeButton, pipeTSplitButton, pipeCurveButton,
+            m_panelRightSideInfo,
+            m_btnPipeLidButton, m_btnPipeButton, m_btnPipeTSplitButton, m_btnPipeCurveButton, m_btnWallButton,
             onItemChooseClick,
-            gamemodeButton,
+            m_btnGamemodeButton,
             onSideButtonClick
         );
         // panel Right side info
-        panelSetup(panelButtons, panelRightSideArea, 'panelButtons');
-        // buttons with panelButtons as parent
+        panelSetup(m_panelButtons, m_panelRightSideArea, 'm_panelButtons');
+        // buttons with m_panelButtons as parent
         createButtons(
-            newGameButton,
-            settingsButton,
-            loadGameButton,
-            saveGameButton,
-            exitGameButton,
-            panelButtons,
+            m_btnNewGameButton,
+            m_btnSettingsButton,
+            m_btnNewGameButton,
+            m_btnLoadGameButton,
+            m_btnSaveGameButton,
+            m_btnExitGameButton,
+            m_panelButtons,
             onSideButtonClick
         );
 
         updateLayout();
 
         // creating fluid animation thread (timer)
-        fluidTimer := TTimer.Create(FMain);
-        with fluidTimer do
+        m_fluidTimer := TTimer.Create(FMain);
+        with m_fluidTimer do
         begin
-            Interval := cellAnimationTickRate;
+            Interval := m_iCellAnimationTickRate;
             OnTimer := FMain.cellQueueHandler;
             Enabled := false;
         end;
@@ -619,21 +643,21 @@ implementation
         FSettings.nbRows.Enabled := b;
         FSettings.nbwallPercentage.Enabled := b;
 
-        newGameButton.Enabled := b;
-        loadGameButton.Enabled := b;
-        saveGameButton.Enabled := b;
+        m_btnNewGameButton.Enabled := b;
+        m_btnLoadGameButton.Enabled := b;
+        m_btnSaveGameButton.Enabled := b;
     end;
 
     procedure TFMain.animationStart();
     begin
-        isSimulating := true;
+        m_bIsSimulating := true;
         enableSimulationMode(false);
-        fluidTimer.Enabled := true;
+        m_fluidTimer.Enabled := true;
     end;
 
     procedure TFMain.finalizeAnimation();
     begin
-        isSimulating := false;
+        m_bIsSimulating := false;
         enableSimulationMode(true);
     end;
 

@@ -164,20 +164,34 @@ implementation
         end;
     end;
 
+    {
+        gets all watersources and puts them to a positionList
+
+        @param  IN/OUT  positionList: appends to it each position
+                        line: gets the positions in 'x y ' format
+                            and delets each position after reading
+    }
     procedure stringRowToWaterSourceList(
         var positionList:TPositionList;
         var line:string
     );
+    var x,y:integer;
     begin
         while (line <> '') do
         begin
+            // read and delete X
+            x := integer(strtoint(copy(line, 1, pos(' ', line) - 1)));
+            delete(line, 1, pos(' ', line));
+
+            // read and delete Y
+            y := integer(strtoint(copy(line, 1, pos(' ', line) - 1)));
+            delete(line, 1, pos(' ', line));
+
             appendPosition(
                 positionList,
-                integer(strtoint(copy(line, 1, pos(' ', line) - 1))),
-                integer(strtoint(copy(line, 1, pos(' ', line) - 1)))
+                x,
+                y
             );
-            delete(line, 1, pos(' ', line));
-            delete(line, 1, pos(' ', line));
         end;
     end;
 
@@ -221,6 +235,7 @@ implementation
             readln(gameFile, line);
             gameStruct.wallPercentage := strtoint(line);
 
+            // gamefield
             for i := 0 to gameStruct.cellRowLength - 1 do
             begin
                 readln(gameFile, line);

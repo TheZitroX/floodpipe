@@ -53,7 +53,8 @@ interface
         );
         TSideButton = (
             GAMEMODE_BUTTON,
-            NEW_BUTTON,
+            ANIMATE_BUTTON,
+            GENERATE_NEW_FIELD_BUTTON,
             SETTINGS_BUTTON,
             LOAD_BUTTON,
             SAVE_BUTTON,
