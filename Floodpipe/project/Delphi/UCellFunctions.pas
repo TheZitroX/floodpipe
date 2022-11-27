@@ -18,9 +18,11 @@ interface
 
     {
         Creates a cell with name and parant
-        @param  IN/OUT  cell as target
-                IN      newParent the parant of target
-                        newName the name of target
+
+        @param  IN/OUT  cell: as target
+
+                IN      newParent: the parant of target
+                        newName: the name of target
     }
     procedure cellSetup(
         var cell:TCell;
@@ -31,13 +33,14 @@ interface
     {
         creates a field (rows * columns) of TCellField
 
-        @param  IN/OUT  cellField the field of TPanel
-                        waterSourcePositionQueueList with all water positions
-                IN      newParent the parent of cellField
-                        rowCount the row-count
-                        columnCount the column-count
-                        onCellClick as mouseEvent
-                        overrideTypes when true all types of cellField will be overriden
+        @param  IN/OUT  cellField: the field of TPanel
+                        waterSourcePositionQueueList: with all water positions
+
+                IN      newParent: the parent of cellField
+                        rowCount: the row-count
+                        columnCount: the column-count
+                        onCellClick: as mouseEvent
+                        overrideTypes: when true all types of cellField will be overriden
     }
     procedure createCells(
         var cellField:TCellField;
@@ -52,15 +55,16 @@ interface
         @brief  increments the rotational state of a cell
                 and updates the bitmap of it
         
-        @param  IN/OUT  TCell the rotated cell
+        @param  IN/OUT  cell: the rotated cell
     }
     procedure rotateCellClockwise(var cell:TCell);
 
     {
         @brief  gets the position of a cell name
 
-        @param  IN      string the cell name
-                OUT     TPosition with the x and y values of the name
+        @param  IN      string: the cell name
+
+        @return TPosition: with the x and y values of the name
     }
     function getPositionFromName(name:string):TPosition;
 
@@ -68,20 +72,22 @@ interface
         gets all openings of a pipe and makes a string from it
 
         @param  IN      the target cell
-                OUT     a string with all openings of the pipe
+
+        @return a string with all openings of the pipe
     }
     function cellOpeningsToString(cell:TCell):string;
 
     {
         sets a cell to the passed types
 
-        @param  IN/OUT  the target cell
-                        waterSourcePositionQueueList with water positions
+        @param  IN/OUT  cell: the target cell
+                        waterSourcePositionQueueList: with water positions
+
                 IN      celltype,
                         cellitem,
                         cellContent,
                         cellRotation
-                        overrideTypes when true all types will be overridden to newTypes
+                        overrideTypes: when true all types will be overridden to newTypes
     }
     procedure setCellToItem(
         var cell:TCell;
@@ -97,8 +103,9 @@ interface
         sets all cells in cellField to the passed types
         sets or clears the waterSources
 
-        @param  IN/OUT  cellField with 2d cell array
-                        waterSourcePositionQueueList with water positions
+        @param  IN/OUT  cellField: with 2d cell array
+                        waterSourcePositionQueueList: with water positions
+
                 IN      celltype,
                         cellitem,
                         cellContent,
@@ -116,51 +123,60 @@ interface
     {
         fills a cell with content
 
-        @param  IN/OUT  target cell
-                IN      content type
+        @param  IN/OUT  cell: target cell
+
+                IN      content: of type TCellContent
     }
     procedure fillCellWithContent(var cell:TCell; content:TCellContent);
 
     {
-        returns true when a cell is empty
+        gives information about the cell content (empty or full)
 
-        @param  IN      the target cell
-                RETURN  true when cell is empty
+        @param  IN      cell: the target cell
+
+        @return true when cell is empty
     }
     function isCellEmpty(cell:TCell):boolean;
 
     {
         gets a cell from position
 
-        @param  IN      cellField with all cells
-                        position (has to be in field!)
+        @param  IN      cellField: with all cells
+                        position: (has to be in field!)
 
-                RETURN  the cell on the position in field
+        @return the cell on the position in field
     }
     function getCellFromPosition(cellField:TCellField; position:TPosition):TCell;
 
     {
         tells if a cell is connected to a position
-        returns false if celltype is not TYPE_PIPE
 
-        @param  IN      cell the target cell
-                        position of expected connection
+        @param  IN      cell: the target cell
+                        position: of expected connection
+        
+        @return false if celltype is not TYPE_PIPE
     }
     function isCellConnected(cell:TCell; position:TPosition):boolean;
 
     {
-        returns true when cellType equals type of position in cellField
+        checks for equal types on cell and position
 
-        @param  IN      cellField with cells
-                        position of target cell in field
+        @param  IN      cellField: with cells
+                        position: of target cell in field
                         and the cellType
+                    
+        @return true when cellType equals type of position in cellField
     }
-    function positionEqualsType(cellField:TCellField; position:TPosition; cellType:TCellType):boolean;
+    function positionEqualsType(
+        cellField:TCellField;
+        position:TPosition;
+        cellType:TCellType
+    ):boolean;
 
     {
         sets the openings from type and rotation of a cell
 
-        @param  IN/OUT  target cell
+        @param  IN/OUT  cell: the target cell
     }
     procedure setOpeningsFromRotation(var cell:TCell);
 

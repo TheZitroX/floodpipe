@@ -330,12 +330,14 @@ implementation
         Shift: TShiftState; X, Y: Integer
     );
     var position:TPosition;
+        i:integer;
     begin
         if not isSimulating then
         begin
+            position := getPositionFromName(TImage(Sender).name);
+
             if isEditorMode then
             begin
-                position := getPositionFromName(TImage(Sender).name);
                 case Button of
                     mbLeft: onCellClick(Sender);
                     mbRight: rotateCellClockwise(
@@ -352,8 +354,26 @@ implementation
                 end; 
             end
             else // not editor mode
-                onCellClick(Sender);
-        end;
+            begin
+                // onCellClick(Sender);
+                case Button of
+                    mbLeft: // rotate -90°
+                        for i := 0 to 2 do
+                            rotateCellClockwise(
+                                m_recGameStruct.cellField[position.x, position.y]
+                            );
+                            
+                    mbRight: // rotate 90°
+                        rotateCellClockwise(
+                            m_recGameStruct.cellField[position.x, position.y]
+                        );
+
+                    mbMiddle:; // nothing
+                end; 
+            end;
+        end
+        else // when simulating
+            showmessage('No interaction durring simulation!');
     end;
 
     procedure TFMain.onCellClick(Sender: TObject);
