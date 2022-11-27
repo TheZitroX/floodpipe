@@ -198,7 +198,23 @@ implementation
 
             GENERATE_NEW_FIELD_BUTTON:
             begin
-                // todo implementation
+                // todo ask if its intended
+                removeCellGrid(m_gridpanelCellGrid, m_recGameStruct.cellField);
+                createCellGrid(
+                    m_gridpanelCellGrid,
+                    m_recGameStruct.waterSourcePositionQueueList,
+                    m_panelGamefield,
+                    m_recGameStruct.cellField, m_recGameStruct.cellRowLength,
+                    m_recGameStruct.cellColumnLength,
+                    onCellMouseDown,
+                    true
+                );
+                generateGame(
+                    m_recGameStruct.cellField,
+                    m_recGameStruct.cellRowLength, m_recGameStruct.cellColumnLength,
+                    m_recGameStruct.wallPercentage,
+                    m_recGameStruct.waterSourcePositionQueueList
+                );
             end;
 
             SETTINGS_BUTTON: 
@@ -643,9 +659,17 @@ implementation
         FSettings.nbRows.Enabled := b;
         FSettings.nbwallPercentage.Enabled := b;
 
+        // side buttons
         m_btnNewGameButton.Enabled := b;
         m_btnLoadGameButton.Enabled := b;
         m_btnSaveGameButton.Enabled := b;
+
+        // all itemchoose buttons
+        m_btnPipeLidButton.Enabled := b;
+        m_btnPipeButton.Enabled := b;
+        m_btnPipeTSplitButton.Enabled := b;
+        m_btnPipeCurveButton.Enabled := b;
+        m_btnWallButton.Enabled := b;
     end;
 
     procedure TFMain.animationStart();
