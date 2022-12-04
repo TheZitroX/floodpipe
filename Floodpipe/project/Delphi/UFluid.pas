@@ -36,7 +36,9 @@ interface
                 IN:     position to place the source
 
                 RETURN: true when success on placement
-                        false when position is not in cellField
+                        false when position is not in cellField or
+                        position is not a pipe or
+                        pipe has water
     }
     function setWaterSource(
         var cellField:TCellField;
@@ -106,12 +108,23 @@ implementation
         position:TPosition
     ):boolean;
     begin
-        if (positionInField(cellField, position)) then
+        if (positionInField(cellField, position) and
+            positionEqualsType(
+                cellField,
+                position,
+                TCellType.TYPE_PIPE
+            ) and
+            isCellEmpty(cellField[position.x, position.y])
+        ) then
         begin
-            // todo when cell is also a pipe
             setWaterSource := true;
-            fillCellWithContent(cellField[position.x, position.y], TCellContent.CONTENT_WATER);
-            appendPosition(positionQueueList, position.x, position.y);
+
+            // check if positionList doesnt has the position
+            if (not hasPosition(positionQueueList, position)) then
+            begin
+                fillCellWithContent(cellField[position.x, position.y], TCellContent.CONTENT_WATER);
+                appendPosition(positionQueueList, position.x, position.y);
+            end;
         end
         else
             setWaterSource := false;

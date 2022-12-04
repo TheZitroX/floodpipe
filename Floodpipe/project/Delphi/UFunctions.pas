@@ -98,7 +98,8 @@ interface
                                         pipeButton,
                                         pipeTSplitButton,
                                         pipeCurveButton,
-                                        wallButton
+                                        wallButton,
+                                        waterSourceButton
                                         gamemodeButton
 
                 IN      onItemChoseClick: eventPointer when button clicked
@@ -106,11 +107,14 @@ interface
     }
     procedure createInfoButtons(
         var newParent:TPanel;
+
         var pipeLidButton:TButton;
         var pipeButton:TButton;
         var pipeTSplitButton:TButton;
         var pipeCurveButton:TButton;
         var wallButton:TButton;
+        var waterSourceButton:TButton;
+        
         onItemChooseClick:TNotifyEvent;
         var gamemodeButton:TButton;
         onGamemodeButtonClick:TNotifyEvent
@@ -344,11 +348,14 @@ implementation
 
     procedure createInfoButtons(
         var newParent:TPanel;
+
         var pipeLidButton:TButton;
         var pipeButton:TButton;
         var pipeTSplitButton:TButton;
         var pipeCurveButton:TButton;
         var wallButton:TButton;
+        var waterSourceButton:TButton;
+        
         onItemChooseClick:TNotifyEvent;
         var gamemodeButton:TButton;
         onGamemodeButtonClick:TNotifyEvent
@@ -409,6 +416,16 @@ implementation
         );
         wallButton.visible := false;
 
+        createOptionButton(
+            waterSourceButton,
+            newParent,
+            'waterSourceButton',
+            'Watersource',
+            onItemChooseClick,
+            alTop,
+            integer(WATER_SOURCE_BUTTON)
+        );
+        waterSourceButton.visible := false;
 
         createOptionButton(
             gamemodeButton,

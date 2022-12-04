@@ -147,6 +147,7 @@ type
         m_btnPipeTSplitButton: TButton;
         m_btnPipeCurveButton: TButton;
         m_btnWallButton: TButton;
+        m_btnWaterSourceButton: TButton;
 
         m_btnGamemodeButton: TButton;
 
@@ -300,6 +301,7 @@ implementation
         m_btnPipeTSplitButton.visible := b;
         m_btnPipeCurveButton.visible := b;
         m_btnWallButton.visible := b;
+        m_btnWaterSourceButton.visible := b;
     end;
 
     procedure TFMain.onGamemodeButtonClick(Sender: TObject);
@@ -493,6 +495,16 @@ implementation
                 );
             end;
 
+            WATER_SOURCE_BUTTON:
+            begin
+                if not setWaterSource(
+                    m_recGameStruct.cellField,
+                    m_recGameStruct.waterSourcePositionQueueList,
+                    position
+                ) then
+                    showmessage('You cant place a watersource there!');
+            end;
+
             else showmessage('no such item');
             end;
         end;
@@ -596,7 +608,15 @@ implementation
         panelSetup(m_panelRightSideInfo, m_panelRightSideArea, 'm_panelRightSideInfo');
         createInfoButtons(
             m_panelRightSideInfo,
-            m_btnPipeLidButton, m_btnPipeButton, m_btnPipeTSplitButton, m_btnPipeCurveButton, m_btnWallButton,
+
+            // item buttons
+            m_btnPipeLidButton,
+            m_btnPipeButton,
+            m_btnPipeTSplitButton,
+            m_btnPipeCurveButton,
+            m_btnWallButton,
+            m_btnWaterSourceButton,
+
             onItemChooseClick,
             m_btnGamemodeButton,
             onSideButtonClick
@@ -670,6 +690,7 @@ implementation
         m_btnPipeTSplitButton.Enabled := b;
         m_btnPipeCurveButton.Enabled := b;
         m_btnWallButton.Enabled := b;
+        m_btnWaterSourceButton.Enabled := b;
     end;
 
     procedure TFMain.animationStart();

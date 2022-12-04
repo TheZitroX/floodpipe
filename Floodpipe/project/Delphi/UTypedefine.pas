@@ -49,7 +49,8 @@ interface
             PIPE_BUTTON,
             PIPE_TSPLIT_BUTTON,
             PIPE_CURVE_BUTTON,
-            WALL_BUTTON
+            WALL_BUTTON,
+            WATER_SOURCE_BUTTON
         );
         TSideButton = (
             GAMEMODE_BUTTON,
