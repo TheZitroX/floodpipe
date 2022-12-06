@@ -1,12 +1,13 @@
 ﻿{
-  file:       UMain.pas
-  author:     John Lienau
-  title:      Main unit of project Floodpipe
-  version:    v1.0
-  date:       03.08.2022
-  copyright:  Copyright (c) 2022
+    file:       UMain.pas
+    author:     John Lienau
+    title:      Main unit of project Floodpipe
+    version:    v1.0
+    date:       03.08.2022
+    copyright:  Copyright (c) 2022
 
-  brief:      Main implementations of all units of the project Floodpipe
+    brief:      This unit contains the main form of the application
+                and all the methods that are called by the form
 }
 
 unit UMain;
@@ -134,14 +135,14 @@ type
         procedure onItemChooseClick(Sender: TObject);
 
     public
-        // panel
+        // ---panels---
         m_panelGameArea: TPanel;
         m_panelRightSideArea: TPanel;
         m_panelRightSideInfo: TPanel;
         m_panelButtons: TPanel;
         m_panelGamefield: TPanel;
 
-        // editor buttons
+        // ---item buttons---
         m_btnPipeLidButton: TButton;
         m_btnPipeButton: TButton;
         m_btnPipeTSplitButton: TButton;
@@ -151,7 +152,7 @@ type
 
         m_btnGamemodeButton: TButton;
 
-        // side panel buttons
+        // ---side buttons---
         m_btnAnimate: TButton;
         m_btnNewGameButton: TButton;
         m_btnSettingsButton: TButton;
@@ -199,23 +200,26 @@ implementation
 
             GENERATE_NEW_FIELD_BUTTON:
             begin
-                // todo ask if its intended
-                removeCellGrid(m_gridpanelCellGrid, m_recGameStruct.cellField);
-                createCellGrid(
-                    m_gridpanelCellGrid,
-                    m_recGameStruct.waterSourcePositionQueueList,
-                    m_panelGamefield,
-                    m_recGameStruct.cellField, m_recGameStruct.cellRowLength,
-                    m_recGameStruct.cellColumnLength,
-                    onCellMouseDown,
-                    true
-                );
-                generateGame(
-                    m_recGameStruct.cellField,
-                    m_recGameStruct.cellRowLength, m_recGameStruct.cellColumnLength,
-                    m_recGameStruct.wallPercentage,
-                    m_recGameStruct.waterSourcePositionQueueList
-                );
+                // ask if its intended to generate a new field
+                if (MessageDlg('Do you want to generate a new field?', mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
+                begin
+                    removeCellGrid(m_gridpanelCellGrid, m_recGameStruct.cellField);
+                    createCellGrid(
+                        m_gridpanelCellGrid,
+                        m_recGameStruct.waterSourcePositionQueueList,
+                        m_panelGamefield,
+                        m_recGameStruct.cellField, m_recGameStruct.cellRowLength,
+                        m_recGameStruct.cellColumnLength,
+                        onCellMouseDown,
+                        true
+                    );
+                    generateGame(
+                        m_recGameStruct.cellField,
+                        m_recGameStruct.cellRowLength, m_recGameStruct.cellColumnLength,
+                        m_recGameStruct.wallPercentage,
+                        m_recGameStruct.waterSourcePositionQueueList
+                    );
+                end;
             end;
 
             SETTINGS_BUTTON: 
@@ -223,32 +227,35 @@ implementation
 
             LOAD_BUTTON:
             begin
-                // todo abfrage ob geladen werden soll
-
-                // save for deleting later when newCellField is generated
-                oldCellField := m_recGameStruct.cellField;
-
-                fileError := loadGameFromFile(
-                    'Test',
-                    m_recGameStruct,
-                    m_panelGamefield,
-                    onCellMouseDown,
-                    m_gridpanelCellGrid
-                );
-                case fileError of
-                    FILE_ERROR_COUNT_NOT_READ_FROM_FILE: ShowMessage('coulnd read from file');
-
-                    else;
-                end;
-                // load variables when no error accoured
-                if (fileError = FILE_ERROR_NONE) then
+                // abfrage ob geladen werden soll
+                if (MessageDlg('Do you want to load a game?', mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
                 begin
-                    removeCellGrid(m_gridpanelCellGrid, oldCellField);
-                    generateGameFromGameStruct(m_recGameStruct);
-                end
-                else
-                begin
-                    // fixme restore old gamefield when file is currupted
+                    // save for deleting later when newCellField is generated
+                    oldCellField := m_recGameStruct.cellField;
+
+                    fileError := loadGameFromFile(
+                        'Test',
+                        m_recGameStruct,
+                        m_panelGamefield,
+                        onCellMouseDown,
+                        m_gridpanelCellGrid
+                    );
+                    case fileError of
+                        FILE_ERROR_COUNT_NOT_READ_FROM_FILE: ShowMessage('coulnd read from file');
+
+                        else;
+                    end;
+                    // load variables when no error accoured
+                    if (fileError = FILE_ERROR_NONE) then
+                    begin
+                        removeCellGrid(m_gridpanelCellGrid, oldCellField);
+                        generateGameFromGameStruct(m_recGameStruct);
+                    end
+                    else
+                    begin
+                        // restore old gamefield when file is currupted
+                        m_recGameStruct.cellField := oldCellField;
+                    end;
                 end;
             end;
 
@@ -261,8 +268,22 @@ implementation
                 end;
 
             EXIT_BUTTON:
-                // todo abfrage nach speichern oder ob geschlossen werden soll
-                Application.Terminate;
+                // ask if its intended to exit the game
+                if (MessageDlg('Do you want to exit the game?', mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
+                begin
+                    // ask if its intended to save the game
+                    if (MessageDlg('Do you want to save the game?', mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
+                    begin
+                        case saveGameToFile('Test', m_recGameStruct) of
+                            FILE_ERROR_FILE_DOESNT_EXIST: showmessage('file doesnt exist');
+                            FILE_ERROR_COULD_NOT_WRITE_TO_FILE: showmessage('could not write to file');
+
+                            else;
+                        end;
+                    end;
+                    
+                    Application.Terminate;
+                end;
 
             else; // nothing
         end;
@@ -276,10 +297,13 @@ implementation
             m_btnOldButon.font.style := [];
         end;
 
+        // when the same button is clicked again
         if (m_eCheckedItem = TItemButton((Sender as TButton).tag)) then
             m_eCheckedItem := NONE_BUTTON
-        else m_eCheckedItem := TItemButton((Sender as TButton).tag);
+        else // when not the same button
+            m_eCheckedItem := TItemButton((Sender as TButton).tag);
 
+        // set font style of new button
         case m_eCheckedItem of
             PIPE_LID_BUTTON,
             PIPE_BUTTON,
@@ -670,7 +694,11 @@ implementation
         var Resize: Boolean
     );
     begin
-        NewHeight := round(MAIN_FORM_ASPECT_RATIO * NewWidth);
+        // keep aspect ratio
+        if NewWidth < NewHeight then
+            NewWidth := round(NewHeight / MAIN_FORM_ASPECT_RATIO)
+        else // NewWidth >= NewHeight
+            NewHeight := round(MAIN_FORM_ASPECT_RATIO * NewWidth);
     end;
 
     procedure TFMain.enableSimulationMode(b: Boolean);

@@ -6,7 +6,8 @@
     date:       30.07.2022
     copyright:  Copyright (c) 2022
 
-    brief:      Mostly used functions by the main unit of Floodpipe
+    brief:      This file contains all functions that are used in the main form
+                and are not directly related to the game logic
 }
 
 unit UFunctions;

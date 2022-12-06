@@ -6,7 +6,8 @@
     date:       01.09.2022
     copyright:  Copyright (c) 2022
 
-    brief:      Fluid symulations
+    brief:      This unit contains the functions to move the fluid in the pipes
+                and to set a water source at a position
 }
 
 unit UFluid;
@@ -49,6 +50,13 @@ interface
 
 implementation
 
+    {
+        moves fluid in all connections of a cell
+
+        @param  IN/OUT: cellField (gets changed when fluid is moving in pipes)
+                        positionQueueList (gets changed when new positions are found)
+                        newPositionQueueList (gets filled with new positions)
+    }
     procedure moveFluidInConnections(
         var cellField:TCellField;
         var positionQueueList, newPositionQueueList:TPositionList
@@ -61,12 +69,14 @@ implementation
         cell := getCellFromPosition(cellField, cellPosition);
 
         openingsRunner := cell.openings.firstNode;
+        // check all openings of the cell
         while(openingsRunner <> nil) do
         begin
             position := addPositions(
                 openingsRunner^.position,
                 cellPosition
             );
+            // check if position is in cellField and position is a pipe and pipe has no water
             if (positionInField(cellField, position) and
                 isCellEmpty(cellField[position.x, position.y]) and
                 isCellConnected(cellField[position.x, position.y], cellPosition)) then
@@ -80,6 +90,7 @@ implementation
                     );
                     appendPosition(newPositionQueueList, position.x, position.y);
             end;
+            // go to next opening
             openingsRunner := openingsrunner^.next;
         end;
     end;
@@ -89,6 +100,7 @@ implementation
         newPositionQueueList:TPositionList;
     begin
         newPositionQueueList.firstNode := nil;
+        // check all positions in positionQueueList
         while (not isPositionListEmpty(positionQueueList)) do
         begin
             moveFluidInConnections(
@@ -108,6 +120,7 @@ implementation
         position:TPosition
     ):boolean;
     begin
+        // check if position is in cellField and position is a pipe and pipe has no water
         if (positionInField(cellField, position) and
             positionEqualsType(
                 cellField,
@@ -119,14 +132,14 @@ implementation
         begin
             setWaterSource := true;
 
-            // check if positionList doesnt has the position
+            // check if position is already in positionQueueList
             if (not hasPosition(positionQueueList, position)) then
             begin
                 fillCellWithContent(cellField[position.x, position.y], TCellContent.CONTENT_WATER);
                 appendPosition(positionQueueList, position.x, position.y);
             end;
         end
-        else
+        else // position is not in cellField or position is not a pipe or pipe has water
             setWaterSource := false;
     end;
 end.
