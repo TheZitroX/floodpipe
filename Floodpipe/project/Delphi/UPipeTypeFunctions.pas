@@ -1,11 +1,13 @@
 {
-  file:       UPipeTypeFunctions.pas
-  author:     John Lienau
-  date:       24.09.2022
-  version:    v1.0
-  copyright:  Copyright (c) 2022
+    file:       UPipeTypeFunctions.pas
+    author:     John Lienau
+    title:      PipeTypeFunctions unit of project Floodpipe
+    version:    v1.0
+    date:       03.08.2022
+    copyright:  Copyright (c) 2022  
 
-  brief:      Provides operations for pipetype(list)
+    brief:      This unit contains all the functions that are used to
+                handle the pipeTypeList
 }
 
 unit UPipeTypeFunctions;

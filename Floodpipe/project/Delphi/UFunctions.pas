@@ -131,7 +131,6 @@ interface
                         btnSave: is the Save button
                         btnExit: is the quit button
 
-                // todo use button ids and a case in one function
                 IN      btnAnimateProcedure
                         btnSettingsProcedure
     }

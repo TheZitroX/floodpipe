@@ -6,10 +6,11 @@
     date:		    30.07.2022
     copyright:	    Copyright (c) 2022
 
-    brief:		    Contains all types used in the program
+    brief:          This file contains all types and structs used in the program.
+                    It is used to make the code more readable and to avoid errors.
 }
 
-// TODO: add more types (e.g. for fluids, ...)
+// TODO: add more types (e.g. for fluids, ...) and add more comments to fill the gaps in the code and look more professional lol.
 unit UTypedefine;
 
 interface

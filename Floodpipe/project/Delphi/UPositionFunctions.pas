@@ -5,7 +5,7 @@
     version:    v1.0
     copyright:  Copyright (c) 2022
 
-    brief:      provides operations for positions
+    brief:      contains functions for positions and positionLists (linked lists) for the game
 }
 
 unit UPositionFunctions;
@@ -14,9 +14,37 @@ interface
 
     uses UTypedefine, sysutils;
 
+    {
+        creates a position from input positions (x, y)
+
+        @param  IN:     posX(Y) the positions
+                RETURN: a position type from input positions (x, y)
+    }
     function getPosition(posX, posY:integer):TPosition;
+
+    {
+        Rotates position clockwise (90°)
+        only (1, 0),(0,-1),(-1,0) and (0,-1) accepted!
+        Other positions will result in an error
+
+        @param  IN/OUT: the position vector
+    }
     procedure rotatePosition(var position:TPosition);
+
+    {
+        checks if a list is empty
+
+        @param  IN:     positionList the list to check 
+                RETURN: true when empty else false
+    }
     function isPositionListEmpty(positionList:TPositionList):boolean;
+
+    {
+        @brief: appends a positionNode to the end of the positionList
+
+        @param: IN/OUT: positionList with the beginning of the list
+                IN:     positionNode the appendend node
+    }
     procedure appendPositionNode(var positionList:TPositionList; positionNode:PPositionNode);
 
     {
@@ -42,13 +70,66 @@ interface
         position:TPosition
     ); overload;
 
+    {
+        @brief: deletes a positionNode from the beginning of the list
+
+        @param: IN/OUT: positionList with the new beginning of the list
+    }
     procedure delFirstPositionNode(var positionList:TPositionList);
+
+    {
+        deletes every position in the list
+
+        @param  IN/OUT: the positionList to be cleared
+    }
     procedure delPositionList(var positionList:TPositionList);
+
+    {
+        rotates all cell openings by 90°
+
+        @param  IN/OUT: target cell
+    }
     procedure rotatePositions(var cell:TCell);
+
+    {
+        rotates all openings by cell rotation
+
+        @param  IN/OUT: target cell
+    }
     procedure rotatePositionsByCellRotation(var cell:TCell);
+    
+    {
+        adds two positions with eachother
+        
+        @param  IN:     position1(2) added with eachother
+                RETURN: added positions
+    }
     function addPositions(position1, position2:TPosition):TPosition;
+    
+    {
+        position in field checker
+        
+        @param  IN:     cellField the cellfield has to be atleast 1x1
+                        and position from type TPosition
+                RETURN: true when in field else false when not in field
+    }
     function positionInField(cellField:TCellField; position:TPosition):boolean;
+    
+    {
+        tells if two positions points to the same
+
+        @param  IN:     position1(2) the checked positions
+                RETURN: true when they point to the same location
+    }
     function positionEquals(position1, position2:TPosition):boolean;
+    
+    {
+        tells if a position is in the positionList
+
+        @param: IN:     positionList with all positions
+                        position the position check against the positionList
+                RETURN: true when found and false when not found
+    }
     function hasPosition(positionList:TPositionList; position:TPosition):boolean;
 
     {
@@ -80,6 +161,12 @@ interface
         position:TPosition
     );
 
+    {
+        gets the length of a positionList
+
+        @param  IN:     the positionList to get the length from
+                RETURN: length of the list (0 when empty)
+    }
     function positionListLength(positionList:TPositionList):integer;
 
 implementation
@@ -95,12 +182,6 @@ implementation
         getPosition.y := posY;
     end;
 
-    {
-        @brief: appends a positionNode to the end of the positionList
-
-        @param: IN/OUT: positionList with the beginning of the list
-                IN:     positionNode the appendend node
-    }
     procedure appendPositionNode(var positionList:TPositionList; positionNode:PPositionNode);
     begin
         // set positionList when beginning doesnt exist
@@ -142,11 +223,6 @@ implementation
         appendPositionNode(positionList, positionNode);
     end;
 
-    {
-        @brief: deletes a positionNode from the beginning of the list
-
-        @param: IN/OUT: positionList with the new beginning of the list
-    }
     procedure delFirstPositionNode(var positionList:TPositionList);
     var
         tempPositionNode:PPositionNode;
@@ -159,11 +235,6 @@ implementation
         end;
     end;
 
-    {
-        deletes every position in the list
-
-        @param  IN/OUT: the positionList to be cleared
-    }
     procedure delPositionList(var positionList:TPositionList);
     begin
         while (not isPositionListEmpty(positionList)) do
@@ -171,23 +242,11 @@ implementation
         positionList.lastNode := nil;
     end;
 
-    {
-        checks if a list is empty
-
-        @param  IN:     positionList
-                RETURN: true when empty
-    }
     function isPositionListEmpty(positionList:TPositionList):boolean;
     begin
         isPositionListEmpty := positionList.firstNode = nil;
     end;
 
-    {
-        Rotates position clockwise (90°)
-        only (1, 0),(0,-1),(-1,0) and (0,-1) accepted!
-
-        @param  IN/OUT: the position vector
-    }
     procedure rotatePosition(var position:TPosition);
     begin
         case position.x of
@@ -212,12 +271,6 @@ implementation
         end;
     end;
 
-
-    {
-        rotates all cell openings by 90°
-
-        @param  IN/OUT: target cell
-    }
     procedure rotatePositions(var cell:TCell);
     var
         openingsRunner:PPositionNode;
@@ -229,11 +282,6 @@ implementation
         end;
     end;  
 
-    {
-        rotates all openings by cell rotation
-
-        @param  IN/OUT: target cell
-    }
     procedure rotatePositionsByCellRotation(var cell:TCell);
     var
         i:integer;
@@ -242,25 +290,12 @@ implementation
             rotatePositions(cell);
     end;
 
-    {
-        adds two positions with eachother
-        
-        @param  IN:     position1(2) added with eachother
-                RETURN: added positions
-    }
     function addPositions(position1, position2:TPosition):TPosition;
     begin
         addPositions.x := position1.x + position2.x;
         addPositions.y := position1.y + position2.y;
     end;
 
-    {
-        position in field checker
-        
-        @param  IN:     the cellfield has to be atleast 1x1
-                        and position from type TPosition
-                RETURN: true when in field
-    }
     function positionInField(cellField:TCellField; position:TPosition):boolean;
     begin
         positionInField := 
@@ -270,12 +305,6 @@ implementation
             (position.y < length(cellField[0]));
     end;
 
-    {
-        tells if two positions points to the same
-
-        @param  IN:     position1(2) the checked positions
-                RETURN: true when they point to the same location
-    }
     function positionEquals(position1, position2:TPosition):boolean;
     begin
         positionEquals := (
@@ -284,13 +313,6 @@ implementation
         );
     end;
 
-    {
-        tells if a position is in the positionList
-
-        @param: IN:     positionList with all positions
-                        position the position check against the positionList
-                RETURN: true when found and false when not found
-    }
     function hasPosition(positionList:TPositionList; position:TPosition):boolean;
     var
         positionListRunner:PPositionNode;
@@ -308,12 +330,6 @@ implementation
         hasPosition := found;
     end;
 
-    {
-        gets the length of a positionList
-
-        @param  IN:     the positionList
-                RETURN: length of the list
-    }
     function positionListLength(positionList:TPositionList):integer;
     var
         listLength:integer;

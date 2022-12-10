@@ -1,15 +1,23 @@
 ﻿{
     file:       UPixelFunctions.pas
     author:     John Lienau
-    title:      Generates pictures and styles them
+    title:      Generates pictures from tilemap resources
     version:    v1.0
     date:       03.08.2022
     copyright:  Copyright (c) 2022
+
+    brief:      This unit contains functions to generate pictures them.
+                It uses the tilemap resources to generate the pictures.
 }
 
 unit UPixelFunctions;
 
     // Bitmap file with all tiles in a 4 by 4 (à 58px) grid
+    // 4 rotations of each tile
+    // 4 types of tiles
+    // 2 content types of pipes
+    // 1 content type of walls
+    // 1 content type of empty cells
     {$R resources/pipesEmptyTilemap.RES}
     {$R resources/pipesWaterTilemap.RES}
     {$R resources/wallsTilemap.RES}
@@ -22,7 +30,7 @@ interface
 
     {
         loads a tile from the tilemapResource to a cell 
-        loads the tile from the cells type
+        loads the tile from the cells type, item and rotation
 
         @param  IN/OUT  cell: the targetcell
     }
@@ -36,7 +44,7 @@ implementation
         @param  IN/OUT  tileBitmap: writes the tile to it
 
                 IN      tilemapBitmap: the resource
-                        cellItem: the item
+                        cellItem: the item of the cell (TYPE_WALL, TYPE_PIPE) other types are not supported
                         cellRotation: selects the rotated variant of cellItem
     }
     procedure getTileFromTilemap(

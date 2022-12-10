@@ -16,7 +16,7 @@ interface
 
 uses
     Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
-    System.Classes, Vcl.Graphics,
+    System.Classes, Vcl.Graphics, System.UITypes,
     Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.ExtCtrls, Vcl.StdCtrls,
 
     USettings,
@@ -29,7 +29,6 @@ type
 
         {
             On Resize the aspect ratio will be maintained
-            // fixme Horizontal sizing is not possible
 
             @param  IN      Sender: not used
 
@@ -51,8 +50,19 @@ type
         }
         procedure FormCreate(Sender: TObject);
 
+        {
+            Setup after the FMain shows
+            Panels, buttons and the game is setup here
+
+            @param  IN      Sender: not used
+        }
         procedure formSetup();
 
+        {
+            On Resize the aspect ratio will be maintained
+
+            @param  IN      Sender: not used
+        }
         procedure FormResize(Sender: TObject);
 
         {
@@ -69,6 +79,9 @@ type
         }
         procedure cellQueueHandler(Sender: TObject);
 
+        {
+            frees the m_recGameStruct.waterSourcePositionQueueList
+        }
         procedure cellQueueHandlerFinalize();
 
         {
@@ -101,15 +114,37 @@ type
         function getSettingsFromFSettings(): Boolean;
 
         // ======buttonMethods======
+        {
+            handles the click on the animate button
+
+            @param  IN      Sender: the button
+        }
         procedure onCellClick(Sender: TObject);
 
+        {
+            handles the click on the animate button
+
+            @param  IN      Sender: the button
+        }
         procedure onCellMouseDown(
             Sender: TObject;
             Button: TMouseButton;
             Shift: TShiftState; X, Y: Integer
         );
 
+        {
+            handles the click on the animate button
+
+            @param  IN      Sender: the button
+        }
         procedure onGamemodeButtonClick(Sender: TObject);
+        
+        {
+            opens a load menu
+            when specific changes has been made a game restart will be made
+
+            @param  IN      Sender: the button 
+        }
         procedure onNewButtonClick(Sender: TObject);
 
         {
@@ -167,7 +202,7 @@ type
         {
             sets the visibility to the passed boolean of all Itembuttons
 
-            @param  IN      b: passed boolean
+            @param  IN      b: passed boolean to set the visibility
         }
         procedure setItemButtonVisibility(b:boolean);
     end;
@@ -182,15 +217,15 @@ var
     m_eCheckedItem: TItemButton;
     m_btnOldButon: TButton;
     m_recGameStruct: TGameStruct;
+    m_bNotSaved: Boolean;
 
 implementation
 
     {$R *.dfm}
 
     procedure TFMain.onSideButtonClick(Sender: TObject);
-    var fileError:TFileError;
-        oldCellField:TCellField;
     begin
+        // check which button was clicked
         case TSideButton((Sender as TButton).tag) of
             GAMEMODE_BUTTON:
                 onGamemodeButtonClick(Sender);
@@ -201,8 +236,23 @@ implementation
             GENERATE_NEW_FIELD_BUTTON:
             begin
                 // ask if its intended to generate a new field
-                if (MessageDlg('Do you want to generate a new field?', mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
+                if (MessageDlg(
+                        'Do you want to generate a new field?',
+                        mtConfirmation,
+                        [mbYes, mbNo],
+                        0
+                    ) = mrYes) then
                 begin
+                    // ask for saveing the current field
+                    if (m_bNotSaved) and 
+                        (MessageDlg(
+                            'Do you want to save the current field?',
+                            mtConfirmation,
+                            [mbYes, mbNo],
+                            0
+                        ) = mrYes) then
+                        saveGame(m_recGameStruct, self, m_bNotSaved);
+                
                     removeCellGrid(m_gridpanelCellGrid, m_recGameStruct.cellField);
                     createCellGrid(
                         m_gridpanelCellGrid,
@@ -217,70 +267,35 @@ implementation
                         m_recGameStruct.cellField,
                         m_recGameStruct.cellRowLength, m_recGameStruct.cellColumnLength,
                         m_recGameStruct.wallPercentage,
-                        m_recGameStruct.waterSourcePositionQueueList
+                        m_recGameStruct.waterSourcePositionQueueList,
+                        not m_bIsEditorMode
                     );
+
+                    m_bNotSaved := true;
                 end;
             end;
 
             SETTINGS_BUTTON: 
                 onSettingsButtonClick(Sender);
 
-            LOAD_BUTTON:
-            begin
-                // abfrage ob geladen werden soll
-                if (MessageDlg('Do you want to load a game?', mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
-                begin
-                    // save for deleting later when newCellField is generated
-                    oldCellField := m_recGameStruct.cellField;
+            LOAD_BUTTON: loadGame(
+                m_recGameStruct,
+                self,
+                m_panelGamefield,
+                onCellMouseDown,
+                m_gridpanelCellGrid,
+                m_bNotSaved
+            );
 
-                    fileError := loadGameFromFile(
-                        'Test',
-                        m_recGameStruct,
-                        m_panelGamefield,
-                        onCellMouseDown,
-                        m_gridpanelCellGrid
-                    );
-                    case fileError of
-                        FILE_ERROR_COUNT_NOT_READ_FROM_FILE: ShowMessage('coulnd read from file');
-
-                        else;
-                    end;
-                    // load variables when no error accoured
-                    if (fileError = FILE_ERROR_NONE) then
-                    begin
-                        removeCellGrid(m_gridpanelCellGrid, oldCellField);
-                        generateGameFromGameStruct(m_recGameStruct);
-                    end
-                    else
-                    begin
-                        // restore old gamefield when file is currupted
-                        m_recGameStruct.cellField := oldCellField;
-                    end;
-                end;
-            end;
-
-            SAVE_BUTTON:
-                case saveGameToFile('Test', m_recGameStruct) of
-                    FILE_ERROR_FILE_DOESNT_EXIST: showmessage('file doesnt exist');
-                    FILE_ERROR_COULD_NOT_WRITE_TO_FILE: showmessage('could not write to file');
-
-                    else;
-                end;
+            SAVE_BUTTON: saveGame(m_recGameStruct, self, m_bNotSaved);
 
             EXIT_BUTTON:
                 // ask if its intended to exit the game
                 if (MessageDlg('Do you want to exit the game?', mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
                 begin
                     // ask if its intended to save the game
-                    if (MessageDlg('Do you want to save the game?', mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
-                    begin
-                        case saveGameToFile('Test', m_recGameStruct) of
-                            FILE_ERROR_FILE_DOESNT_EXIST: showmessage('file doesnt exist');
-                            FILE_ERROR_COULD_NOT_WRITE_TO_FILE: showmessage('could not write to file');
-
-                            else;
-                        end;
-                    end;
+                    if m_bNotSaved and (MessageDlg('Do you want to save the game?', mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
+                        saveGame(m_recGameStruct, self, m_bNotSaved);
                     
                     Application.Terminate;
                 end;
@@ -362,9 +377,25 @@ implementation
                 // settings übernehmen welche die simulation beeinflussen würde
                 if (not m_bIsSimulating) then
                 begin
-                    if getSettingsFromFSettings() then
+                    // wenn die settings geändert wurden und die neue simulation geladen werden muss (z.B. neue größe)
+                    // dann wird nach einer bestätigung gefragt
+                    if getSettingsFromFSettings() and (MessageDlg(
+                        'Do you want to generate a new gamefield with the new settings?',
+                        mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
                     begin
-                        // todo ask for window reload
+                        // ask for saving the old game when it is not saved
+                        if m_bNotSaved and (MessageDlg('Do you want to save the game?', mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
+                        begin
+                            case saveGameToFile('Test', m_recGameStruct) of
+                                FILE_ERROR_FILE_DOESNT_EXIST: showmessage('file doesnt exist');
+                                FILE_ERROR_COULD_NOT_WRITE_TO_FILE: showmessage('could not write to file');
+                                FILE_ERROR_NONE: m_bNotSaved := false;
+
+                                else showmessage('unnamed error'); // should never happen
+                            end;
+                        end;
+
+                        // remove old gamefield and create new one
                         removeCellGrid(m_gridpanelCellGrid, m_recGameStruct.cellField);
                         createCellGrid(
                             m_gridpanelCellGrid,
@@ -379,8 +410,11 @@ implementation
                             m_recGameStruct.cellField,
                             m_recGameStruct.cellRowLength, m_recGameStruct.cellColumnLength,
                             m_recGameStruct.wallPercentage,
-                            m_recGameStruct.waterSourcePositionQueueList
+                            m_recGameStruct.waterSourcePositionQueueList,
+                            not m_bIsEditorMode
                         );
+
+                        m_bNotSaved := true;
                     end;
                 end;
             end;
@@ -448,6 +482,7 @@ implementation
         begin
             position := getPositionFromName(TImage(Sender).name);
 
+            // check which item is checked
             case m_eCheckedItem of
             NONE_BUTTON:
             begin
@@ -529,9 +564,12 @@ implementation
                     showmessage('You cant place a watersource there!');
             end;
 
-            else showmessage('no such item');
+            else // should never happen 
+                showmessage('no such item');
             end;
         end;
+
+        m_bNotSaved := true;
     end;
 
     procedure TFMain.updateLayout();
@@ -550,7 +588,7 @@ implementation
     procedure TFMain.cellQueueHandlerFinalize();
     begin
         finalizeAnimation();
-        // todo set leak positions on field
+        // todo show leaks
     end;
 
     procedure TFMain.setFSettingsFromSettings();
@@ -673,9 +711,10 @@ implementation
         generateGame(
             m_recGameStruct.cellField,
             m_recGameStruct.cellRowLength, m_recGameStruct.cellColumnLength,
-            m_recGameStruct.wallPercentage, m_recGameStruct.waterSourcePositionQueueList
+            m_recGameStruct.wallPercentage, m_recGameStruct.waterSourcePositionQueueList,
+            true
         );
-
+        m_bNotSaved := true;
     end;
 
     procedure TFMain.FormCreate(Sender: TObject);

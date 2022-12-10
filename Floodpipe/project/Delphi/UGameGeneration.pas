@@ -1,5 +1,13 @@
 {
-  // todo headder
+    file:       UGameGeneration.pas
+    author:     John Lienau
+    title:      Game generation unit of project Floodpipe
+    version:    v1.0
+    date:       03.08.2022
+    copyright:  Copyright (c) 2022
+
+    brief:      This unit contains the methods to generate a game
+                with given settings
 }
 
 unit UGameGeneration;
@@ -16,11 +24,13 @@ interface
                 
                 IN      cellRow- and Columnlength of the field
                         wallPercentage between 0 and 100
+                        bScrumbleField: if true, the field will be scrambled
     }
     procedure generateGame(
         cellField: TCellField;
         cellRowLength, cellColumnLength, wallPercentage: integer;
-        var waterSourcePositionQueueList:TPositionList
+        var waterSourcePositionQueueList:TPositionList;
+        bScrumbleField:boolean
     );
 
     {
@@ -188,10 +198,27 @@ implementation
         delPositionList(needToHaveDirectionList);
     end;
 
+    procedure scrambleField(
+        var cellField: TCellField;
+        cellRowLength, cellColumnLength: integer
+    );
+    var i, j, count:integer;
+    begin
+        for i := 0 to cellColumnLength - 1 do
+            for j := 0 to cellRowLength - 1 do
+            begin
+                if positionEqualsType(cellField, getPosition(i, j), TCellType.TYPE_PIPE) then
+                    // rotate random times
+                    for count := 0 to random(3) do
+                        rotateCellClockwise(cellField[i, j]);
+            end;
+    end;
+
     procedure generateGame(
         cellField: TCellField;
         cellRowLength, cellColumnLength, wallPercentage: integer;
-        var waterSourcePositionQueueList:TPositionList
+        var waterSourcePositionQueueList:TPositionList;
+        bScrumbleField:boolean
     );
     var i, j, wallCount, maxWallCount:integer;
         waterSourcePosition:TPosition;
@@ -243,7 +270,9 @@ implementation
             waterSourcePosition
         ) then assert(true, 'setWaterSource problem');
 
-        // todo srumble rotations
+        // scramble field when needed
+        if bScrumbleField then
+            scrambleField(cellField, cellRowLength, cellColumnLength);
     end;
 
 

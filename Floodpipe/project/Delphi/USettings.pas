@@ -1,3 +1,15 @@
+{
+    file:       USettings.pas
+    author:     John Lienau
+    title:      Settings unit of project Floodpipe
+    version:    v1.0
+    date:       03.08.2022
+    copyright:  Copyright (c) 2022
+
+    brief:      This unit contains the settings form of the application
+                and all the methods that are called by the form
+}
+
 unit USettings;
 
 interface
@@ -9,6 +21,7 @@ uses
     Vcl.ExtCtrls;
 
 type
+    // Settings form class declaration with all the controls and methods that are called by the form elements
     TFSettings = class(TForm)
         nbColumns: TNumberBox;
         nbRows: TNumberBox;
@@ -29,11 +42,11 @@ type
         { Public declarations }
     end;
 
-var
-    FSettings: TFSettings;
+var FSettings: TFSettings; // Settings form variable declaration
 
 implementation
 
-{$R *.dfm}
+    {$R *.dfm} // Form resource file
 
+    // nothing to see here, move along
 end.
