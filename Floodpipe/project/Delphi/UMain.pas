@@ -366,6 +366,16 @@ implementation
 
     procedure TFMain.onNewButtonClick(Sender: TObject);
     begin
+        // fixme no saving when loading is not possible.
+        // // tempsave the current game and start the animation
+        // saveGame(
+        //     m_recGameStruct,
+        //     self,
+        //     m_bNotSaved,
+        //     '~$tempAnimationSave',
+        //     false,
+        //     true
+        // );
         animationStart();
     end;
 
@@ -589,6 +599,9 @@ implementation
     begin
         finalizeAnimation();
         // todo show leaks
+
+        // fixme here should be the loading of the old game struct from the temp file
+        // but i dont know how to do that yet without having a bug.
     end;
 
     procedure TFMain.setFSettingsFromSettings();

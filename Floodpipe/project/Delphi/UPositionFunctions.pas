@@ -345,33 +345,43 @@ implementation
         positionListLength := listLength;
     end;
 
+    // write a procedure to remove all positions from a list
     procedure removePositions(
         var positionList:TPositionList;
         position:TPosition
     );
-    var beforePosition, positionListRunner:PPositionNode;
+    var
+        beforePosition, positionListRunner:PPositionNode;
     begin
         positionListRunner := positionList.firstNode;
         beforePosition := nil;
 
-        while positionListRunner <> nil do
+        // remove all positions from list that are equal to position
+        while (positionListRunner <> nil) do
         begin
+            // if position is equal to position in list then remove it
             if positionEquals(positionListRunner^.position, position) then
-                if positionListRunner = positionList.firstNode then
+                // if position is first node then remove it and set first node
+                if (positionListRunner = positionList.firstNode) then
                 begin
                     delFirstPositionNode(positionList);
                     beforePosition := positionList.firstNode;
                     positionListRunner := positionList.firstNode;
                 end
-                else
+                else // if position is not first node then remove it and set next node
                 begin
                     beforePosition^.next := positionListRunner^.next;
                     dispose(positionListRunner);
                     positionListRunner := beforePosition^.next;
-                end;
+                end
+            else // if position is not equal to position in list then set next node and before node
+            begin
+                beforePosition := positionListRunner;
+                positionListRunner := positionListRunner^.next;
+            end;
         end;
     end;
-
+    
     function positionToString(position:TPosition):string;
     begin
         positionToString := inttostr(position.x) + ' ' + inttostr(position.y);

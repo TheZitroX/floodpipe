@@ -213,22 +213,24 @@ implementation
     begin
         if (overrideTypes) then
         begin
-            // remove watersource when new content isnt water
+            // remove water source from queue if cell is water and new cell is not water and in queue
             if (cell.cellContent = CONTENT_WATER) and
-                hasPosition(waterSourcePositionQueueList, getPositionFromName(cell.image.Name)) and
-                (newCellContent <> CONTENT_WATER) then
+                (newCellContent <> CONTENT_WATER) and
+                hasPosition(waterSourcePositionQueueList, getPositionFromName(cell.image.Name)) then
                 removePositions(waterSourcePositionQueueList, getPositionFromName(cell.image.Name))
+            // add water source to queue if cell is empty and new cell is water and not already in queue
             else if ((cell.cellContent = CONTENT_EMPTY) and
-                (newCellContent = CONTENT_WATER)) then
+                (newCellContent = CONTENT_WATER)) and
+                not hasPosition(waterSourcePositionQueueList, getPositionFromName(cell.image.Name)) then
                 appendPosition(waterSourcePositionQueueList, getPositionFromName(cell.image.Name));
 
-                with cell do
-                begin
-                    cellType := newCellType;
-                    cellItem := newCellItem;
-                    cellContent := newCellContent;
-                    cellRotation := newCellRotation;
-                end;
+            with cell do
+            begin
+                cellType := newCellType;
+                cellItem := newCellItem;
+                cellContent := newCellContent;
+                cellRotation := newCellRotation;
+            end;
         end;
 
         loadPictureFromBitmap(cell);
@@ -262,14 +264,17 @@ implementation
 
     procedure setOpeningsFromRotation(var cell:TCell);
     begin
-        with cell do begin
+        with cell do
+        begin
+            // clear openings
+            if (not isPositionListEmpty(openings)) then
+                delPositionList(openings);
+
             case cellType of
                 TYPE_NONE:;
                 TYPE_WALL:;// do nothing
                 TYPE_PIPE: 
                     begin
-                        if (not isPositionListEmpty(openings)) then
-                            delPositionList(openings);
                         case cellItem of
                             PIPE: begin
                                 appendPosition(openings, 1, 0);
@@ -286,10 +291,11 @@ implementation
                                 appendPosition(openings, 0, 1);
                             end;
                         end;
+                        // rotate openings by rotation of cell (clockwise)
+                        rotatePositionsByCellRotation(cell);
                     end;
                 else assert(true, 'ERROR cant set openings from this type');
             end;
-            rotatePositionsByCellRotation(cell);
         end;
     end;
 

@@ -41,7 +41,27 @@ interface
         gameStruct:TGameStruct;
         form:TForm;
         var bNotSaved:boolean
-    );
+    ) overload;
+
+    {
+        saves the game to a file
+
+        @param  IN/OUT  bNotSaved: boolean to set to false when game is saved
+                
+                IN      gameStruct: the game to save
+                        form: the form to create the save dialog
+                        filename: the path, either from exe or absolut path to the file
+                        bAskToOverwrite: when true, the user is asked to overwrite the file when it already exists
+                        bMakeHidden: when true, the file is made hidden
+    }
+    procedure saveGame(
+        gameStruct:TGameStruct;
+        form:TForm;
+        var bNotSaved:boolean;
+        filename:string;
+        bAskToOverwrite:boolean = true;
+        bMakeHidden:boolean = false
+    ) overload;
 
     {
         creates, or writes, on filename 
@@ -49,12 +69,14 @@ interface
         @param  IN      filename: the path, either from exe or
                         absolut path to the file
                         gameStruct: the game to save
+                        bMakeHidden: when true, the file is made hidden
                 
                 RETURN  a TFileError type
     }
     function saveGameToFile(
         filename:string;
-        gameStruct:TGameStruct
+        gameStruct:TGameStruct;
+        bMakeHidden:boolean = false
     ):TFileError;
 
     {
@@ -75,7 +97,31 @@ interface
         onCellMouseDown:TMouseEvent;
         cellGrid:TGridPanel;
         var bNotSaved:boolean
-    );
+    ) overload;
+
+    {
+        loads an gameStruct from an existing file
+
+        @param  IN/OUT  bNotSaved: boolean to set to false when game is loaded
+                        gameStruct: the game to load from file
+                
+                IN      form: the form to create the save dialog
+                        panelGAmefield: the parent panel of the cells
+                        onCellMouseDown:The function pointer to the mouse event
+                        cellGrid is the positioning of the cells
+                        filename: the path, either from exe or absolut path to the file
+                        bAskToLoad: when true, the user is asked to load the file
+    }
+    procedure loadGame(
+        var gameStruct:TGameStruct;
+        form:TForm;
+        panelGamefield:TPanel;
+        onCellMouseDown:TMouseEvent;
+        cellGrid:TGridPanel;
+        var bNotSaved:boolean;
+        filename:string;
+        bAskToLoad:boolean = true
+    ) overload;
     
     {
         loads an gameStruct from an existing file
@@ -103,7 +149,7 @@ implementation
         gameStruct:TGameStruct;
         form:TForm;
         var bNotSaved:boolean
-    );
+    ) overload;
     var fileError:TFileError;
         saveDialog:TSaveDialog;
         sFileName:string;
@@ -154,6 +200,102 @@ implementation
         saveDialog.free(); 
     end;
 
+    procedure saveGame(
+        gameStruct:TGameStruct;
+        form:TForm;
+        var bNotSaved:boolean;
+        filename:string;
+        bAskToOverwrite:boolean = true;
+        bMakeHidden:boolean = false
+    ) overload;
+    var fileError:TFileError;
+    begin
+        fileError := FILE_ERROR_NONE;
+
+        // when user did not specify the ending of sFileName the ending is added
+        if not filename.endswith(GAME_FILE_TYPE_EXTENSION) then
+            filename := concat(filename, GAME_FILE_TYPE_EXTENSION);
+
+        // when file exists, ask the user to overwrite it
+        if bAskToOverwrite and fileexists(filename) then
+        begin
+            // when user wants to overwrite the file
+            if (MessageDlg('Do you want to overwrite the file?', mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
+                fileError := saveGameToFile(filename, gameStruct, bMakeHidden);
+        end
+        else // file doesnt exist
+            fileError := saveGameToFile(filename, gameStruct);
+
+        // show message to user depending on the error
+        if bAskToOverwrite then
+            case fileError of
+                FILE_ERROR_FILE_DOESNT_EXIST: showmessage('file doesnt exist');
+                FILE_ERROR_COULD_NOT_WRITE_TO_FILE: showmessage('could not write to file');
+                FILE_ERROR_NONE: 
+                begin
+                    ShowMessage('saved game');
+                    bNotSaved := false;
+                end;
+
+                else showmessage('unknown error'); // should never happen
+            end;
+    end;
+
+    procedure loadGame(
+        var gameStruct:TGameStruct;
+        form:TForm;
+        panelGamefield:TPanel;
+        onCellMouseDown:TMouseEvent;
+        cellGrid:TGridPanel;
+        var bNotSaved:boolean;
+        filename:string;
+        bAskToLoad:boolean = true
+    ) overload;
+    var fileError:TFileError;
+    begin
+        fileError := FILE_ERROR_NONE;
+
+        // when user did not specify the ending of sFileName the ending is added
+        if not filename.endswith(GAME_FILE_TYPE_EXTENSION) then
+            filename := concat(filename, GAME_FILE_TYPE_EXTENSION);
+
+        // when file exists, ask the user to overwrite it
+        if bAskToLoad and fileexists(filename) then
+        begin
+            // when user wants to overwrite the file
+            if (MessageDlg('Do you want to load the file?', mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
+                fileError := loadGameFromFile(
+                    filename,
+                    gameStruct,
+                    panelGamefield,
+                    onCellMouseDown,
+                    cellGrid
+                );
+        end
+        else // file doesnt exist or user doesnt want to load the file
+            fileError := loadGameFromFile(
+                filename,
+                gameStruct,
+                panelGamefield,
+                onCellMouseDown,
+                cellGrid
+            );
+
+        // show message to user depending on the error
+        if bAskToLoad then
+            case fileError of
+                FILE_ERROR_FILE_DOESNT_EXIST: showmessage('file doesnt exist');
+                FILE_ERROR_COUNT_NOT_READ_FROM_FILE: showmessage('could not read from file');
+                FILE_ERROR_NONE:
+                begin
+                    ShowMessage('loaded game');
+                    bNotSaved := false;
+                end;
+
+                else showmessage('unknown error'); // should never happen
+            end;
+    end;
+
     procedure loadGame(
         var gameStruct:TGameStruct;
         form:TForm;
@@ -161,7 +303,7 @@ implementation
         onCellMouseDown:TMouseEvent;
         cellGrid:TGridPanel;
         var bNotSaved:boolean
-    );
+    ) overload;
     var fileError:TFileError;
         openDialog:TOpenDialog;
         oldCellField:TCellField;
@@ -230,7 +372,8 @@ implementation
 
     function saveGameToFile(
         filename:string;
-        gameStruct:TGameStruct
+        gameStruct:TGameStruct;
+        bMakeHidden:boolean = false
     ):TFileError;
     var fileError:TFileError;
         gameFile:TextFile;
@@ -241,6 +384,11 @@ implementation
         AssignFile(gameFile, filename);
         try
             Rewrite(gameFile);
+
+            // make file hidden under windows when bMakeHidden is true
+            if bMakeHidden then
+                FileSetAttr(filename, faHidden);
+            
 
             // gamefield rows, then columns
             writeln(gameFile, gameStruct.cellRowLength);
