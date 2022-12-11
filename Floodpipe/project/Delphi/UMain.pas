@@ -291,10 +291,20 @@ implementation
 
             EXIT_BUTTON:
                 // ask if its intended to exit the game
-                if (MessageDlg('Do you want to exit the game?', mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
+                if (MessageDlg(
+                    'Do you want to exit the game?',
+                    mtConfirmation,
+                    [mbYes, mbNo],
+                    0
+                ) = mrYes) then
                 begin
                     // ask if its intended to save the game
-                    if m_bNotSaved and (MessageDlg('Do you want to save the game?', mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
+                    if m_bNotSaved and (MessageDlg(
+                        'Do you want to save the game?',
+                        mtConfirmation,
+                        [mbYes, mbNo],
+                        0
+                    ) = mrYes) then
                         saveGame(m_recGameStruct, self, m_bNotSaved);
                     
                     Application.Terminate;
@@ -394,7 +404,12 @@ implementation
                         mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
                     begin
                         // ask for saving the old game when it is not saved
-                        if m_bNotSaved and (MessageDlg('Do you want to save the game?', mtConfirmation, [mbYes, mbNo], 0) = mrYes) then
+                        if m_bNotSaved and (MessageDlg(
+                            'Do you want to save the game?',
+                            mtConfirmation,
+                            [mbYes, mbNo],
+                            0
+                        ) = mrYes) then
                         begin
                             case saveGameToFile('Test', m_recGameStruct) of
                                 FILE_ERROR_FILE_DOESNT_EXIST: showmessage('file doesnt exist');

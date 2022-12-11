@@ -195,9 +195,6 @@ implementation
     var
         i:integer;
     begin
-        // remove old cellGrid
-        removeCellGrid(cellGrid, cellField);
-
         cellGrid := TGridPanel.Create(panelParent);
         cellGrid.parent := panelParent;
         cellGrid.Align := alClient;

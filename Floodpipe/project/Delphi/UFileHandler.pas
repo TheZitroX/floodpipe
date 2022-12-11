@@ -385,11 +385,6 @@ implementation
         try
             Rewrite(gameFile);
 
-            // make file hidden under windows when bMakeHidden is true
-            if bMakeHidden then
-                FileSetAttr(filename, faHidden);
-            
-
             // gamefield rows, then columns
             writeln(gameFile, gameStruct.cellRowLength);
             writeln(gameFile, gameStruct.cellColumnLength);
