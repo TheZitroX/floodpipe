@@ -16,42 +16,172 @@ interface
 
         UTypedefine, UPixelfunctions, UProperties, UPositionFunctions;
 
+    {
+        Creates a cell with name and parant
+
+        @param  IN/OUT  cell: as target
+
+                IN      newParent: the parant of target
+                        newName: the name of target
+    }
     procedure cellSetup(
         var cell:TCell;
         newParent:TWinControl;
         newName:string
     );
+
+    {
+        creates a field (rows * columns) of TCellField
+
+        @param  IN/OUT  cellField: the field of TPanel
+                        waterSourcePositionQueueList: with all water positions
+
+                IN      newParent: the parent of cellField
+                        rowCount: the row-count
+                        columnCount: the column-count
+                        onCellClick: as mouseEvent
+                        overrideTypes: when true all types of cellField will be overriden
+    }
     procedure createCells(
         var cellField:TCellField;
+        var waterSourcePositionQueueList:TPositionList; 
         newParent:TWinControl;
         rowCount, columnCount:integer;
-        onCellClick:TNotifyEvent
+        onCellClick:TMouseEvent;
+        overrideTypes:boolean
     );
+
+    {
+        @brief  increments the rotational state of a cell
+                and updates the bitmap of it
+        
+        @param  IN/OUT  cell: the rotated cell
+    }
     procedure rotateCellClockwise(var cell:TCell);
+
+    {
+        @brief  gets the position of a cell name
+
+        @param  IN      string: the cell name
+
+        @return TPosition: with the x and y values of the name
+    }
     function getPositionFromName(name:string):TPosition;
+
+    {
+        gets all openings of a pipe and makes a string from it
+
+        @param  IN      the target cell
+
+        @return a string with all openings of the pipe
+    }
     function cellOpeningsToString(cell:TCell):string;
+
+    {
+        sets a cell to the passed types
+
+        @param  IN/OUT  cell: the target cell
+                        waterSourcePositionQueueList: with water positions
+
+                IN      celltype,
+                        cellitem,
+                        cellContent,
+                        cellRotation
+                        overrideTypes: when true all types will be overridden to newTypes
+    }
     procedure setCellToItem(
         var cell:TCell;
+        var waterSourcePositionQueueList:TPositionList;
+        newCellType:TCellType;
+        newCellItem:TCellItem;
+        newCellContent:TCellContent;
+        newCellRotation:TCellRotation;
+        overrideTypes:boolean
+    );
+
+    {
+        sets all cells in cellField to the passed types
+        sets or clears the waterSources
+
+        @param  IN/OUT  cellField: with 2d cell array
+                        waterSourcePositionQueueList: with water positions
+
+                IN      celltype,
+                        cellitem,
+                        cellContent,
+                        cellRotation
+    }
+    procedure setCellFieldToItem(
+        var cellField:TCellField;
+        var waterSourcePositionQueueList:TPositionList;
         newCellType:TCellType;
         newCellItem:TCellItem;
         newCellContent:TCellContent;
         newCellRotation:TCellRotation
     );
+
+    {
+        fills a cell with content
+
+        @param  IN/OUT  cell: target cell
+
+                IN      content: of type TCellContent
+    }
     procedure fillCellWithContent(var cell:TCell; content:TCellContent);
+
+    {
+        gives information about the cell content (empty or full)
+
+        @param  IN      cell: the target cell
+
+        @return true when cell is empty
+    }
     function isCellEmpty(cell:TCell):boolean;
+
+    {
+        gets a cell from position
+
+        @param  IN      cellField: with all cells
+                        position: (has to be in field!)
+
+        @return the cell on the position in field
+    }
     function getCellFromPosition(cellField:TCellField; position:TPosition):TCell;
+
+    {
+        tells if a cell is connected to a position
+
+        @param  IN      cell: the target cell
+                        position: of expected connection
+        
+        @return false if celltype is not TYPE_PIPE
+    }
     function isCellConnected(cell:TCell; position:TPosition):boolean;
-    function positionEqualsType(cellField:TCellField; position:TPosition; cellType:TCellType):boolean;
+
+    {
+        checks for equal types on cell and position
+
+        @param  IN      cellField: with cells
+                        position: of target cell in field
+                        and the cellType
+                    
+        @return true when cellType equals type of position in cellField
+    }
+    function positionEqualsType(
+        cellField:TCellField;
+        position:TPosition;
+        cellType:TCellType
+    ):boolean;
+
+    {
+        sets the openings from type and rotation of a cell
+
+        @param  IN/OUT  cell: the target cell
+    }
     procedure setOpeningsFromRotation(var cell:TCell);
 
 implementation
 
-    {
-        Creates a cell with name and parant
-        @param  cell as target
-                newParent the parant of target
-                newName the name of target
-    }
     procedure cellSetup(
         var cell:TCell;
         newParent:TWinControl;
@@ -71,48 +201,80 @@ implementation
         end;
     end;
 
-    {
-        sets a cell to the passed types
-
-        @param  IN/OUT: the target cell
-                IN:     celltype, cellitem,
-                        cellContent and cellRotation
-    }
     procedure setCellToItem(
         var cell:TCell;
+        var waterSourcePositionQueueList:TPositionList;
+        newCellType:TCellType;
+        newCellItem:TCellItem;
+        newCellContent:TCellContent;
+        newCellRotation:TCellRotation;
+        overrideTypes:boolean
+    );
+    begin
+        if (overrideTypes) then
+        begin
+            // remove water source from queue if cell is water and new cell is not water and in queue
+            if (cell.cellContent = CONTENT_WATER) and
+                (newCellContent <> CONTENT_WATER) and
+                hasPosition(waterSourcePositionQueueList, getPositionFromName(cell.image.Name)) then
+                removePositions(waterSourcePositionQueueList, getPositionFromName(cell.image.Name))
+            // add water source to queue if cell is empty and new cell is water and not already in queue
+            else if ((cell.cellContent = CONTENT_EMPTY) and
+                (newCellContent = CONTENT_WATER)) and
+                not hasPosition(waterSourcePositionQueueList, getPositionFromName(cell.image.Name)) then
+                appendPosition(waterSourcePositionQueueList, getPositionFromName(cell.image.Name));
+
+            with cell do
+            begin
+                cellType := newCellType;
+                cellItem := newCellItem;
+                cellContent := newCellContent;
+                cellRotation := newCellRotation;
+            end;
+        end;
+
+        loadPictureFromBitmap(cell);
+        setOpeningsFromRotation(cell);
+    end;
+
+    procedure setCellFieldToItem(
+        var cellField:TCellField;
+        var waterSourcePositionQueueList:TPositionList;
         newCellType:TCellType;
         newCellItem:TCellItem;
         newCellContent:TCellContent;
         newCellRotation:TCellRotation
     );
+    var i,j:integer;
+    begin
+        for i := 0 to length(cellField) - 1 do
+            for j := 0 to length(cellField[0]) - 1 do
+            begin
+                setCellToItem(
+                    cellField[i, j],
+                    waterSourcePositionQueueList,
+                    newCellType,
+                    newCellItem,
+                    newCellContent,
+                    newCellRotation,
+                    true
+                );
+            end;
+    end;
+
+    procedure setOpeningsFromRotation(var cell:TCell);
     begin
         with cell do
         begin
-            cellType := newCellType;
-            cellItem := newCellItem;
-            cellContent := newCellContent;
-            cellRotation := newCellRotation;
-        end;
-        loadPictureFromBitmap(cell);
-        setOpeningsFromRotation(cell);
-    end;
+            // clear openings
+            if (not isPositionListEmpty(openings)) then
+                delPositionList(openings);
 
-
-    {
-        sets the openings from type and rotation of a cell
-
-        @param  IN/OUT: target cell
-    }
-    procedure setOpeningsFromRotation(var cell:TCell);
-    begin
-        with cell do begin
             case cellType of
                 TYPE_NONE:;
                 TYPE_WALL:;// do nothing
                 TYPE_PIPE: 
                     begin
-                        if (not isPositionListEmpty(openings)) then
-                            delPositionList(openings);
                         case cellItem of
                             PIPE: begin
                                 appendPosition(openings, 1, 0);
@@ -129,26 +291,22 @@ implementation
                                 appendPosition(openings, 0, 1);
                             end;
                         end;
+                        // rotate openings by rotation of cell (clockwise)
+                        rotatePositionsByCellRotation(cell);
                     end;
                 else assert(true, 'ERROR cant set openings from this type');
             end;
-            rotatePositionsByCellRotation(cell);
         end;
     end;
 
-    {
-        creates a field (rows * columns) of TCellField
-
-        @param  cellField the field of TPanel
-                newParent the parent of cellField
-                rowCount the row-count
-                columnCount the column-count
-    }
     procedure createCells(
         var cellField:TCellField;
+        var waterSourcePositionQueueList:TPositionList; 
         newParent:TWinControl;
         rowCount, columnCount:integer;
-        onCellClick:TNotifyEvent);
+        onCellClick:TMouseEvent;
+        overrideTypes:boolean
+    );
     var
         i, j:integer;
     begin
@@ -156,7 +314,8 @@ implementation
         setLength(cellField, columnCount, rowCount);
         // create cells
         for j := 0 to rowCount - 1 do
-            for i := 0 to columnCount - 1 do begin
+            for i := 0 to columnCount - 1 do
+            begin
                 cellSetup(
                     cellField[i, j],
                     newParent,
@@ -165,27 +324,23 @@ implementation
                 cellField[i][j].image.Align := alClient;
                 setCellToItem(
                     cellField[i, j],
+                    waterSourcePositionQueueList,
                     // debug just random types for testing
                     TCellType.TYPE_NONE,
                     TCellItem(Random(Succ(Ord(High(TCellItem))))),
                     // TCellItem.PIPE,
                     // TCellContent(Random(Succ(Ord(High(TCellContent))))),
                     TCellContent.CONTENT_EMPTY,
-                    TCellRotation(Random(Succ(Ord(High(TCellRotation)))))
-                    // TCellRotation.NONE
+                    TCellRotation(Random(Succ(Ord(High(TCellRotation))))),
+                    // TCellRotation.NONE,
+                    overrideTypes
                 );
                 cellField[i, j].openings.firstNode := nil;
                 setOpeningsFromRotation(cellField[i, j]);
-                cellField[i][j].image.OnClick := onCellClick;
+                cellField[i][j].image.OnMouseDown := onCellClick;
             end;
     end;
 
-    {
-        @brief  increments the rotational state of a cell
-                and updates the bitmap of it
-        
-        @param  IN/OUT: TCell the rotated cell
-    }
     procedure rotateCellClockwise(var cell:TCell);
     begin
         if (cell.cellRotation = high(TCellRotation)) then
@@ -195,12 +350,6 @@ implementation
         rotatePositions(cell);
     end;
 
-    {
-        @brief  gets the position of a cell name
-
-        @param  IN:     string the cell name
-                OUT:    TPosition with the x and y values of the name
-    }
     function getPositionFromName(name:string):TPosition;
         {
             @brief  to get the x-integer-value of the Cell-name
@@ -242,12 +391,6 @@ implementation
         getPositionFromName := position;
     end;
 
-    {
-        gets all openings of a pipe and makes a string from it
-
-        @param  IN:     the target cell
-                OUT:    a string with all openings of the pipe
-    }
     function cellOpeningsToString(cell:TCell):string;
     var
         stringBuilder:TStringBuilder;
@@ -268,36 +411,17 @@ implementation
         cellOpeningsToString := stringBuilder.toString();
     end;
 
-    {
-        fills a cell with content
-
-        @param  IN/OUT: target cell
-                IN:     content type
-    }
     procedure fillCellWithContent(var cell:TCell; content:TCellContent);
     begin
         cell.cellContent := content;
         loadPictureFromBitmap(cell);
     end;
 
-    {
-        returns true when a cell is empty
-
-        @param  IN:     the target cell
-                RETURN: true when cell is empty
-    }
     function isCellEmpty(cell:TCell):boolean;
     begin
         isCellEmpty := cell.cellContent = TCellContent.CONTENT_EMPTY;
     end;
 
-    {
-        gets a cell from position
-
-        @param  IN:     cellField with all cells
-                        position (has to be in field!)
-                RETURN: the cell on the position in field
-    }
     function getCellFromPosition(cellField:TCellField; position:TPosition):TCell;
     begin
         getCellFromPosition := cellField[
@@ -306,13 +430,6 @@ implementation
         ];
     end;
 
-    {
-        tells if a cell is connected to a position
-        returns false if celltype is not TYPE_PIPE
-
-        @param  IN:     cell the target cell
-                        position of expected connection
-    }
     function isCellConnected(cell:TCell; position:TPosition):boolean;
     var
         openingsRunner:PPositionNode;
@@ -335,13 +452,6 @@ implementation
         isCellConnected := isConnected;
     end;
 
-    {
-        returns true when cellType equals type of position in cellField
-
-        @param  IN:     cellField with cells
-                        position of target cell in field
-                        and the cellType
-    }
     function positionEqualsType(cellField:TCellField; position:TPosition; cellType:TCellType):boolean;
     begin
         positionEqualsType := cellField[position.x, position.y].cellType = cellType;
