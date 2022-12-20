@@ -13,6 +13,7 @@ object FMain: TFMain
   Font.Name = 'Tahoma'
   Font.Style = []
   OldCreateOrder = False
+  Position = poScreenCenter
   Visible = True
   OnCanResize = FormCanResize
   OnCreate = FormCreate
